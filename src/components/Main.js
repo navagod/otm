@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 
 
-class App extends Component {
+class Main extends Component {
   render() {
     return (
       <div className="App">
-      App Page
+      Main Page
       </div>
       );
     }
   }
 
-  export default App;
+  export default Main;

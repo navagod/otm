@@ -4,7 +4,7 @@ var app = express();
 var PORT = process.env.PORT || 8080;
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
-
+var socket = require('./socket');
 // using webpack-dev-server and middleware in development environment
 if (process.env.NODE_ENV !== 'production') {
   var webpackDevMiddleware = require('webpack-dev-middleware');
@@ -19,16 +19,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.use(express.static(path.join(__dirname, 'dist')));
 
-app.get('/', function(request, response) {
+app.get('/*', function(request, response) {
   response.sendFile(__dirname + '/dist/index.html')
-});
-
-io.on('connection', function(client) {
-  console.log('client connected!');
-
-  client.on('join', function(data) {
-    console.log(data);
-  });
 });
 
 server.listen(PORT, function(error) {
@@ -38,3 +30,4 @@ server.listen(PORT, function(error) {
     console.info('==> 🌎  Listening on port %s. Visit http://localhost:%s/ in your browser.', PORT, PORT);
   }
 });
+io.on('connection', socket);

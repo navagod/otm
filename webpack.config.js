@@ -21,7 +21,10 @@ module.exports = {
   },
   devServer: {
     contentBase: './dist',
-    hot: true
+    hot: true,
+    inline: true,
+    port: 8080,
+    historyApiFallback: true
   },
   plugins: [
     new webpack.optimize.OccurenceOrderPlugin(),
