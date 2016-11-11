@@ -59,7 +59,7 @@ class Project extends Component {
 	}
 	_updateEditCard(data){
 		var {cardList} = this.state;
-		var index = _.findIndex(cardList,{id:data.id})
+		var index = _.findIndex(cardList,{'id':data.id})
 		cardList.splice(index, 1, {title:data.title,color:data.color,icon:data.icon});
 		this.setState({
 			cardList,

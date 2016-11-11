@@ -220,7 +220,7 @@ class Dashboard extends Component {
 
 				
 				{item.map((u, ui) => 
-					<div className="col s2 no-padding" key={ui}>
+					<div className="col s2 no-padding" key={"project_dashboard-"+ui}>
 					{u.user_name?
 						<div>
 						{u.user_avatar?

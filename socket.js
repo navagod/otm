@@ -3,9 +3,9 @@ module.exports = function (socket) {
 	var neo4j = require('neo4j');
 	var config = {
 		port: 5000,
-		neo4jURL: '0.0.0.0:32769',
+		neo4jURL: '0.0.0.0:7474',
 		neo4jUSER: 'neo4j',
-		neo4jPASS:  '1234'
+		neo4jPASS:  'orisma'
 	};
 	var db = new neo4j.GraphDatabase('http://'+config.neo4jUSER+':'+config.neo4jPASS+'@'+config.neo4jURL);
 	var boardList = [];
@@ -37,41 +37,28 @@ module.exports = function (socket) {
 socket.on('project:listArr',function(data,rs){
 
 	db.cypher({
-		query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) RETURN ID(p),p,ID(u),u.Name,u.Avatar',
+		query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) RETURN ID(p),p,ID(u),u.Name',
 	},function(err,results){
 		if (err) console.log(err);
 		if(results){
-			boardList = [];
+			boardList = []
 			results.forEach(function(item,index){
 				var project_id = item['ID(p)'];
-				var user = {
-						user_name:item['u.Name'],
-						user_avatar:item['u.Avatar']
-					};
-				if(typeof boardList[project_id] == "undefined"){ 
-				// 	// Todo push member to project
-				// 	boardList[project_id]["m"].push(user);
-
-				// }else{
-					// Todo create new index	
+				if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){ 
 					boardList[project_id] = {
 						d:{
+							id: project_id,
 							title: item['p']['properties']['title'],
 							detail: item['p']['properties']['detail'],
-						}
+						},
+						m:[]
 					};
 					
 				}
-				// boardList[project_id]["m"] = [];
-				boardList[project_id].push({m:user});
-
-
-				// boardList.push({
-				// 	id:item['ID(p)'],
-				// 	title:item['p']['properties']['title'],
-				// 	detail:item['p']['properties']['detail'],
-				// 	uid:item['ID(u)'],
-				// });
+				boardList[project_id]['m'].push({
+					id:item['ID(u)'],
+					title:item['u.Name']
+				});
 			});
 			rs(boardList);
 		}
@@ -287,7 +274,7 @@ socket.on('card:save', function (data,fn) {
 //Task===============//
 socket.on('task:add',function(data,rs){
 	db.cypher({
-		query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' MATCH (c:Cards) WHERE ID(c) = '+data.cid+' CREATE (t:Tasks {title:"'+data.title+'",duedate:"",detail:"",position:'+data.sortNum+'}) CREATE (u)-[:CREATE_BY {date:"'+data.at_create+'"}]->(t)-[:LIVE_IN]->(c) CREATE (t)-[:LIVE_IN]->(p) CREATE (cm:Comments {text:"Create task by "+u.Name,date:"'+data.at_create+'",type:"log"}) CREATE (u)-[:Comment]->(cm)-[:IN]->(t) RETURN ID(t)',
+		query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' MATCH (c:Cards) WHERE ID(c) = '+data.cid+' CREATE (t:Tasks {title:"'+data.title+'",endDate:"'+(new Date().getTime() + 86400000)+'",startDate:"'+new Date().getTime()+'",detail:"",position:'+data.sortNum+',status:"active"}) CREATE (u)-[:CREATE_BY {date:"'+data.at_create+'"}]->(t)-[:LIVE_IN]->(c) CREATE (t)-[:LIVE_IN]->(p) CREATE (cm:Comments {text:"Create task by "+u.Name,date:"'+data.at_create+'",type:"log"}) CREATE (u)-[:Comment]->(cm)-[:IN]->(t) RETURN ID(t)',
 	},function(err,results){
 		if (err) {
 			console.log(err);
@@ -316,7 +303,7 @@ socket.on('task:add',function(data,rs){
 });
 socket.on('task:list',function(data,rs){
 	db.cypher({
-		query:'MATCH (t:Tasks)-[n:LIVE_IN]->(c:Cards)-[n2:LIVE_IN]->(p:Projects)  WHERE ID(c) = '+data.cid+' OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (lb:Labels)-[in:IN]->(t)  OPTIONAL  MATCH (td:Todos)-[in:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in:IN]->(t) WHERE tdc.status="success" RETURN u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.duedate,t.detail,COUNT(ID(cm)) AS total_comment,lb.Title as tag_name,lb.Color as tag_color,ID(p) AS pid,ID(c) AS cid,COUNT(ID(td)) AS total_todo,COUNT(ID(tdc)) AS todo_success ORDER BY t.position ASC',
+		query:'MATCH (t:Tasks)-[n:LIVE_IN]->(c:Cards)-[n2:LIVE_IN]->(p:Projects)  WHERE ID(c) = '+data.cid+' OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (lb:Labels)-[in:IN]->(t)  OPTIONAL  MATCH (td:Todos)-[in:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in:IN]->(t) WHERE tdc.status="success" RETURN u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.endDate,t.detail,t.status,COUNT(ID(cm)) AS total_comment,lb.Title as tag_name,lb.Color as tag_color,ID(p) AS pid,ID(c) AS cid,COUNT(ID(td)) AS total_todo,COUNT(ID(tdc)) AS todo_success ORDER BY t.position ASC',
 	},function(err,results){
 		if (err) console.log(err);
 		var res = [];
@@ -328,7 +315,7 @@ socket.on('task:list',function(data,rs){
 					title:value['t.title'],
 					detail:value['t.detail'],
 					position:value['t.position'],
-					duedate:value['t.duedate'],
+					duedate:value['t.endDate'],
 					pid:value['pid'],
 					cid:value['cid'],
 					total_comment:value['total_comment'],
@@ -348,9 +335,118 @@ socket.on('task:list',function(data,rs){
 		});
 });
 
+socket.on('task:listByProject',function(data,rs){
+	db.cypher({
+		query:'MATCH (p:Projects)<-[l:LIVE_IN]-(t:Tasks) WHERE ID(p) = '+data.pid+' OPTIONAL MATCH (u:Users)-[a:Assigned]->(t) RETURN ID(t),t.title,t.startDate,t.endDate,t.status,ID(u)',
+	},function(err,results){
+		if (err) console.log(err);
+		var res = [];
+		if(results){
+			results.forEach(function(item,index){
+				res.push({
+					group:item['ID(u)'],
+					id:item['ID(t)'],
+					title:item['t.title'],
+					start_time:item['t.startDate'],
+					end_time:item['t.endDate'],
+					status:item['t.status']
+				})
+			});
+			rs(res);
+		}else{
+			rs(false);
+		}
+	});
+});
+
+socket.on('task:changeEndTime', function (data,fn) {
+	db.cypher({
+		query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' SET t.endDate = "'+data.time+'" RETURN t'
+	}, function (err, results) {
+		if (err) console.log(err);
+		
+		db.cypher({
+			query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) RETURN ID(p),p,ID(u),u.Name',
+		},function(err,results_sub){
+			if (err) console.log(err);
+			if(results_sub){
+				boardList = []
+				results_sub.forEach(function(item,index){
+					var project_id = item['ID(p)'];
+					if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){ 
+						boardList[project_id] = {
+							d:{
+								id: project_id,
+								title: item['p']['properties']['title'],
+								detail: item['p']['properties']['detail'],
+							},
+							m:[]
+						};
+
+					}
+					boardList[project_id]['m'].push({
+						id:item['ID(u)'],
+						title:item['u.Name']
+					});
+				});
+				socket.broadcast.emit('task:updateEndTime', {
+					pid:data.pid,
+					list:boardList
+				});
+			}
+		});
 
 
+		fn(true);
+	});
+});
 
+socket.on('task:changePosition', function (data,fn) {
+	db.cypher({
+		query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' RETURN t.startDate,t.endDate'
+	}, function (err, results) {
+		if (err) console.log(err);
+		
+		db.cypher({
+			query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' SET t.startDate = "'+data.time+'" MATCH (u:Users)-[a:Assigned]->(t:Tasks) WHERE ID(t) = '+data.tid+' DELETE a MATCH (u2:Users) WHERE ID(u2) = '+data.uid+' CREATE (u2)-[:Assigned]->(t) RETURN t'
+		}, function (err, results_process) {
+			if (err) console.log(err);
+
+			db.cypher({
+				query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) RETURN ID(p),p,ID(u),u.Name',
+			},function(err,results_sub){
+				if (err) console.log(err);
+				if(results_sub){
+					boardList = []
+					results_sub.forEach(function(item,index){
+						var project_id = item['ID(p)'];
+						if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){ 
+							boardList[project_id] = {
+								d:{
+									id: project_id,
+									title: item['p']['properties']['title'],
+									detail: item['p']['properties']['detail'],
+								},
+								m:[]
+							};
+
+						}
+						boardList[project_id]['m'].push({
+							id:item['ID(u)'],
+							title:item['u.Name']
+						});
+					});
+					socket.broadcast.emit('task:updateEndTime', {
+						pid:data.pid,
+						list:boardList
+					});
+				}
+			});
+			fn(true);
+		});
+		
+	});
+});
 //Task===============//
 /*socket.on('list:join_boards',function(data,rs){
 

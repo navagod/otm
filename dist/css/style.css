@@ -246,7 +246,7 @@
 	float: left;
 	width: 20%;
 	background: #eee;
-	min-height: 700px;
+	min-height: 100vh;
 }
 .react-calendar-timeline{
 	max-width: 80%;
@@ -310,5 +310,18 @@
 .assignedUser{
 	display: inline-block;
 }
-
-
+.react-calendar-timeline .rct-items .rct-item.done {
+  background: green;
+}
+.react-calendar-timeline .rct-items .rct-item.active {
+  background: blue;
+}
+.react-calendar-timeline .rct-items .rct-item.process {
+  background: orange;
+}
+.react-calendar-timeline .rct-items .rct-item.bug {
+  background: red;
+}
+.react-calendar-timeline .rct-items .rct-item.remove {
+  background: #aaa;
+}

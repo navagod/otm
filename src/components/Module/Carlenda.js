@@ -3,20 +3,51 @@ module.exports = {
 	listProject(cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('project:listArr', {}, (result) => {
-			if(result && result.length > 0){
-				cb(result)
-			}else{
+			if(!result){
 				cb(false)
+			}else{
+				cb(result.filter(cleanArray))
 			}
 		});
 	},
-	listUser(pid,cb){
+	listTask(pid,cb){
 		cb = arguments[arguments.length - 1]
-		socket.emit('user:listByProject', {pid:pid}, (result) => {
-			if(result && result.length > 0){
-				cb(result)
-			}else{
+		socket.emit('task:listByProject', {pid:pid}, (result) => {
+			if(!result){
 				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	changeEndTime(pid,tid,time,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('task:changeEndTime', {
+			pid:pid,
+			tid:tid,
+			time:time,
+			uid:localStorage.uid
+		}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	changePosition(pid,tid,time,uid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('task:changePosition', {
+			pid:pid,
+			tid:tid,
+			time:time,
+			new_uid:time,
+			uid:localStorage.uid
+		}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
 			}
 		});
 	}

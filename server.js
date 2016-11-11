@@ -1,7 +1,7 @@
 var path = require('path');
 var express = require('express');
 var app = express();
-var PORT = process.env.PORT || 8080;
+var PORT = process.env.PORT || 80;
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var socket = require('./socket');

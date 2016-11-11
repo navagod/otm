@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import auth from './Module/Auth';
 import {Link} from 'react-router';
-import tasks from './Module/Task'
+import tasks from './Module/Task';
+import moment from 'moment';
 var _ = require('lodash')
 const socket = io.connect();
 
