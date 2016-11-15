@@ -3,9 +3,9 @@ module.exports = function (socket) {
 	var neo4j = require('neo4j');
 	var config = {
 		port: 5000,
-		neo4jURL: '0.0.0.0:7474',
-		neo4jUSER: 'neo4j',
-		neo4jPASS:  'orisma'
+		neo4jURL: process.env.NEO4JURL ||'0.0.0.0:7474',
+		neo4jUSER: process.env.NEO4JUSER ||'neo4j',
+		neo4jPASS:  process.env.NEO4JPASS ||'orisma'
 	};
 	var db = new neo4j.GraphDatabase('http://'+config.neo4jUSER+':'+config.neo4jPASS+'@'+config.neo4jURL);
 	var boardList = [];
@@ -21,10 +21,10 @@ module.exports = function (socket) {
 		var yyyy = today.getFullYear();
 		if(dd<10){
 			dd='0'+dd
-		} 
+		}
 		if(mm<10){
 			mm='0'+mm
-		} 
+		}
 		var today = yyyy+'-'+mm+'-'+dd;
 		return today;
 	};
@@ -44,7 +44,7 @@ socket.on('project:listArr',function(data,rs){
 			boardList = []
 			results.forEach(function(item,index){
 				var project_id = item['ID(p)'];
-				if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){ 
+				if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){
 					boardList[project_id] = {
 						d:{
 							id: project_id,
@@ -53,7 +53,7 @@ socket.on('project:listArr',function(data,rs){
 						},
 						m:[]
 					};
-					
+
 				}
 				boardList[project_id]['m'].push({
 					id:item['ID(u)'],
@@ -234,7 +234,7 @@ socket.on('card:sortlist', function (data,fn) {
 		if(process_query) {
 			socket.broadcast.emit('card:updateSort', {
 				pid:data.pid,
-				lists:data.lists 
+				lists:data.lists
 			});
 			fn(true);
 		}else{
@@ -309,7 +309,7 @@ socket.on('task:list',function(data,rs){
 		var res = [];
 		if(results){
 			results.forEach(function(value,index){
-				var push_arr = 
+				var push_arr =
 				{
 					id:value['tid'],
 					title:value['t.title'],
@@ -364,7 +364,7 @@ socket.on('task:changeEndTime', function (data,fn) {
 		query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' SET t.endDate = "'+data.time+'" RETURN t'
 	}, function (err, results) {
 		if (err) console.log(err);
-		
+
 		db.cypher({
 			query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) RETURN ID(p),p,ID(u),u.Name',
 		},function(err,results_sub){
@@ -373,7 +373,7 @@ socket.on('task:changeEndTime', function (data,fn) {
 				boardList = []
 				results_sub.forEach(function(item,index){
 					var project_id = item['ID(p)'];
-					if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){ 
+					if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){
 						boardList[project_id] = {
 							d:{
 								id: project_id,
@@ -417,7 +417,7 @@ socket.on('task:changePosition', function (data,fn) {
 					boardList = []
 					results_sub.forEach(function(item,index){
 						var project_id = item['ID(p)'];
-						if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){ 
+						if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){
 							boardList[project_id] = {
 								d:{
 									id: project_id,
@@ -521,6 +521,6 @@ socket.on('task:changePosition', function (data,fn) {
 	});
 	//users============//
 	socket.on('disconnect', function () {
-		
+
 	});
 };
