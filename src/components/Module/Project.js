@@ -21,7 +21,7 @@ module.exports = {
 		cb = arguments[arguments.length - 1]
 		socket.emit('project:list', {}, (result) => {
 			if(result && result.length > 0){
-				cb(result)
+				cb(result.filter(cleanArray))
 			}else{
 				cb(false)
 			}
@@ -30,10 +30,12 @@ module.exports = {
 	get(id,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('project:get', {id:id}, (result) => {
-			if(result){
-				cb(result)
-			}else{
+			if(!result){
 				cb(false)
+			}else{
+				console.log(result)
+				cb(result)
+				
 			}
 		});
 	},
@@ -120,7 +122,7 @@ module.exports = {
 		cb = arguments[arguments.length - 1]
 		socket.emit('user:list', {}, (result) => {
 			if(result && result.length > 0){
-				cb(result)
+				cb(result.filter(cleanArray))
 			}else{
 				cb(false)
 			}

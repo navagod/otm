@@ -17,7 +17,6 @@ class Timelines extends Component {
 			errorMsg:"",
 			projectList:[],
 			userList:[],
-			taskUnsignList:[],
 			taskAssignList:[],
 			currentPid:0
 		}
@@ -46,7 +45,6 @@ class Timelines extends Component {
 	componentWillUnmount() {
 		this.setState({projectList:[],
 			userList:[],
-			taskUnsignList:[],
 			taskAssignList:[],
 			currentPid:0})
 	}
@@ -58,10 +56,8 @@ class Timelines extends Component {
 			}else{
 				var ac = [],uc = []
 				rs.forEach(function(v,i){
-					var zero_group = v.group?v.group:0
-					console.log(zero_group)
 					ac.push({
-						group:zero_group,
+						group:v.group,
 						id:v.id,
 						title:v.title,
 						start_time:moment.unix(Math.round(parseInt(v.start_time) / 1000)),
@@ -74,8 +70,6 @@ class Timelines extends Component {
 					
 				})
 			}
-
-			
 			item.m.sort(function (a, b) {
 				if (a.id > b.id) {
 					return 1;
@@ -85,8 +79,7 @@ class Timelines extends Component {
 				}
 				return 0;
 			});
-			console.log(item.m)
-			this.setState({currentPid:item.d.id,userList:item.m,taskUnsignList:uc,taskAssignList:ac})
+			this.setState({currentPid:item.d.id,userList:item.m,taskAssignList:ac})
 
 		})
 
