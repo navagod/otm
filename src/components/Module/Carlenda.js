@@ -35,13 +35,15 @@ module.exports = {
 			}
 		});
 	},
-	changePosition(pid,tid,time,uid,cb){
+	changePosition(pid,tid,time_start,time_end,group,cb){
+		console.log(pid,tid,time_start,time_end,group)
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:changePosition', {
 			pid:pid,
 			tid:tid,
-			time:time,
-			new_uid:time,
+			time_start:time_start,
+			time_end:time_end,
+			new_uid:group,
 			uid:localStorage.uid
 		}, (result) => {
 			if(!result){

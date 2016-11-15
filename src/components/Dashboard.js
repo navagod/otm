@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
-import {Link} from 'react-router';
+import React, { Component } from 'react'
+import {Link} from 'react-router'
 import projects from './Module/Project'
 var _ = require('lodash')
-const socket = io.connect();
+const socket = io.connect()
 class Dashboard extends Component {
 	constructor(props) {
-		super(props);
+		super(props)
 		this.state = {
 			error: false,
 			errorMsg:"",
@@ -25,25 +25,25 @@ class Dashboard extends Component {
 			if(!rs){
 				return Materialize.toast("ยังไม่มีโปรเจคใดๆเปิดใช้งาน", 4000)
 			}else{
-				return this.setState({listProject:rs});
+				return this.setState({listProject:rs})
 			}
 		})
-		socket.on('project:updateAddList', this._updateAddProjectList.bind(this));
-		socket.on('project:updateEditProject', this._updateEditProject.bind(this));
-		socket.on('project:updateAddAssign', this._updateAddAssign.bind(this));
-		socket.on('project:updateRemoveAssign', this._updateRemoveAssign.bind(this));
+		socket.on('project:updateAddList', this._updateAddProjectList.bind(this))
+		socket.on('project:updateEditProject', this._updateEditProject.bind(this))
+		socket.on('project:updateAddAssign', this._updateAddAssign.bind(this))
+		socket.on('project:updateRemoveAssign', this._updateRemoveAssign.bind(this))
 	}
 	componentDidUpdate(){
-		$('.tooltip-user').tooltip();
+		$('.tooltip-user').tooltip()
 	}
 	openAddProject(e){
 		if(!this.state.dialogAdd){
-			this.setState({dialogAdd:true});
+			this.setState({dialogAdd:true})
 		}
 	}
 	closeAddProject(e){
 		if(this.state.dialogAdd){
-			this.setState({dialogAdd:false});
+			this.setState({dialogAdd:false})
 		}
 	}
 	submitAddProject(event){
@@ -53,7 +53,7 @@ class Dashboard extends Component {
 		projects.add(title, detail, (rs) => {
 			if(rs){
 				Materialize.toast('เพิ่มโปรเจคใหม่สำเร็จ', 4000)
-				this.setState({dialogAdd:false});
+				this.setState({dialogAdd:false})
 			}else{
 				Materialize.toast('เกิดข้อผิดพลาด', 4000)	
 			}
@@ -62,34 +62,34 @@ class Dashboard extends Component {
 	}
 
 	_updateAddProjectList(data){
-		var {listProject} = this.state;
+		var {listProject} = this.state
 		listProject = data.list
-		this.setState({listProject});
+		this.setState({listProject})
 	}
 
 	_updateEditProject(data){
-		var {listProject} = this.state;
+		var {listProject} = this.state
 		listProject = data.list
-		this.setState({listProject,editTitle:"",editDetail:"",editId:"",editUsers:[]});
+		this.setState({listProject,editTitle:"",editDetail:"",editId:"",editUsers:[]})
 	}
 
 	_updateAddAssign(data){
 		if(data.pid==this.state.editId){
-			var {editUsers} = this.state;
+			var {editUsers} = this.state
 			editUsers.push({
 				uid:data.id,
 				name:data.name,
 				avatar:data.avatar
-			});
-			this.setState({editUsers});
+			})
+			this.setState({editUsers})
 		}
 	}
 	_updateRemoveAssign(data){
 		if(data.pid==this.state.editId){
-			var {editUsers} = this.state;
+			var {editUsers} = this.state
 			var index = _.findIndex(editUsers,{uid:data.id})
-			editUsers.splice(index, 1);
-			this.setState({editUsers});
+			editUsers.splice(index, 1)
+			this.setState({editUsers})
 		}
 	}
 	openEditProject(id){
@@ -114,7 +114,7 @@ class Dashboard extends Component {
 						editDetail:rs[0].p.properties.detail,
 						editId:id,
 						editUsers:users
-					});
+					})
 				}
 			})
 			
@@ -122,7 +122,7 @@ class Dashboard extends Component {
 	}
 	closeEditProject(e){
 		if(this.state.dialogEdit){
-			this.setState({dialogEdit:false});
+			this.setState({dialogEdit:false})
 		}
 	}
 
@@ -134,7 +134,7 @@ class Dashboard extends Component {
 				if(!rs){
 					return Materialize.toast("เกิดข้อผิดพลาดไม่พบสมาชิกคนอื่น", 4000)
 				}else{
-					return this.setState({selectUser:true,listUsers:rs});
+					return this.setState({selectUser:true,listUsers:rs})
 				}
 			})
 			
@@ -142,19 +142,19 @@ class Dashboard extends Component {
 	}
 	closeSelectUser(e){
 		if(this.state.selectUser){
-			this.setState({selectUser:false});
+			this.setState({selectUser:false})
 		}
 	}
 
 	submitEditProject(event){
 		event.preventDefault()
-		var id = this.state.editId;
+		var id = this.state.editId
 		const title = this.refs.project_edit_name.value
 		const detail = this.refs.detail_edit_project.value
 		projects.save(title, detail, id, (rs) => {
 			if(rs){
 				Materialize.toast('บันทึกโปรเจคสำเร็จ', 4000)
-				this.setState({dialogEdit:false});
+				this.setState({dialogEdit:false})
 			}else{
 				Materialize.toast('เกิดข้อผิดพลาด', 4000)	
 			}
@@ -162,17 +162,17 @@ class Dashboard extends Component {
 	}
 
 	onEditTitle(e){
-		this.setState({editTitle:e.target.value});
+		this.setState({editTitle:e.target.value})
 	}
 	onEditDetail(e){
-		this.setState({editDetail:e.target.value});
+		this.setState({editDetail:e.target.value})
 	}
 
 	activeListUser(id){
 		if(_.findIndex(this.state.editUsers,{'uid':id}) >=0){
-			return "chooseUser active";
+			return "chooseUser active"
 		}else{
-			return "chooseUser";
+			return "chooseUser"
 		}
 	}
 	selectUserActive(uid){
@@ -190,13 +190,13 @@ class Dashboard extends Component {
 		})
 	}
 	render() {
-		var items = this.state.listProject;
+		var items = this.state.listProject
 		
 
 			var arrs = groupBy(items, function(item)
 			{
-				return [item.id];
-			});
+				return [item.id]
+			})
 
 		return (
 			<div className="row">
@@ -351,9 +351,9 @@ class Dashboard extends Component {
 			</div>
 			:null}
 			</div>
-			);
+			)
 }
 }
 
 
-export default Dashboard;
+export default Dashboard
