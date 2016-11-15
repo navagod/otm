@@ -3,9 +3,9 @@ module.exports = function (socket) {
 	var neo4j = require('neo4j');
 	var config = {
 		port: 5000,
-		neo4jURL: process.env.NEO4JURL || '10.187.25.203:7474',
-		neo4jUSER: process.env.NEO4JUSER || 'neo4j',
-		neo4jPASS: process.env.NEO4JPASS || 'orisma'
+		neo4jURL: '0.0.0.0:7474',
+		neo4jUSER: 'neo4j',
+		neo4jPASS:  'orisma'
 	};
 	var db = new neo4j.GraphDatabase('http://'+config.neo4jUSER+':'+config.neo4jPASS+'@'+config.neo4jURL);
 	var boardList = [];
@@ -21,10 +21,10 @@ module.exports = function (socket) {
 		var yyyy = today.getFullYear();
 		if(dd<10){
 			dd='0'+dd
-		}
+		} 
 		if(mm<10){
 			mm='0'+mm
-		}
+		} 
 		var today = yyyy+'-'+mm+'-'+dd;
 		return today;
 	};
@@ -37,26 +37,23 @@ module.exports = function (socket) {
 socket.on('project:listArr',function(data,rs){
 
 	db.cypher({
-		query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name',
+		query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p)  RETURN ID(p),p,ID(u),u.Name',
 	},function(err,results){
 		if (err) console.log(err);
 		if(results){
 			boardList = []
 			results.forEach(function(item,index){
 				var project_id = item['ID(p)'];
-				if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){
+				if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){ 
 					boardList[project_id] = {
 						d:{
 							id: project_id,
 							title: item['p']['properties']['title'],
 							detail: item['p']['properties']['detail'],
 						},
-						m:[{
-							id:0,
-							title:"Unassigned"
-						}]
+						m:[]
 					};
-
+					
 				}
 				boardList[project_id]['m'].push({
 					id:item['ID(u)'],
@@ -70,7 +67,7 @@ socket.on('project:listArr',function(data,rs){
 socket.on('project:list',function(data,rs){
 
 	db.cypher({
-		query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) RETURN ID(p),p,ID(u),u.Name,u.Avatar',
+		query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name,u.Avatar',
 	},function(err,results){
 		if (err) console.log(err);
 		if(results){
@@ -91,7 +88,7 @@ socket.on('project:list',function(data,rs){
 });
 socket.on('project:get',function(data,rs){
 	db.cypher({
-		query:'MATCH (p:Projects) WHERE ID(p) = '+data.id+' OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) RETURN p,ID(u),u.Name,u.Avatar',
+		query:'MATCH (p:Projects) WHERE ID(p) = '+data.id+' OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN p,ID(u),u.Name,u.Avatar',
 	},function(err,results){
 		if (err) console.log(err);
 		if(results){
@@ -108,7 +105,7 @@ socket.on('project:add', function (data,fn) {
 	}, function (err, results) {
 		if (err){ console.log(err); fn(false); }else{
 			db.cypher({
-				query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) RETURN ID(p),p,ID(u),u.Name,u.Avatar',
+				query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name,u.Avatar',
 			},function(err,results){
 				if (err) console.log(err);
 				if(results){
@@ -133,7 +130,7 @@ socket.on('project:save', function (data,fn) {
 		if (err) console.log(err);
 
 		db.cypher({
-			query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) RETURN ID(p),p,ID(u),u.Name,u.Avatar',
+			query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name,u.Avatar',
 		},function(err,results){
 			if (err) console.log(err);
 			if(results){
@@ -237,7 +234,7 @@ socket.on('card:sortlist', function (data,fn) {
 		if(process_query) {
 			socket.broadcast.emit('card:updateSort', {
 				pid:data.pid,
-				lists:data.lists
+				lists:data.lists 
 			});
 			fn(true);
 		}else{
@@ -277,7 +274,7 @@ socket.on('card:save', function (data,fn) {
 //Task===============//
 socket.on('task:add',function(data,rs){
 	db.cypher({
-		query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' MATCH (c:Cards) WHERE ID(c) = '+data.cid+' CREATE (t:Tasks {title:"'+data.title+'",endDate:"'+(new Date().getTime() + 86400000)+'",startDate:"'+new Date().getTime()+'",detail:"",position:'+data.sortNum+',status:"active"}) CREATE (u)-[:CREATE_BY {date:"'+data.at_create+'"}]->(t)-[:LIVE_IN]->(c) CREATE (t)-[:LIVE_IN]->(p) CREATE (cm:Comments {text:"Create task by "+u.Name,date:"'+data.at_create+'",type:"log"}) CREATE (u)-[:Comment]->(cm)-[:IN]->(t) RETURN ID(t)',
+		query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' MATCH (c:Cards) WHERE ID(c) = '+data.cid+' MATCH (uz:Users) WHERE ID(uz)=0 CREATE (t:Tasks {title:"'+data.title+'",endDate:"'+(new Date().getTime() + 86400000)+'",startDate:"'+new Date().getTime()+'",detail:"",position:'+data.sortNum+',status:"active"}) CREATE (u)-[:CREATE_BY {date:"'+data.at_create+'"}]->(t)-[:LIVE_IN]->(c) CREATE (t)-[:LIVE_IN]->(p) CREATE (cm:Comments {text:"Create task by "+u.Name,date:"'+data.at_create+'",type:"log"}) CREATE (u)-[:Comment]->(cm)-[:IN]->(t) CREATE (uz)-[:Assigned]->(t) RETURN ID(t)',
 	},function(err,results){
 		if (err) {
 			console.log(err);
@@ -312,7 +309,7 @@ socket.on('task:list',function(data,rs){
 		var res = [];
 		if(results){
 			results.forEach(function(value,index){
-				var push_arr =
+				var push_arr = 
 				{
 					id:value['tid'],
 					title:value['t.title'],
@@ -367,7 +364,7 @@ socket.on('task:changeEndTime', function (data,fn) {
 		query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' SET t.endDate = "'+data.time+'" RETURN t'
 	}, function (err, results) {
 		if (err) console.log(err);
-
+		
 		db.cypher({
 			query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) RETURN ID(p),p,ID(u),u.Name',
 		},function(err,results_sub){
@@ -376,7 +373,7 @@ socket.on('task:changeEndTime', function (data,fn) {
 				boardList = []
 				results_sub.forEach(function(item,index){
 					var project_id = item['ID(p)'];
-					if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){
+					if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){ 
 						boardList[project_id] = {
 							d:{
 								id: project_id,
@@ -405,16 +402,8 @@ socket.on('task:changeEndTime', function (data,fn) {
 });
 
 socket.on('task:changePosition', function (data,fn) {
-	db.cypher({
-		query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (u:Users)-[a:Assigned]->(t) RETURN t.startDate,t.endDate,ID(u)'
-	}, function (err, results) {
-		if (err) console.log(err);
-		var sql_u_null ="",sql_u_delete = ""
-		if(results["ID(u)"]){
-			sql_u_null = ' MATCH (u:Users)-[a:Assigned]->(t) '
-			sql_u_delete = ' DELETE a '
-		}
-		var sql = 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' '+sql_u_null+' MATCH (u2:Users) WHERE ID(u2) = '+data.new_uid+sql_u_delete+' CREATE (u2)-[:Assigned]->(t) SET t.startDate = "'+data.time_start+'", t.endDate = "'+data.time_end+'" RETURN t'
+
+		var sql = 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (u:Users)-[a:Assigned]->(t) MATCH (u2:Users) WHERE ID(u2) = '+data.new_uid+' DELETE a CREATE (u2)-[:Assigned]->(t) SET t.startDate = "'+data.time_start+'", t.endDate = "'+data.time_end+'" RETURN t'
 		db.cypher({
 			query: sql
 		}, function (err, results_process) {
@@ -428,7 +417,7 @@ socket.on('task:changePosition', function (data,fn) {
 					boardList = []
 					results_sub.forEach(function(item,index){
 						var project_id = item['ID(p)'];
-						if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){
+						if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){ 
 							boardList[project_id] = {
 								d:{
 									id: project_id,
@@ -453,236 +442,9 @@ socket.on('task:changePosition', function (data,fn) {
 			fn(true);
 		});
 
-	});
 });
 //Task===============//
-/*socket.on('list:join_boards',function(data,rs){
 
-	db.cypher({
-		query:'MATCH (u:User {id:"'+data.id+'"})-[j:JOIN]->(b:Board)  RETURN ID(b),b',
-	},function(err,results){
-		if (err) console.log(err);
-		if(results){
-			boardList = [];
-			results.forEach(function(item,index){
-				boardList.push({id:item['ID(b)'],title:item['b']['properties']['title']});
-			});
-			rs(boardList);
-		}
-	});
-});
-
-socket.on('add:list', function (data,fn) {
-	db.cypher({
-		query: 'MATCH (u:Users) WHERE u.id = "'+data.uid+'" MATCH (b:Board) WHERE ID(b) = '+data.bid+' CREATE (l:List {title:"'+data.name+'",position:'+data.sort+'}) CREATE (l)-[:CREATE_BY {date:"'+data.at_create+'"}]->(u),(l)-[:LIVE_IN]->(b)  RETURN ID(l)'
-	}, function (err, results) {
-		if (err) fn(false);
-		fn(results[0]['ID(l)']);
-	});
-});
-socket.on('list:lists',function(data,rs){
-	db.cypher({
-		query:'MATCH (b:Board)-[c:CREATE_BY]->(u:Users) WHERE ID(b) = '+data.boardId+' OPTIONAL MATCH (l:List)-[r:LIVE_IN]->(b) RETURN b.title,ID(l),l ORDER BY l.position',
-	},function(err,results){
-		if (err) console.log(err);
-		if(results){
-			lists = [];
-			if(results[0]['l']){
-				results.forEach(function(item,index){
-					lists.push({id:item['l']['_id'],title:item['l']['properties']['title'],position:item['l']['properties']['position']});
-				});
-			}
-			rs({board:results[0]['b.title'],lists:lists});
-		}
-	});
-});
-socket.on('sort:list', function (data,fn) {
-		// console.log(data);
-		var process_query = true;
-		data.lists.forEach(function(value,index){
-			db.cypher({
-				query: 'MATCH (l:List)-[r:LIVE_IN]->(b:Board)-[c:CREATE_BY]->(u:User {id:"'+data.uid+'"}) WHERE ID(b) = '+data.bid+'  AND ID(l) = '+value.id+' SET l.position = '+value.position+' RETURN ID(l)'
-			}, function (err, results) {
-				if (err){
-					console.log(err);
-					process_query = false;
-				}
-			});
-		});
-		if(process_query) fn(true);
-	});
-
-socket.on('list:card',function(data,rs){
-	db.cypher({
-		query:'MATCH (c:Card)-[n:LIVE_IN]->(l:List)-[n2:LIVE_IN]->(b:Board) WHERE ID(b) = '+data.bid+' RETURN c,ID(l) ORDER BY c.position ASC',
-	},function(err,results){
-		if (err) console.log(err);
-		var res = [];
-		if(results[0]){
-			results.forEach(function(value,index){
-				var push_arr = {
-					list_id:value['ID(l)'],data:
-					{
-						id:value['c']['_id'],
-						title:value['c']['properties']['title'],
-						description:value['c']['properties']['description'],
-						position:value['c']['properties']['position'],
-						start_date:value['c']['properties']['start_date'],
-						end_date:value['c']['properties']['end_date']
-					}
-				};
-
-				res.push(push_arr);
-			});
-		}
-			// console.log(res);
-			rs(res);
-		});
-});
-socket.on('get:card',function(data,rs){
-
-	db.cypher({
-		query:'MATCH (c:Card) WHERE ID(c) = '+data.cid+' OPTIONAL MATCH (u:Users)-[j:JOIN]->(c) RETURN c,u',
-	},function(err,results){
-		if (err) console.log(err);
-		if(results[0]){
-			var data;
-			var mem = [];
-			var fullmem = [];
-			results.forEach(function(v,i){
-				data = v['c']['properties'];
-				if(v['u']){
-					mem.push(v['u']['properties']['id']);
-					fullmem.push({id:v['u']['properties']['id'],fullName:v['u']['properties']['fullName'],avatar:v['u']['properties']['avatar'],email:v['u']['properties']['email']});
-				}
-			});
-			rs({data:data,joinMember:mem,joinMemberFull:fullmem});
-		}else{
-			rs(false);
-		}
-	});
-});
-socket.on('delete:card',function(data,rs){
-	db.cypher({
-		query:'MATCH (u:Users)<-[p:CREATE_BY]-(c:Card)-[i:LIVE_IN]->(l:List) WHERE id(c) = '+data.cid+' OPTIONAL MATCH (c)<-[ic:LIVE_IN]-(cm:Comment)-[pc:CREATE_BY]->(u)  DELETE p,i,ic,pc,cm,c',
-	},function(err,results){
-		if (err) console.log(err);
-		rs(true);
-	});
-});
-socket.on('save:card',function(data,rs){
-	var query = 'MATCH (c:Card) WHERE ID(c) = ' + data.cid;
-	switch(data.cmd) {
-		case 'title':
-		query += ' SET c.title = "'+data.data.title+'" RETURN ID(c)';
-		break;
-		case 'desc':
-		query += ' SET c.detail = "'+data.data.detail+'" RETURN ID(c)';
-		break;
-		case 'date':
-		query += ' SET c.start_date = "'+data.data.start+'", c.end_date = "'+data.data.end+'" RETURN ID(c)';
-		break;
-		case 'drop':
-		query += ' MATCH (u:Users)<-[cr:CREATE_BY]-(c)  MATCH (u2:Users) WHERE u2.firstName = "'+data.data.user+'" DELETE cr CREATE (c)-[c3:CREATE_BY {at_create:"'+new Date().getTime()+'"}]->(u2) SET c.start_date = "'+data.data.start+'", c.end_date = "'+data.data.end+'" RETURN ID(c)';
-		break;
-		case 'member':
-		if(data.data.typeAction=='add'){
-			query += ' MATCH (u:User {id:"'+data.data.uid+'"}) CREATE (u)-[j:JOIN]->(c) RETURN u';
-		}else{
-			query += ' MATCH (u:User {id:"'+data.data.uid+'"})-[j:JOIN]->(c) DELETE j RETURN ID(u)';
-		}
-		break;
-	}
-	db.cypher({
-		query:query,
-	},function(err,results){
-		if (err) console.log(err);
-		if(results[0]){
-			if(data.cmd==='member' && data.data.typeAction=='add'){
-				rs({id:results[0]['u']['properties']['id'],fullName:results[0]['u']['properties']['fullName'],avatar:results[0]['u']['properties']['avatar'],email:results[0]['u']['properties']['email']});
-			}else{
-				rs(true);
-			}
-
-		}else{
-			rs(false);
-		}
-	});
-});
-socket.on('add:comment',function(data,rs){
-	db.cypher({
-		query:'MATCH (u:Users) WHERE u.id = "'+data.uid+'" MATCH (l:Card) WHERE ID(l) = '+data.cid+' CREATE (c:Comment {message:"'+data.data+'"}) CREATE (u)<-[:CREATE_BY {date:"'+data.at_create+'"}]-(c)-[:LIVE_IN]->(l) RETURN ID(c),u.firstName,u.id',
-	},function(err,results){
-		if (err) console.log(err);
-		rs(results[0]);
-	});
-});
-socket.on('delete:comment',function(data,rs){
-	db.cypher({
-		query:'MATCH (u:Users)<-[p:CREATE_BY]-(c:Comment)-[i:LIVE_IN]->(l:Card) WHERE u.id = "'+data.uid+'" AND ID(c)='+data.cid+' DELETE p,c,i',
-	},function(err,results){
-		if (err) console.log(err);
-		rs(true);
-	});
-});
-socket.on('list:comment',function(data,rs){
-	db.cypher({
-		query:'MATCH (u:Users)<-[a:CREATE_BY]-(c:Comment)-[n:LIVE_IN]->(l:Card) WHERE ID(l) = '+data.cid+' RETURN u.firstName,u.id,c,a.date ORDER BY a.date ASC',
-	},function(err,results){
-		if (err) console.log(err);
-		var res = [];
-		if(results[0]){
-			results.forEach(function(value,index){
-				var push_arr = {
-					comment_id:value['c']['_id'],
-					message:value['c']['properties']['message'],
-					uid:value['u.id'],
-					user:value['u.firstName'],
-					at_create:value['a.date']
-				};
-				res.push(push_arr);
-			});
-		}
-		rs(res);
-	});
-});
-socket.on('list:members',function(data,rs){
-	db.cypher({
-		query:'MATCH (u:Users) RETURN u',
-	},function(err,results){
-		if (err) console.log(err);
-		if(results){
-			var userList = [];
-			results.forEach(function(item,index){
-				userList.push({id:item['u']['properties']['id'],avatar:item['u']['properties']['avatar'],fullName:item['u']['properties']['fullName'],email:item['u']['properties']['email'],firstName:item['u']['properties']['firstName']});
-			});
-			rs(userList);
-		}
-	});
-});
-socket.on('list:events',function(data,rs){
-	db.cypher({
-		query:'MATCH (u2:Users)<-[uc:CREATE_BY]-(c:Card)-[n:LIVE_IN]->(l:List)-[n2:LIVE_IN]->(b:Board) WHERE ID(b) = '+data.bid+' RETURN c,u2.firstName',
-	},function(err,results){
-		if (err) console.log(err);
-		var cardList = [];
-		results.forEach(function(item,index){
-			if(item['c']){
-				var timeDiff = Math.abs(item['c']['properties']['end_date'] - item['c']['properties']['start_date']);
-				var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
-
-				cardList.push({
-					id:item['c']['_id'].toString(),
-					title:item['c']['properties']['title'],
-					duration:diffDays,
-					startDate:timeConverter(item['c']['properties']['start_date']),
-					resource:item['u2.firstName']
-				});
-			}
-		});
-		rs({events:cardList});
-	});
-});*/
 
 	//users============//
 	socket.on('user:register',function(data,rs){
@@ -759,6 +521,6 @@ socket.on('list:events',function(data,rs){
 	});
 	//users============//
 	socket.on('disconnect', function () {
-
+		
 	});
 };
