@@ -3,7 +3,6 @@ import {Link} from 'react-router'
 import projects from './Module/Project'
 
 var _ = require('lodash')
-const socket = io.connect()
 class Dashboard extends Component {
 	constructor(props) {
 		super(props)
@@ -29,6 +28,7 @@ class Dashboard extends Component {
 				return this.setState({listProject:rs})
 			}
 		})
+    let socket = this.props.socket
 		socket.on('project:updateAddList', this._updateAddProjectList.bind(this))
 		socket.on('project:updateEditProject', this._updateEditProject.bind(this))
 		socket.on('project:updateAddAssign', this._updateAddAssign.bind(this))

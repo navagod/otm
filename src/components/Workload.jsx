@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import auth from './Module/Auth'
-const socket = io.connect();
+
 class Workload extends Component {
 	constructor(props) {
 		super(props);
@@ -8,12 +8,12 @@ class Workload extends Component {
 			error: false,
 			errorMsg:""
 		}
-		
+
 	}
 	componentDidMount(){
-		
+
 	}
-	
+
 	render() {
 		return (
 			<div></div>

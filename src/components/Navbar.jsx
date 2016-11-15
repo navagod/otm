@@ -3,13 +3,17 @@ import {Link} from 'react-router';
 import auth from './Module/Auth';
 
 class Navbar extends Component {
+  componentWillMount() {
+    var socket = io()
+    this.setState({socket: socket})
+  }
 	render() {
 		return (
 			<div>
 			<nav className="light-blue lighten-1" role="navigation" id="navbar">
 			<div className="nav-wrapper container"><Link to="/" id="logo-container" className="brand-logo">OTM</Link>
-			
-			
+
+
 			{ auth.loggedIn() ?
 				<ul className="right hide-on-med-and-down">
 				<li><Link to="/dashboard"><i className="large material-icons">dashboard</i></Link></li>
@@ -28,7 +32,7 @@ class Navbar extends Component {
 			</div>
 			</nav>
 			<div>
-			{this.props.children}
+			{ React.cloneElement(this.props.children, {socket: this.state.socket}) }
 			</div>
 			</div>
 			);

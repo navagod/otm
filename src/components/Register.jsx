@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import auth from './Module/Auth';
-const socket = io.connect();
 class Register extends Component {
 	constructor(props) {
 		super(props);
@@ -31,7 +30,7 @@ class Register extends Component {
 					Materialize.toast("อีเมล์นี้ถูกใช้งานแล้ว", 4000)
 					)}
 		return (
-			
+
 			<div className="row">
 			<div className="col s6 offset-s3">
 			<form className="col s12" onSubmit={this.handleSubmit}>
@@ -65,7 +64,7 @@ class Register extends Component {
 			</form>
 			</div>
 			</div>
-			
+
 			);
 	}
 }

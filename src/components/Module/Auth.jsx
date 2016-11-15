@@ -1,4 +1,4 @@
-const socket = io.connect();
+
 module.exports = {
   login(email, pass, cb) {
     cb = arguments[arguments.length - 1]
@@ -85,6 +85,7 @@ module.exports = {
   onChange() {}
 }
 function pretendGetProfile(uid, cb) {
+  let socket = this.props.socket
   socket.emit('user:getProfile', {
     uid:uid
   }, (result) => {
@@ -96,6 +97,7 @@ function pretendGetProfile(uid, cb) {
   });
 }
 function pretendSaveProfile(uid,pass,name, cb) {
+  let socket = this.props.socket
   socket.emit('user:saveProfile', {
     uid:uid,
     name:name,
@@ -109,6 +111,7 @@ function pretendSaveProfile(uid,pass,name, cb) {
   });
 }
 function pretendRequest(email, pass, cb) {
+  let socket = this.props.socket
   socket.emit('user:login', {
     email:email,
     pass:pass
@@ -122,6 +125,7 @@ function pretendRequest(email, pass, cb) {
 }
 
 function pretendRegister(email, pass, name, cb) {
+  let socket = this.props.socket
   socket.emit('user:register', {
     email:email,
     pass:pass,

@@ -4,7 +4,6 @@ import {Link} from 'react-router';
 import projects from './Module/Project'
 import Task from './Task'
 var _ = require('lodash')
-const socket = io.connect();
 
 class Project extends Component {
 	constructor(props) {
@@ -36,6 +35,7 @@ class Project extends Component {
 				this.setState({projectTitle:rs.board,cardList:rs.lists});
 			}
 		})
+    let socket = this.props.socket
 		socket.on('card:updateSort', this._updateSortCardList.bind(this));
 		socket.on('card:updateAddList', this._updateAddCardList.bind(this));
 		socket.on('card:updateEditCard', this._updateEditCard.bind(this));
@@ -43,7 +43,7 @@ class Project extends Component {
 	}
 	componentDidUpdate(prevProps, prevState){
 		cal_list();
-		
+
 	}
 	_updateAddCardList(data){
 		if(data.pid == this.state.projectId){
@@ -149,7 +149,7 @@ class Project extends Component {
 						cardEditId:id})
 				}
 			})
-			
+
 		}
 	}
 
@@ -212,7 +212,7 @@ class Project extends Component {
 			<div id="list-cards">
 			<div id="inner-list">
 			<div id="card-sort">
-			{ card_items.map((card_item, i) => 
+			{ card_items.map((card_item, i) =>
 				<div className="card-item connectedSortable" id={"c-"+card_item.id} data-id={card_item.id} key={i}>
 				<div className={"card-header " + card_item.color}>
 				<div className="card-icon"><i className="material-icons">{card_item.icon}</i></div>
@@ -275,7 +275,7 @@ class Project extends Component {
 					</div>
 					</div>
 					<div className="modal-footer">
-					
+
 					<button type="submit" className="waves-effect waves-green btn-flat">Save</button>
 					<button type="button" className="waves-effect waves-red btn-flat" id="closeEditCard" onClick={this.closeEditCard.bind(this)}>Close</button>
 					<button type="button" className="waves-effect waves-red btn-flat red">Delete Panel</button>
@@ -284,7 +284,7 @@ class Project extends Component {
 					</div>
 					<div className="lean-overlay" id="materialize-lean-overlay-2"></div>
 					</div>
-					:null 
+					:null
 				}
 
 				</div>

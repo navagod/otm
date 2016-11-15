@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import auth from './Module/Auth';
-const socket = io.connect();
 class Profile extends Component {
 	constructor(props) {
 		super(props);
@@ -41,7 +40,7 @@ class Profile extends Component {
 	}
 	render() {
 		return (
-			
+
 			<div className="row">
 			<div className="col s6 offset-s3">
 			<form className="col s12" onSubmit={this.handleSubmit}>

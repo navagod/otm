@@ -4,7 +4,6 @@ import {Link} from 'react-router';
 import tasks from './Module/Task';
 import moment from 'moment';
 var _ = require('lodash')
-const socket = io.connect();
 
 class Task extends Component {
 	constructor(props) {
@@ -29,11 +28,11 @@ class Task extends Component {
 				this.setState({listTasks:rs});
 			}
 		})
-
+    let socket = this.props.socket
 		socket.on('task:updateAddTaskList', this._updateAddTaskList.bind(this));
 	}
 	componentDidUpdate(prevProps, prevState){
-		
+
 	}
 	_updateAddTaskList(data){
 		if(data.pid == this.state.projectId && data.lists.cid == this.state.cardId){
@@ -68,7 +67,7 @@ class Task extends Component {
 	render() {
 		return (
 			<div className="sort-task" key={"box-"+this.state.projectId} id={"box-"+this.state.projectId}>
-			{ this.state.listTasks.map((task_item, i) => 
+			{ this.state.listTasks.map((task_item, i) =>
 				<div className="task-box" id={"task-"+task_item.id} key={i}>
 				<Link to="#">
 				<div className="task-assign">
@@ -102,7 +101,7 @@ class Task extends Component {
 							</Link>
 							</div>
 							)}
-			
+
 			{this.state.openAddTask ?
 				<div className="task-box">
 				<form onSubmit={this.submitAddTask.bind(this)}>
@@ -112,7 +111,7 @@ class Task extends Component {
 				:
 				<div id="add-task" onClick={this.openAddTaskDialog.bind(this)}>+</div>
 			}
-			
+
 			</div>
 			)
 	}

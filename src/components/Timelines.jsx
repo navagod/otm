@@ -3,7 +3,6 @@ import {Link} from 'react-router'
 import auth from './Module/Auth'
 import Timeline from 'react-calendar-timeline'
 import moment from 'moment'
-const socket = io.connect()
 import CM from './Module/Carlenda'
 var _ = require('lodash')
 
@@ -20,7 +19,7 @@ class Timelines extends Component {
 			taskAssignList:[],
 			currentPid:0
 		}
-		
+
 	}
 	componentDidMount(){
 		CM.listProject((rs)=>{
@@ -39,7 +38,7 @@ class Timelines extends Component {
 				this.setState({projectList:rs})
 			}
 		})
-
+    let socket = this.props.socket
 		socket.on('task:updateEndTime', this._updateEndTime.bind(this))
 	}
 	componentWillUnmount() {
@@ -67,7 +66,7 @@ class Timelines extends Component {
 						canChangeGroup: true,
 						className:v.status
 					})
-					
+
 				})
 			}
 			item.m.sort(function (a, b) {
@@ -125,7 +124,7 @@ class Timelines extends Component {
 			<div>
 			<div id="project-list">
 			<div id="btn-all-project">All Projects</div>
-			{ items.map((item, i) => 
+			{ items.map((item, i) =>
 				<div className={this.activeProject(item.d.id)} onClick={this.selectProject.bind(this,item)} key={"list-project-"+i}><i className="material-icons tiny">library_books</i> {item.d.title}</div>
 				)}
 				</div>
