@@ -1,6 +1,6 @@
 {
   "name": "react-websocket-starter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "starter app for using react with socket.io",
   "main": "server.js",
   "scripts": {
