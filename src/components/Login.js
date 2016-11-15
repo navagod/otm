@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import auth from './Module/Auth';
-const socket = io.connect();
 class Login extends Component {
 	constructor(props) {
 		super(props);
@@ -18,9 +17,10 @@ class Login extends Component {
 		const pass = this.refs.pass.value
 
 		auth.login(email, pass, (loggedIn) => {
-			if (!loggedIn)
+			if (!loggedIn){
 				// return this.setState({ error: true,errorMsg:"ข้อมูลเข้าสู่ระบบไม่ถูกต้อง" })
-			return Materialize.toast("ข้อมูลเข้าสู่ระบบไม่ถูกต้อง", 4000)
+  			return Materialize.toast("ข้อมูลเข้าสู่ระบบไม่ถูกต้อง", 4000)
+      }
 			const { location } = this.props
 
 			if (location.state && location.state.nextPathname) {
@@ -32,7 +32,7 @@ class Login extends Component {
 	}
 	render() {
 		return (
-			
+
 			<div className="row">
 			<div className="col s6 offset-s3">
 			<form className="col s12" onSubmit={this.handleSubmit}>

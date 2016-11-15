@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import {Link} from 'react-router'
 import projects from './Module/Project'
+
 var _ = require('lodash')
 const socket = io.connect()
 class Dashboard extends Component {
@@ -55,9 +56,8 @@ class Dashboard extends Component {
 				Materialize.toast('เพิ่มโปรเจคใหม่สำเร็จ', 4000)
 				this.setState({dialogAdd:false})
 			}else{
-				Materialize.toast('เกิดข้อผิดพลาด', 4000)	
+				Materialize.toast('เกิดข้อผิดพลาด', 4000)
 			}
-			
 		})
 	}
 
@@ -117,7 +117,7 @@ class Dashboard extends Component {
 					})
 				}
 			})
-			
+
 		}
 	}
 	closeEditProject(e){
@@ -137,7 +137,7 @@ class Dashboard extends Component {
 					return this.setState({selectUser:true,listUsers:rs})
 				}
 			})
-			
+
 		}
 	}
 	closeSelectUser(e){
@@ -156,7 +156,7 @@ class Dashboard extends Component {
 				Materialize.toast('บันทึกโปรเจคสำเร็จ', 4000)
 				this.setState({dialogEdit:false})
 			}else{
-				Materialize.toast('เกิดข้อผิดพลาด', 4000)	
+				Materialize.toast('เกิดข้อผิดพลาด', 4000)
 			}
 		})
 	}
@@ -191,10 +191,8 @@ class Dashboard extends Component {
 	}
 	render() {
 		var items = this.state.listProject
-		
 
-			var arrs = groupBy(items, function(item)
-			{
+			var arrs = groupBy(items, function(item) {
 				return [item.id]
 			})
 
@@ -205,7 +203,7 @@ class Dashboard extends Component {
 			</div>
 			<div id="list-board">
 			<div className="row">
-			{ arrs.map((item, i) => 
+			{ arrs.map((item, i) =>
 				<div className="col s4 m3" key={i}>
 				<div className="card blue-grey">
 				<div className="editProjectBtn waves-effect waves-blue blue btn-flat" onClick={this.openEditProject.bind(this,item[0].id)}><i className="material-icons">mode_edit</i></div>
@@ -218,15 +216,14 @@ class Dashboard extends Component {
 				</Link>
 				<div className="card-action">
 
-				
-				{item.map((u, ui) => 
+
+				{item.map((u, ui) =>
 					<div className="col s2 no-padding" key={"project_dashboard-"+ui}>
-					{u.user_name?
-						<div>
-						{u.user_avatar?
-							<img  src={"/"+u.user_avatar} className=" responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
-							:
-							<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.user_name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className=" responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
+					{u.user_name
+            ? <div>
+						{u.user_avatar
+              ? <img  src={"/"+u.user_avatar} className=" responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
+							: <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.user_name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className=" responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
 						}
 						</div>
 						:null}
@@ -272,7 +269,7 @@ class Dashboard extends Component {
 			</div>
 			<div className="lean-overlay" id="materialize-lean-overlay-1"></div>
 			</div>
-			:null 
+			:null
 		}
 
 		{this.state.dialogEdit ?
@@ -297,7 +294,7 @@ class Dashboard extends Component {
 			</div>
 			<div className="row">
 			<div className="">
-			{this.state.editUsers.map((u, ui) => 
+			{this.state.editUsers.map((u, ui) =>
 				<div className="col s1 no-padding" key={ui}>
 				{u.name?
 					<div>
@@ -324,7 +321,7 @@ class Dashboard extends Component {
 			</div>
 			<div className="lean-overlay" id="materialize-lean-overlay-2"></div>
 			</div>
-			:null 
+			:null
 		}
 		{this.state.selectUser ?
 			<div id="user-list" className="modal modal-fixed-footer open">
@@ -332,7 +329,7 @@ class Dashboard extends Component {
 			<h4>Select Uses</h4>
 			<div>
 			<div className="row">
-			{ this.state.listUsers.map((user, i) => 
+			{ this.state.listUsers.map((user, i) =>
 
 				<div key={i} className={this.activeListUser(user.id)} onClick={this.selectUserActive.bind(this,user.id)}>
 				{user.avatar?

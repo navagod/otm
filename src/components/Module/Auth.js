@@ -91,7 +91,7 @@ function pretendGetProfile(uid, cb) {
     if(!result) {
       cb({ process: false })
     }else{
-      cb({ process: true,name:result['u']['properties']['Name'],email:result['u']['properties']['Email']})
+      cb({ process: true,name:result['u']['properties']['Name'],email:result['u']['properties']['Email'] })
     }
   });
 }
