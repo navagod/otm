@@ -37,7 +37,7 @@ module.exports = function (socket) {
 socket.on('project:listArr',function(data,rs){
 
 	db.cypher({
-		query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) RETURN ID(p),p,ID(u),u.Name',
+		query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name',
 	},function(err,results){
 		if (err) console.log(err);
 		if(results){
@@ -51,7 +51,10 @@ socket.on('project:listArr',function(data,rs){
 							title: item['p']['properties']['title'],
 							detail: item['p']['properties']['detail'],
 						},
-						m:[]
+						m:[{
+							id:0,
+							title:"Unassigned"
+						}]
 					};
 					
 				}
@@ -101,7 +104,7 @@ socket.on('project:get',function(data,rs){
 
 socket.on('project:add', function (data,fn) {
 	db.cypher({
-		query: 'MATCH (m:Users) WHERE ID(m) = '+data.uid+' CREATE (p:Projects {title:"'+data.title+'",detail:"'+data.detail+'",status:"active"}) CREATE (p)<-[:CREATE_BY {date:"'+data.at_create+'"}]-(m)  RETURN ID(p)'
+		query: 'MATCH (m:Users) WHERE ID(m) = '+data.uid+' MATCH (u:Users) WHERE ID(u) = 0 CREATE (p:Projects {title:"'+data.title+'",detail:"'+data.detail+'",status:"active"}) CREATE (p)<-[:CREATE_BY {date:"'+data.at_create+'"}]-(m) CREATE (u)-[:Assigned]->(p) RETURN ID(p)'
 	}, function (err, results) {
 		if (err){ console.log(err); fn(false); }else{
 			db.cypher({
@@ -303,11 +306,11 @@ socket.on('task:add',function(data,rs){
 });
 socket.on('task:list',function(data,rs){
 	db.cypher({
-		query:'MATCH (t:Tasks)-[n:LIVE_IN]->(c:Cards)-[n2:LIVE_IN]->(p:Projects)  WHERE ID(c) = '+data.cid+' OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (lb:Labels)-[in:IN]->(t)  OPTIONAL  MATCH (td:Todos)-[in:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in:IN]->(t) WHERE tdc.status="success" RETURN u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.endDate,t.detail,t.status,COUNT(ID(cm)) AS total_comment,lb.Title as tag_name,lb.Color as tag_color,ID(p) AS pid,ID(c) AS cid,COUNT(ID(td)) AS total_todo,COUNT(ID(tdc)) AS todo_success ORDER BY t.position ASC',
+		query:'MATCH (t:Tasks)-[n:LIVE_IN]->(c:Cards)-[n2:LIVE_IN]->(p:Projects)  WHERE ID(c) = '+data.cid+' OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in1:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (lb:Labels)-[in4:IN]->(t)  OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) WHERE tdc.status="success" RETURN u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.endDate,t.detail,t.status,COUNT(ID(cm)) AS total_comment,lb.Title as tag_name,lb.Color as tag_color,ID(p) AS pid,ID(c) AS cid,COUNT(ID(td)) AS total_todo,COUNT(ID(tdc)) AS todo_success ORDER BY t.position ASC',
 	},function(err,results){
 		if (err) console.log(err);
 		var res = [];
-		if(results[0]){
+		if(results){
 			results.forEach(function(value,index){
 				var push_arr = 
 				{
@@ -403,12 +406,17 @@ socket.on('task:changeEndTime', function (data,fn) {
 
 socket.on('task:changePosition', function (data,fn) {
 	db.cypher({
-		query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' RETURN t.startDate,t.endDate'
+		query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (u:Users)-[a:Assigned]->(t) RETURN t.startDate,t.endDate,ID(u)'
 	}, function (err, results) {
 		if (err) console.log(err);
-		
+		var sql_u_null ="",sql_u_delete = ""
+		if(results["ID(u)"]){
+			sql_u_null = ' MATCH (u:Users)-[a:Assigned]->(t) '
+			sql_u_delete = ' DELETE a '
+		}
+		var sql = 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' '+sql_u_null+' MATCH (u2:Users) WHERE ID(u2) = '+data.new_uid+sql_u_delete+' CREATE (u2)-[:Assigned]->(t) SET t.startDate = "'+data.time_start+'", t.endDate = "'+data.time_end+'" RETURN t'
 		db.cypher({
-			query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' SET t.startDate = "'+data.time+'" MATCH (u:Users)-[a:Assigned]->(t:Tasks) WHERE ID(t) = '+data.tid+' DELETE a MATCH (u2:Users) WHERE ID(u2) = '+data.uid+' CREATE (u2)-[:Assigned]->(t) RETURN t'
+			query: sql
 		}, function (err, results_process) {
 			if (err) console.log(err);
 
@@ -737,7 +745,7 @@ socket.on('list:events',function(data,rs){
 	socket.on('user:list',function(data,rs){
 
 		db.cypher({
-			query:'MATCH (u:Users) RETURN ID(u) AS uid,u.Name AS name,u.Avatar AS avatar',
+			query:'MATCH (u:Users) WHERE ID(u)<>0 RETURN ID(u) AS uid,u.Name AS name,u.Avatar AS avatar',
 		},function(err,results){
 			if (err) console.log(err);
 			if(results){

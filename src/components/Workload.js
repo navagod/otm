@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import auth from './Module/Auth';
+import React, { Component } from 'react'
+import auth from './Module/Auth'
 const socket = io.connect();
 class Workload extends Component {
 	constructor(props) {

@@ -1,20 +1,20 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react'
+import ReactDOM from 'react-dom'
 import { Router,Route,IndexRoute,browserHistory} from 'react-router'
 
-import App from './components/App';
-import auth from './components/Module/Auth';
-import Main from './components/Main';
-import Login from './components/Login';
-import Logout from './components/Logout';
-import Profile from './components/Profile';
-import Nopage from './components/Nopage';
-import Project from './components/Project';
-import Dashboard from './components/Dashboard';
-import Navbar from './components/Navbar';
-import Register from './components/Register';
-import Workload from './components/Workload';
-import Timeline from './components/Timelines';
+import App from './components/App'
+import auth from './components/Module/Auth'
+import Main from './components/Main'
+import Login from './components/Login'
+import Logout from './components/Logout'
+import Profile from './components/Profile'
+import Nopage from './components/Nopage'
+import Project from './components/Project'
+import Dashboard from './components/Dashboard'
+import Navbar from './components/Navbar'
+import Register from './components/Register'
+import Workload from './components/Workload'
+import Timeline from './components/Timelines'
 import { createHashHistory,createBrowserHistory } from 'history'
 
 
@@ -53,4 +53,4 @@ ReactDOM.render(
 		</Route>
 		</Router>),
 	document.getElementById('root')
-	);
+	)

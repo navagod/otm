@@ -1,21 +1,17 @@
-import React, { Component } from 'react';
-import {Link} from 'react-router';
-import auth from './Module/Auth';
+import React, { Component } from 'react'
+import {Link} from 'react-router'
+import auth from './Module/Auth'
 import Timeline from 'react-calendar-timeline'
 import moment from 'moment'
-const socket = io.connect();
+const socket = io.connect()
 import CM from './Module/Carlenda'
 var _ = require('lodash')
 
-// const items = [
-// {id: 1, group: 1, title: 'item 1', start_time: moment(), end_time: moment().add(1, 'hour')},
-// {id: 2, group: 2, title: 'item 2', start_time: moment().add(-0.5, 'hour'), end_time: moment().add(0.5, 'hour')},
-// {id: 3, group: 1, title: 'item 3', start_time: moment().add(2, 'hour'), end_time: moment().add(3, 'hour')}
-// ]
+
 
 class Timelines extends Component {
 	constructor(props) {
-		super(props);
+		super(props)
 		this.state = {
 			error: false,
 			errorMsg:"",
@@ -32,12 +28,29 @@ class Timelines extends Component {
 			if(!rs){
 
 			}else{
+				rs.sort(function (a, b) {
+					if (a.d.id > b.d.id) {
+						return 1;
+					}
+					if (a.d.id < b.d.id) {
+						return -1;
+					}
+					return 0;
+				});
 				this.setState({projectList:rs})
 			}
 		})
 
-		socket.on('task:updateEndTime', this._updateEndTime.bind(this));
+		socket.on('task:updateEndTime', this._updateEndTime.bind(this))
 	}
+	componentWillUnmount() {
+		this.setState({projectList:[],
+			userList:[],
+			taskUnsignList:[],
+			taskAssignList:[],
+			currentPid:0})
+	}
+
 	selectProject(item){
 		CM.listTask(item.d.id,(rs)=>{
 			if(!rs){
@@ -45,43 +58,38 @@ class Timelines extends Component {
 			}else{
 				var ac = [],uc = []
 				rs.forEach(function(v,i){
-					if(!v.group){
-						uc.push({
-							group:v.group,
-							id:v.id,
-							title:v.title,
-							start_time:moment.unix(Math.round(parseInt(v.start_time) / 1000)),
-							end_time:moment.unix(Math.round(parseInt(v.end_time) / 1000)),
-							canMove: true,
-							canResize: true,
-							canChangeGroup: true,
-							status:v.status,
-							itemsSorted: true,
-							itemTouchSendsClick: false,
-							stackItems: true,
-							itemHeightRatio: 0.75,
-						})
-					}else{
-						ac.push({
-							group:v.group,
-							id:v.id,
-							title:v.title,
-							start_time:moment.unix(Math.round(parseInt(v.start_time) / 1000)),
-							end_time:moment.unix(Math.round(parseInt(v.end_time) / 1000)),
-							canMove: true,
-							canResize: true,
-							canChangeGroup: true,
-							status:v.status,
-							itemsSorted: true,
-							itemTouchSendsClick: false,
-							stackItems: true,
-							itemHeightRatio: 0.75,
-						})
-					}
+					var zero_group = v.group?v.group:0
+					console.log(zero_group)
+					ac.push({
+						group:zero_group,
+						id:v.id,
+						title:v.title,
+						start_time:moment.unix(Math.round(parseInt(v.start_time) / 1000)),
+						end_time:moment.unix(Math.round(parseInt(v.end_time) / 1000)),
+						canMove: true,
+						canResize: true,
+						canChangeGroup: true,
+						className:v.status
+					})
+					
 				})
 			}
+
+			
+			item.m.sort(function (a, b) {
+				if (a.id > b.id) {
+					return 1;
+				}
+				if (a.id < b.id) {
+					return -1;
+				}
+				return 0;
+			});
+			console.log(item.m)
 			this.setState({currentPid:item.d.id,userList:item.m,taskUnsignList:uc,taskAssignList:ac})
+
 		})
+
 	}
 
 	_updateEndTime(data){
@@ -109,15 +117,17 @@ class Timelines extends Component {
 			return "btn-select-project"
 		}
 	}
-	moveItem(itemId, dragTime, newGroupOrder){
-		CM.changePosition(this.state.currentPid,itemId,dragTime,newGroupOrder,(rs)=>{
+	moveItem(itemId, data){
+		CM.changePosition(this.state.currentPid,itemId,data.start_time,data.end_time,data.group,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}
 		})
 	}
+
 	render() {
-		var items = this.state.projectList;
+		var items = this.state.projectList
+
 		return (
 			<div>
 			<div id="project-list">
@@ -125,22 +135,25 @@ class Timelines extends Component {
 			{ items.map((item, i) => 
 				<div className={this.activeProject(item.d.id)} onClick={this.selectProject.bind(this,item)} key={"list-project-"+i}><i className="material-icons tiny">library_books</i> {item.d.title}</div>
 				)}
-			</div>
-			<Timeline groups={this.state.userList}
-			items={this.state.taskAssignList}
-			defaultTimeStart={moment().add(-12, 'hour')}
-			defaultTimeEnd={moment().add(12, 'hour')}
-			onItemResize={this.resizeItem.bind(this)}
-			onItemMove={this.moveItem.bind(this)}
-			/>
-			<div>
-			
-			</div>
-			<div id="unassigned"></div>
-			</div>
+				</div>
+				<Timeline groups={this.state.userList}
+				items={this.state.taskAssignList}
+				defaultTimeStart={moment().add(-12, 'hour')}
+				defaultTimeEnd={moment().add(12, 'hour')}
+				onItemResize={this.resizeItem.bind(this)}
+				onItemMove={this.moveItem.bind(this)}
+				stackItems={true}
+				dragSnap={60 * 60 * 1000}
 
-			)
+				/>
+				<div>
+
+				</div>
+				<div id="unassigned"></div>
+				</div>
+
+				)
 	}
 }
 
-export default Timelines;
+export default Timelines

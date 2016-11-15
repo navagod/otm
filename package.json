@@ -26,7 +26,7 @@
     "neo4j-transactions": "^1.0.2",
     "node-sass": "^3.4.2",
     "react": "^15.3.2",
-    "react-calendar-timeline": "^0.8.6",
+    "react-calendar-timeline": "file:///root/react-calendar-timeline",
     "react-dom": "^15.3.2",
     "react-materialize": "^0.17.0",
     "react-pinboard": "^0.0.8",
