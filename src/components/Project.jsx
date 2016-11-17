@@ -4,7 +4,6 @@ import {Link} from 'react-router';
 import projects from './Module/Project'
 import Task from './Task'
 var _ = require('lodash')
-
 class Project extends Component {
 	constructor(props) {
 		super(props);
@@ -28,17 +27,17 @@ class Project extends Component {
 		// window.addEventListener('mousedown', this.inputClick.bind(this), false);
 		$( "#card-sort" ).sortable({update: this.handleSortCardUpdate.bind(this)
 		}).disableSelection();
-		projects.listCard(this.state.projectId,(rs)=>{
+		projects.listCard(this.props.socket,this.state.projectId,(rs)=>{
 			if(!rs){
 
 			}else{
 				this.setState({projectTitle:rs.board,cardList:rs.lists});
 			}
 		})
-    let socket = this.props.socket
-		socket.on('card:updateSort', this._updateSortCardList.bind(this));
-		socket.on('card:updateAddList', this._updateAddCardList.bind(this));
-		socket.on('card:updateEditCard', this._updateEditCard.bind(this));
+
+		this.props.socket.on('card:updateSort', this._updateSortCardList.bind(this));
+		this.props.socket.on('card:updateAddList', this._updateAddCardList.bind(this));
+		this.props.socket.on('card:updateEditCard', this._updateEditCard.bind(this));
 		cal_list();
 	}
 	componentDidUpdate(prevProps, prevState){
@@ -60,7 +59,7 @@ class Project extends Component {
 	_updateEditCard(data){
 		var {cardList} = this.state;
 		var index = _.findIndex(cardList,{'id':data.id})
-		cardList.splice(index, 1, {title:data.title,color:data.color,icon:data.icon});
+		cardList.splice(index, 1, {id:data.id,title:data.title,color:data.color,icon:data.icon,position:data.position});
 		this.setState({
 			cardList,
 			cardEditTitle:"",
@@ -80,7 +79,7 @@ class Project extends Component {
 			item.position = index;
 		});
 		$node.sortable('cancel');
-		projects.updateCard(this.state.projectId,newItems,(rs)=>{
+		projects.updateCard(this.props.socket,this.state.projectId,newItems,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
@@ -118,13 +117,14 @@ class Project extends Component {
 		if(title == ""){
 			return false
 		}
-		projects.addCard(title,this.state.projectId,sortNum,(rs)=>{
+		projects.addCard(this.props.socket,title,this.state.projectId,sortNum,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
+			}else{
+				var {cardList} = this.state;
+				cardList.push(rs.lists);
+				this.setState({cardList,addCardEnable: false});
 			}
-			this.setState({
-				addCardEnable: false
-			})
 		})
 	}
 	esc(e){
@@ -137,7 +137,7 @@ class Project extends Component {
 
 	editCard(id){
 		if(!this.state.dialogEdit){
-			projects.getCard(id,(rs)=>{
+			projects.getCard(this.props.socket,id,(rs)=>{
 				if(!rs){
 					return Materialize.toast("เกิดข้อผิดพลาด ไม่พบข้อมูลนี้", 4000)
 				}else{
@@ -162,11 +162,22 @@ class Project extends Component {
 		const color = this.refs.color_edit_card.value
 		const icon = this.refs.icon_edit_card.value
 		const position = this.state.cardEditPosition
-		projects.saveCard(title,color,icon,position,this.state.cardEditId,(rs)=>{
+		projects.saveCard(this.props.socket,title,color,icon,position,this.state.cardEditId,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
-				this.setState({dialogEdit:false})
+				var {cardList} = this.state;
+				var index = _.findIndex(cardList,{'id':this.state.cardEditId})
+				cardList.splice(index, 1, {id:this.state.cardEditId,title:title,color:color,icon:icon,position:position});
+				this.setState({
+					cardList,
+					cardEditTitle:"",
+					cardEditColor:"",
+					cardEditIcon:"",
+					cardEditId:"",
+					cardEditPosition:0,
+					dialogEdit:false
+				});
 			}
 		})
 	}
@@ -192,6 +203,10 @@ class Project extends Component {
 		}else{
 			return "color-select "+color;
 		}
+	}
+	deletePanel(event){
+		event.preventDefault()
+		console.log("deleted")
 	}
 	render() {
 		var card_items = this.state.cardList
@@ -219,7 +234,7 @@ class Project extends Component {
 				<div className="card-title">{card_item.title}</div>
 				<div className="card-menu" onClick={this.editCard.bind(this,card_item.id)}><i className="material-icons tiny">mode_edit</i></div>
 				</div>
-				<div className="card-body"><Task projectId={this.state.projectId} cardId={card_item.id} /></div>
+				<div className="card-body"><Task projectId={this.state.projectId} socket={this.props.socket} cardId={card_item.id} /></div>
 				</div>
 				)}
 			</div>
@@ -278,7 +293,8 @@ class Project extends Component {
 
 					<button type="submit" className="waves-effect waves-green btn-flat">Save</button>
 					<button type="button" className="waves-effect waves-red btn-flat" id="closeEditCard" onClick={this.closeEditCard.bind(this)}>Close</button>
-					<button type="button" className="waves-effect waves-red btn-flat red">Delete Panel</button>
+					<button type="button" className="waves-effect waves-red btn-flat red" onClick={this.deletePanel.bind(this)}>Delete</button>
+					
 					</div>
 					</form>
 					</div>
@@ -286,7 +302,12 @@ class Project extends Component {
 					</div>
 					:null
 				}
-
+				{ 
+					(typeof this.props.params.taskId == "undefined")?
+					this.props.children
+					:
+					React.cloneElement(this.props.children, {socket: this.props.socket})
+				}
 				</div>
 
 				);

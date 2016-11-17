@@ -34,7 +34,15 @@ function groupBy( array , f )
 }
 function cleanArray(actual) {
   if(actual){
-      return actual;
+    return actual;
   }
 
+}
+function calTeatarea(){
+  $('.hiddenInput').each(function () {
+    this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;');
+  }).on('input', function () {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
+  });
 }

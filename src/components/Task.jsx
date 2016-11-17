@@ -11,7 +11,7 @@ class Task extends Component {
 		this.state = {
 			error: false,
 			errorMsg:"",
-			projectId:this.props.projectId,
+			projectId:this.props.projectId || this.props.params.projectId,
 			cardId:this.props.cardId,
 			openAddTask:false,
 			listTasks:[]
@@ -21,18 +21,18 @@ class Task extends Component {
 		$( ".sort-task" ).sortable({connectWith: ".sort-task"
 	}).disableSelection();
 
-		tasks.list(this.state.cardId,(rs)=>{
+		tasks.list(this.props.socket,this.state.cardId,(rs)=>{
 			if(!rs){
 
 			}else{
 				this.setState({listTasks:rs});
 			}
 		})
-    let socket = this.props.socket
-		socket.on('task:updateAddTaskList', this._updateAddTaskList.bind(this));
+		
+		this.props.socket.on('task:updateAddTaskList', this._updateAddTaskList.bind(this));
 	}
 	componentDidUpdate(prevProps, prevState){
-
+		calTeatarea()
 	}
 	_updateAddTaskList(data){
 		if(data.pid == this.state.projectId && data.lists.cid == this.state.cardId){
@@ -55,13 +55,15 @@ class Task extends Component {
 		event.preventDefault()
 		const title = this.refs.addTaskTitle.value
 		const sortNum = this.state.listTasks.length + 1
-		tasks.add(localStorage.uid,this.state.projectId,this.state.cardId,title,sortNum,(rs)=>{
+		tasks.add(this.props.socket,localStorage.uid,this.state.projectId,this.state.cardId,title,sortNum,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
+			}else{
+				var {listTasks} = this.state;
+				listTasks.push(rs.lists);
+				this.setState({listTasks,openAddTask: false});
 			}
-			this.setState({
-				openAddTask: false
-			})
+			
 		})
 	}
 	render() {
@@ -69,7 +71,7 @@ class Task extends Component {
 			<div className="sort-task" key={"box-"+this.state.projectId} id={"box-"+this.state.projectId}>
 			{ this.state.listTasks.map((task_item, i) =>
 				<div className="task-box" id={"task-"+task_item.id} key={i}>
-				<Link to="#">
+				<Link to={`/task/${this.state.projectId}/${task_item.id}`}>
 				<div className="task-assign">
 				{task_item.user_name && task_item.user_avatar ?
 					<img src={"/"+task_item.user_avatar} width="50" height="50" className="circle responsive-img" />

@@ -116,9 +116,12 @@ socket.on('project:add', function (data,fn) {
 					socket.broadcast.emit('project:updateAddList', {
 						list:boardList
 					});
+					fn({list:boardList});
+				}else{
+					fn([])
 				}
 			});
-			fn(results);
+			
 		}
 	});
 });
@@ -143,8 +146,35 @@ socket.on('project:save', function (data,fn) {
 					list:boardList
 				});
 			}
+			fn(boardList);
 		});
-		fn(true);
+		
+	});
+});
+
+socket.on('project:delete', function (data,fn) {
+	db.cypher({
+		query: 'MATCH (p:Projects) WHERE ID(p) = '+data.id+' SET p.status = "disabled" RETURN p'
+	}, function (err, results) {
+		if (err) console.log(err);
+
+		db.cypher({
+			query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name,u.Avatar',
+		},function(err,results){
+			if (err) console.log(err);
+			if(results){
+				boardList = [];
+				results.forEach(function(item,index){
+					boardList.push({id:item['ID(p)'],title:item['p']['properties']['title'],detail:item['p']['properties']['detail'],uid:item['ID(u)'],user_name:item['u.Name'],user_avatar:item['u.Avatar']});
+				});
+				socket.broadcast.emit('project:updateEditProject', {
+					pid:data.id,
+					list:boardList
+				});
+			}
+			fn(boardList);
+		});
+		
 	});
 });
 
@@ -159,7 +189,7 @@ socket.on('project:addAssign', function (data,fn) {
 				name: results[0]['u.Name'],
 				avatar: results[0]['u.Avatar']
 			});
-			fn(results);
+			fn({id: data.uid,name: results[0]['u.Name'],avatar: results[0]['u.Avatar']});
 		}
 	});
 });
@@ -195,7 +225,14 @@ socket.on('card:add',function(data,rs){
 				icon: "info_outline",
 				position: data.sortNum}
 			});
-			rs(results);
+			rs({
+				pid:data.pid,
+				lists:{id:results[0]['ID(c)'],
+				title: data.title,
+				color: "black",
+				icon: "info_outline",
+				position: data.sortNum}
+			});
 		}
 	});
 });
@@ -297,7 +334,24 @@ socket.on('task:add',function(data,rs){
 					tags_color:""
 				}
 			});
-			rs(results);
+			rs({
+				pid:data.pid,
+				lists:{
+					id:results[0]['ID(t)'],
+					title:data.title,
+					detail:"",
+					position:data.sortNum,
+					duedate:"",
+					pid:data.pid,
+					cid:data.cid,
+					total_comment:0,
+					total_task:"0/0",
+					user_avatar:"",
+					user_name:"",
+					tags:"",
+					tags_color:""
+				}
+			});
 		}
 	});
 });
@@ -403,45 +457,58 @@ socket.on('task:changeEndTime', function (data,fn) {
 
 socket.on('task:changePosition', function (data,fn) {
 
-		var sql = 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (u:Users)-[a:Assigned]->(t) MATCH (u2:Users) WHERE ID(u2) = '+data.new_uid+' DELETE a CREATE (u2)-[:Assigned]->(t) SET t.startDate = "'+data.time_start+'", t.endDate = "'+data.time_end+'" RETURN t'
+	var sql = 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (u:Users)-[a:Assigned]->(t) MATCH (u2:Users) WHERE ID(u2) = '+data.new_uid+' DELETE a CREATE (u2)-[:Assigned]->(t) SET t.startDate = "'+data.time_start+'", t.endDate = "'+data.time_end+'" RETURN t'
+	db.cypher({
+		query: sql
+	}, function (err, results_process) {
+		if (err) console.log(err);
+
 		db.cypher({
-			query: sql
-		}, function (err, results_process) {
+			query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) RETURN ID(p),p,ID(u),u.Name',
+		},function(err,results_sub){
 			if (err) console.log(err);
+			if(results_sub){
+				boardList = []
+				results_sub.forEach(function(item,index){
+					var project_id = item['ID(p)'];
+					if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){
+						boardList[project_id] = {
+							d:{
+								id: project_id,
+								title: item['p']['properties']['title'],
+								detail: item['p']['properties']['detail'],
+							},
+							m:[]
+						};
 
-			db.cypher({
-				query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) RETURN ID(p),p,ID(u),u.Name',
-			},function(err,results_sub){
-				if (err) console.log(err);
-				if(results_sub){
-					boardList = []
-					results_sub.forEach(function(item,index){
-						var project_id = item['ID(p)'];
-						if(typeof boardList[project_id] == "undefined" || !boardList[project_id]){
-							boardList[project_id] = {
-								d:{
-									id: project_id,
-									title: item['p']['properties']['title'],
-									detail: item['p']['properties']['detail'],
-								},
-								m:[]
-							};
-
-						}
-						boardList[project_id]['m'].push({
-							id:item['ID(u)'],
-							title:item['u.Name']
-						});
+					}
+					boardList[project_id]['m'].push({
+						id:item['ID(u)'],
+						title:item['u.Name']
 					});
-					socket.broadcast.emit('task:updateEndTime', {
-						pid:data.pid,
-						list:boardList
-					});
-				}
-			});
-			fn(true);
+				});
+				socket.broadcast.emit('task:updateEndTime', {
+					pid:data.pid,
+					list:boardList
+				});
+			}
 		});
+		fn(true);
+	});
 
+});
+socket.on('task:get',function(data,rs){
+	db.cypher({
+		query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (uc:Users)-[:CREATE_BY]->(t)  MATCH (p:Projects)<-[:LIVE_IN]-(t) OPTIONAL MATCH (ua:Users)-[:Assigned]->(t) WHERE ID(ua) <> 0 AND ID(t) = '+data.tid+' RETURN t.title,t.detail,t.startDate,t.endDate,t.status,uc.Name,uc.Avatar,ua.Name,ua.Avatar,ID(ua),ID(p),p.title',
+	},function(err,results){
+		if (err) console.log(err);
+		if(!results || err){
+			rs(false)
+		}else{
+			rs(results)
+
+		}
+	})
 });
 //Task===============//
 

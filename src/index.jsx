@@ -1,6 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Router,Route,IndexRoute,browserHistory} from 'react-router'
+import Router from 'react-router/BrowserRouter'
+import Match from 'react-router/Match'
+
 
 import auth from './components/Module/Auth'
 import Main from './components/Main'
@@ -14,6 +16,7 @@ import Navbar from './components/Navbar'
 import Register from './components/Register'
 import Workload from './components/Workload'
 import Timeline from './components/Timelines'
+import PopupPage from './components/PopupPage'
 import { createHashHistory,createBrowserHistory } from 'history'
 
 function requireAuth(nextState, replace) {
@@ -35,7 +38,7 @@ function norequireAuth(nextState, replace) {
 }
 
 ReactDOM.render(
-	(<Router history={browserHistory}>
+	(<Router>
 		<Route path="/" component={Navbar}>
   		<IndexRoute component={Dashboard} />
   		<Route path="/dashboard" component={Dashboard} onEnter={requireAuth}/>
@@ -44,7 +47,9 @@ ReactDOM.render(
   		<Route path="/logout" component={Logout} onEnter={requireAuth}/>
   		<Route path="/register" component={Register} onEnter={norequireAuth}/>
   		<Route path="/profile" component={Profile} onEnter={requireAuth}/>
-  		<Route path="/project/:projectId" component={Project}  onEnter={requireAuth}/>
+  		<Route path="/project/:projectId" component={Project}  onEnter={requireAuth}>
+	  		<Route path="/task/:projectId/:taskId" component={PopupPage}  onEnter={requireAuth}/>
+  		</Route>
   		<Route path="/workload" component={Workload}  onEnter={requireAuth}/>
   		<Route path="/timeline" component={Timeline}  onEnter={requireAuth}/>
   		<Route path="*" component={Nopage}/>

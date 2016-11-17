@@ -1,6 +1,6 @@
-const socket = io.connect();
+
 module.exports = {
-	listProject(cb){
+	listProject(socket,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('project:listArr', {}, (result) => {
 			if(!result){
@@ -10,7 +10,7 @@ module.exports = {
 			}
 		});
 	},
-	listTask(pid,cb){
+	listTask(socket,pid,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:listByProject', {pid:pid}, (result) => {
 			if(!result){
@@ -20,7 +20,7 @@ module.exports = {
 			}
 		});
 	},
-	changeEndTime(pid,tid,time,cb){
+	changeEndTime(socket,pid,tid,time,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:changeEndTime', {
 			pid:pid,
@@ -35,7 +35,7 @@ module.exports = {
 			}
 		});
 	},
-	changePosition(pid,tid,time_start,time_end,group,cb){
+	changePosition(socket,pid,tid,time_start,time_end,group,cb){
 		console.log(pid,tid,time_start,time_end,group)
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:changePosition', {

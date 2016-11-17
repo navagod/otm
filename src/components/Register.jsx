@@ -14,7 +14,7 @@ class Register extends Component {
 		const email = this.refs.email.value
 		const pass = this.refs.pass.value
 		const name = this.refs.name.value
-		auth.register(email, pass, name, (loggedIn) => {
+		auth.register(this.props.socket,email, pass, name, (loggedIn) => {
 			if (!loggedIn)
 				return this.setState({ error: true })
 			const { location } = this.props

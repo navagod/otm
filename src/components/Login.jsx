@@ -16,7 +16,7 @@ class Login extends Component {
 		const email = this.refs.email.value
 		const pass = this.refs.pass.value
 
-		auth.login(email, pass, (loggedIn) => {
+		auth.login(this.props.socket,email, pass, (loggedIn) => {
 			if (!loggedIn){
 				// return this.setState({ error: true,errorMsg:"ข้อมูลเข้าสู่ระบบไม่ถูกต้อง" })
   			return Materialize.toast("ข้อมูลเข้าสู่ระบบไม่ถูกต้อง", 4000)

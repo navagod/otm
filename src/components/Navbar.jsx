@@ -4,7 +4,7 @@ import auth from './Module/Auth';
 
 class Navbar extends Component {
   componentWillMount() {
-    var socket = io()
+    var socket = io.connect()
     this.setState({socket: socket})
   }
 	render() {
@@ -18,7 +18,6 @@ class Navbar extends Component {
 				<ul className="right hide-on-med-and-down">
 				<li><Link to="/dashboard"><i className="large material-icons">dashboard</i></Link></li>
 				<li><Link to="/timeline"><i className="large material-icons">clear_all</i></Link></li>
-				<li><Link to="/workload"><i className="large material-icons">perm_contact_calendar</i></Link></li>
 				<li><Link to="/profile"><i className="large material-icons">perm_identity</i></Link></li>
 				<li className="relative"><a href="#"><i className="large material-icons">info</i> <span className="notify">4</span></a></li>
 				<li><Link to="/logout"><i className="large material-icons">power_settings_new</i></Link></li>

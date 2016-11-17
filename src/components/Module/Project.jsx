@@ -1,7 +1,7 @@
-const socket = io.connect();
+
 module.exports = {
 
-	add(title,detail, cb) {
+	add(socket,title,detail, cb) {
 		cb = arguments[arguments.length - 1]
 		socket.emit('project:add', {
 			uid:localStorage.uid,
@@ -12,12 +12,12 @@ module.exports = {
 			if(!result) {
 				cb(false)
 			}else{
-				cb(true)
+				cb(result)
 			}
 		});
 	},
 
-	list(cb){
+	list(socket,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('project:list', {}, (result) => {
 			if(result && result.length > 0){
@@ -27,19 +27,18 @@ module.exports = {
 			}
 		});
 	},
-	get(id,cb){
+	get(socket,id,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('project:get', {id:id}, (result) => {
 			if(!result){
 				cb(false)
 			}else{
-				console.log(result)
 				cb(result)
 				
 			}
 		});
 	},
-	save(title,detail,id, cb) {
+	save(socket,title,detail,id, cb) {
 		cb = arguments[arguments.length - 1]
 		socket.emit('project:save', {
 			id:id,
@@ -49,11 +48,23 @@ module.exports = {
 			if(!result) {
 				cb(false)
 			}else{
-				cb(true)
+				cb(result.filter(cleanArray))
 			}
 		});
 	},
-	addCard(title,id,sortNum,cb){
+	delete(socket,id, cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('project:delete', {
+			id:id
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result.filter(cleanArray))
+			}
+		});
+	},
+	addCard(socket,title,id,sortNum,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('card:add', {
 			uid:localStorage.uid,
@@ -65,21 +76,21 @@ module.exports = {
 			if(!result) {
 				cb(false)
 			}else{
-				cb(true)
+				cb(result)
 			}
 		});
 	},
-	listCard(pid,cb){
+	listCard(socket,pid,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('card:list', {pid:pid}, (result) => {
-			if(result){
-				cb(result)
-			}else{
+			if(!result){
 				cb(false)
+			}else{
+				cb(result)
 			}
 		});
 	},
-	updateCard(pid,data,cb){
+	updateCard(socket,pid,data,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('card:sortlist', {
 			lists:data,
@@ -92,7 +103,7 @@ module.exports = {
 			}
 		});
 	},
-	getCard(id,cb){
+	getCard(socket,id,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('card:get', {id:id}, (result) => {
 			if(result){
@@ -102,7 +113,7 @@ module.exports = {
 			}
 		});
 	},
-	saveCard(title,color,icon,position,id, cb) {
+	saveCard(socket,title,color,icon,position,id, cb) {
 		cb = arguments[arguments.length - 1]
 		socket.emit('card:save', {
 			id:id,
@@ -118,7 +129,7 @@ module.exports = {
 			}
 		});
 	},
-	getUsers(cb){
+	getUsers(socket,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('user:list', {}, (result) => {
 			if(result && result.length > 0){
@@ -128,7 +139,7 @@ module.exports = {
 			}
 		});
 	},
-	assignedUser(uid,pid,mode,cb){
+	assignedUser(socket,uid,pid,mode,cb){
 		cb = arguments[arguments.length - 1]
 		if(mode=="add"){
 			socket.emit('project:addAssign', {
@@ -138,7 +149,7 @@ module.exports = {
 				if(!result) {
 					cb(false)
 				}else{
-					cb(true)
+					cb(result)
 				}
 			});
 		}else{
@@ -149,7 +160,7 @@ module.exports = {
 				if(!result) {
 					cb(false)
 				}else{
-					cb(true)
+					cb(result)
 				}
 			});
 		}

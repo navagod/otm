@@ -1,13 +1,13 @@
 
 module.exports = {
-  login(email, pass, cb) {
+  login(socket,email, pass, cb) {
     cb = arguments[arguments.length - 1]
     if (localStorage.token) {
       if (cb) cb(true)
         this.onChange(true)
       return
     }
-    pretendRequest(email, pass, (res) => {
+    pretendRequest(socket,email, pass, (res) => {
       if (res.authenticated) {
         localStorage.token = Math.random().toString(36).substring(7)
         localStorage.name = res.name
@@ -20,14 +20,14 @@ module.exports = {
       }
     })
   },
-  register(email,pass,name,cb){
+  register(socket,email,pass,name,cb){
     cb = arguments[arguments.length - 1]
     if (localStorage.token) {
       if (cb) cb(true)
         this.onChange(true)
       return
     }
-    pretendRegister(email, pass,name, (res) => {
+    pretendRegister(socket,email, pass,name, (res) => {
       if (res.authenticated) {
         localStorage.token = Math.random().toString(36).substring(7)
         localStorage.name = res.name
@@ -40,11 +40,11 @@ module.exports = {
       }
     })
   },
-  getProfile(uid,cb){
+  getProfile(socket,uid,cb){
 
     cb = arguments[arguments.length - 1]
     if (localStorage.token) {
-      pretendGetProfile(uid,(res) => {
+      pretendGetProfile(socket,uid,(res) => {
         if(res.process){
           cb({name:res.name,email:res.email})
         }else{
@@ -55,9 +55,9 @@ module.exports = {
       cb(false)
     }
   },
-  saveProfile(uid,pass,name,cb){
+  saveProfile(socket,uid,pass,name,cb){
     cb = arguments[arguments.length - 1]
-    pretendSaveProfile(uid,pass,name, (res) => {
+    pretendSaveProfile(socket,uid,pass,name, (res) => {
       if (res) {
         localStorage.name = name
         cb(true)
@@ -84,8 +84,7 @@ module.exports = {
 
   onChange() {}
 }
-function pretendGetProfile(uid, cb) {
-  let socket = this.props.socket
+function pretendGetProfile(socket,uid, cb) {
   socket.emit('user:getProfile', {
     uid:uid
   }, (result) => {
@@ -96,8 +95,7 @@ function pretendGetProfile(uid, cb) {
     }
   });
 }
-function pretendSaveProfile(uid,pass,name, cb) {
-  let socket = this.props.socket
+function pretendSaveProfile(socket,uid,pass,name, cb) {
   socket.emit('user:saveProfile', {
     uid:uid,
     name:name,
@@ -110,8 +108,7 @@ function pretendSaveProfile(uid,pass,name, cb) {
     }
   });
 }
-function pretendRequest(email, pass, cb) {
-  let socket = this.props.socket
+function pretendRequest(socket,email, pass, cb) {
   socket.emit('user:login', {
     email:email,
     pass:pass
@@ -124,8 +121,7 @@ function pretendRequest(email, pass, cb) {
   });
 }
 
-function pretendRegister(email, pass, name, cb) {
-  let socket = this.props.socket
+function pretendRegister(socket,email, pass, name, cb) {
   socket.emit('user:register', {
     email:email,
     pass:pass,

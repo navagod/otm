@@ -12,7 +12,7 @@ class Profile extends Component {
 		this.handleSubmit = this.handleSubmit.bind(this);
 	}
 	componentDidMount(){
-		auth.getProfile(localStorage.uid,(ds)=>{
+		auth.getProfile(this.props.socket,localStorage.uid,(ds)=>{
 			if(!ds){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
@@ -25,7 +25,7 @@ class Profile extends Component {
 		const uid = localStorage.uid
 		const pass = this.refs.pass.value
 		const name = this.refs.name.value
-		auth.saveProfile(uid, pass, name, (saved) => {
+		auth.saveProfile(this.props.socket,uid, pass, name, (saved) => {
 			if (!saved){
 				//return this.setState({ error: true,errorMsg:"เกิดข้อผิดพลาด" })
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)

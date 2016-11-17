@@ -21,18 +21,18 @@ class Dashboard extends Component {
 		}
 	}
 	componentDidMount(){
-		projects.list((rs)=>{
+		projects.list(this.props.socket,(rs)=>{
 			if(!rs){
 				return Materialize.toast("ยังไม่มีโปรเจคใดๆเปิดใช้งาน", 4000)
 			}else{
 				return this.setState({listProject:rs})
 			}
 		})
-    let socket = this.props.socket
-		socket.on('project:updateAddList', this._updateAddProjectList.bind(this))
-		socket.on('project:updateEditProject', this._updateEditProject.bind(this))
-		socket.on('project:updateAddAssign', this._updateAddAssign.bind(this))
-		socket.on('project:updateRemoveAssign', this._updateRemoveAssign.bind(this))
+
+		this.props.socket.on('project:updateAddList', this._updateAddProjectList.bind(this))
+		this.props.socket.on('project:updateEditProject', this._updateEditProject.bind(this))
+		this.props.socket.on('project:updateAddAssign', this._updateAddAssign.bind(this))
+		this.props.socket.on('project:updateRemoveAssign', this._updateRemoveAssign.bind(this))
 	}
 	componentDidUpdate(){
 		$('.tooltip-user').tooltip()
@@ -51,12 +51,15 @@ class Dashboard extends Component {
 		event.preventDefault()
 		const title = this.refs.project_add_name.value
 		const detail = this.refs.detail_add_project.value
-		projects.add(title, detail, (rs) => {
-			if(rs){
-				Materialize.toast('เพิ่มโปรเจคใหม่สำเร็จ', 4000)
-				this.setState({dialogAdd:false})
-			}else{
+		projects.add(this.props.socket,title, detail, (rs) => {
+			if(!rs){
 				Materialize.toast('เกิดข้อผิดพลาด', 4000)
+			}else{
+				console.log(rs)
+				var {listProject} = this.state
+				listProject = rs.list
+				this.setState({listProject,dialogAdd:false})
+				Materialize.toast('เพิ่มโปรเจคใหม่สำเร็จ', 4000)
 			}
 		})
 	}
@@ -70,7 +73,7 @@ class Dashboard extends Component {
 	_updateEditProject(data){
 		var {listProject} = this.state
 		listProject = data.list
-		this.setState({listProject,editTitle:"",editDetail:"",editId:"",editUsers:[]})
+		this.setState({listProject,editTitle:"",editDetail:"",editId:"",editUsers:[],dialogEdit:false})
 	}
 
 	_updateAddAssign(data){
@@ -95,8 +98,7 @@ class Dashboard extends Component {
 	openEditProject(id){
 		if(!this.state.dialogEdit){
 
-			projects.get(id,(rs)=>{
-				console.log(rs)
+			projects.get(this.props.socket,id,(rs)=>{
 				if(!rs){
 					return Materialize.toast("เกิดข้อผิดพลาดไม่พบโปรเจคนี้", 4000)
 				}else{
@@ -126,11 +128,26 @@ class Dashboard extends Component {
 		}
 	}
 
+	deleteProject(){
+		event.preventDefault()
+		var id = this.state.editId
 
+		projects.delete(this.props.socket,id, (rs) => {
+			if(!rs){
+				Materialize.toast('เกิดข้อผิดพลาด', 4000)
+				
+			}else{
+				var {listProject} = this.state
+				listProject = rs
+				this.setState({listProject,editTitle:"",editDetail:"",editId:"",editUsers:[],dialogEdit:false})
+				Materialize.toast('ลบโปรเจคสำเร็จ', 4000)
+			}
+		})
+	}
 
 	openSelectUser(){
 		if(!this.state.selectUser){
-			projects.getUsers((rs)=>{
+			projects.getUsers(this.props.socket,(rs)=>{
 				if(!rs){
 					return Materialize.toast("เกิดข้อผิดพลาดไม่พบสมาชิกคนอื่น", 4000)
 				}else{
@@ -151,12 +168,15 @@ class Dashboard extends Component {
 		var id = this.state.editId
 		const title = this.refs.project_edit_name.value
 		const detail = this.refs.detail_edit_project.value
-		projects.save(title, detail, id, (rs) => {
-			if(rs){
-				Materialize.toast('บันทึกโปรเจคสำเร็จ', 4000)
-				this.setState({dialogEdit:false})
-			}else{
+		projects.save(this.props.socket,title, detail, id, (rs) => {
+			if(!rs){
 				Materialize.toast('เกิดข้อผิดพลาด', 4000)
+				
+			}else{
+				var {listProject} = this.state
+				listProject = rs
+				this.setState({listProject,editTitle:"",editDetail:"",editId:"",editUsers:[],dialogEdit:false})
+				Materialize.toast('บันทึกโปรเจคสำเร็จ', 4000)
 			}
 		})
 	}
@@ -169,6 +189,7 @@ class Dashboard extends Component {
 	}
 
 	activeListUser(id){
+		
 		if(_.findIndex(this.state.editUsers,{'uid':id}) >=0){
 			return "chooseUser active"
 		}else{
@@ -182,19 +203,34 @@ class Dashboard extends Component {
 		}else{
 			mode = "add"
 		}
-		projects.assignedUser(uid,this.state.editId,mode,(rs)=>{
+		projects.assignedUser(this.props.socket,uid,this.state.editId,mode,(rs)=>{
 			if(!rs){
 				Materialize.toast('เกิดข้อผิดพลาด', 4000)
-			}
+			}else{
+				if(mode=="add"){
+					var {editUsers} = this.state
+					editUsers.push({
+						uid:rs.id,
+						name:rs.name,
+						avatar:rs.avatar
+					})
+					this.setState({editUsers})
 
+				}else{
+					var {editUsers} = this.state
+					var index = _.findIndex(editUsers,{uid:uid})
+					editUsers.splice(index, 1)
+					this.setState({editUsers})
+				}
+			}
 		})
 	}
 	render() {
 		var items = this.state.listProject
 
-			var arrs = groupBy(items, function(item) {
-				return [item.id]
-			})
+		var arrs = groupBy(items, function(item) {
+			return [item.id]
+		})
 
 		return (
 			<div className="row">
@@ -220,9 +256,9 @@ class Dashboard extends Component {
 				{item.map((u, ui) =>
 					<div className="col s2 no-padding" key={"project_dashboard-"+ui}>
 					{u.user_name
-            ? <div>
+						? <div>
 						{u.user_avatar
-              ? <img  src={"/"+u.user_avatar} className=" responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
+							? <img  src={"/"+u.user_avatar} className=" responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
 							: <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.user_name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className=" responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
 						}
 						</div>
@@ -315,7 +351,7 @@ class Dashboard extends Component {
 			<div className="modal-footer">
 			<button type="submit" className="waves-effect waves-green btn-flat green">Save</button>
 			<button type="button" className="waves-effect waves-red btn-flat" id="closeAddProject" onClick={this.closeEditProject.bind(this)}>Close</button>
-			<button type="button" className="waves-effect waves-red btn-flat red">Delete Project</button>
+			<button type="button" className="waves-effect waves-red btn-flat red"  onClick={this.deleteProject.bind(this)}>Delete Project</button>
 			</div>
 			</form>
 			</div>
@@ -333,9 +369,9 @@ class Dashboard extends Component {
 
 				<div key={i} className={this.activeListUser(user.id)} onClick={this.selectUserActive.bind(this,user.id)}>
 				{user.avatar?
-					<img src={"/"+user.avatar} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={user.name} />
+					<img src={"/"+user.avatar} className="circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
 					:
-					<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+user.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={user.name} />
+					<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+user.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
 				}
 				</div>
 				)}

@@ -22,7 +22,7 @@ class Timelines extends Component {
 
 	}
 	componentDidMount(){
-		CM.listProject((rs)=>{
+		CM.listProject(this.props.socket,(rs)=>{
 			if(!rs){
 
 			}else{
@@ -38,8 +38,8 @@ class Timelines extends Component {
 				this.setState({projectList:rs})
 			}
 		})
-    let socket = this.props.socket
-		socket.on('task:updateEndTime', this._updateEndTime.bind(this))
+
+		this.props.socket.on('task:updateEndTime', this._updateEndTime.bind(this))
 	}
 	componentWillUnmount() {
 		this.setState({projectList:[],
@@ -49,7 +49,7 @@ class Timelines extends Component {
 	}
 
 	selectProject(item){
-		CM.listTask(item.d.id,(rs)=>{
+		CM.listTask(this.props.socket,item.d.id,(rs)=>{
 			if(!rs){
 
 			}else{
@@ -94,7 +94,7 @@ class Timelines extends Component {
 
 	}
 	resizeItem(id,time){
-		CM.changeEndTime(this.state.currentPid,id,time,(rs)=>{
+		CM.changeEndTime(this.props.socket,this.state.currentPid,id,time,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}
@@ -110,7 +110,7 @@ class Timelines extends Component {
 		}
 	}
 	moveItem(itemId, data){
-		CM.changePosition(this.state.currentPid,itemId,data.start_time,data.end_time,data.group,(rs)=>{
+		CM.changePosition(this.props.socket,this.state.currentPid,itemId,data.start_time,data.end_time,data.group,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}
@@ -127,24 +127,24 @@ class Timelines extends Component {
 			{ items.map((item, i) =>
 				<div className={this.activeProject(item.d.id)} onClick={this.selectProject.bind(this,item)} key={"list-project-"+i}><i className="material-icons tiny">library_books</i> {item.d.title}</div>
 				)}
-				</div>
-				<Timeline groups={this.state.userList}
-				items={this.state.taskAssignList}
-				defaultTimeStart={moment().add(-12, 'hour')}
-				defaultTimeEnd={moment().add(12, 'hour')}
-				onItemResize={this.resizeItem.bind(this)}
-				onItemMove={this.moveItem.bind(this)}
-				stackItems={true}
-				dragSnap={60 * 60 * 1000}
+			</div>
+			<Timeline groups={this.state.userList}
+			items={this.state.taskAssignList}
+			defaultTimeStart={moment().add(-12, 'hour')}
+			defaultTimeEnd={moment().add(12, 'hour')}
+			onItemResize={this.resizeItem.bind(this)}
+			onItemMove={this.moveItem.bind(this)}
+			stackItems={true}
+			dragSnap={60 * 60 * 1000}
 
-				/>
-				<div>
+			/>
+			<div>
 
-				</div>
-				<div id="unassigned"></div>
-				</div>
+			</div>
+			
+			</div>
 
-				)
+			)
 	}
 }
 
