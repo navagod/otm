@@ -498,6 +498,7 @@ socket.on('task:changePosition', function (data,fn) {
 
 });
 socket.on('task:get',function(data,rs){
+	var comments = [],labels = [];
 	db.cypher({
 		query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (uc:Users)-[:CREATE_BY]->(t)  MATCH (p:Projects)<-[:LIVE_IN]-(t) OPTIONAL MATCH (ua:Users)-[:Assigned]->(t) WHERE ID(ua) <> 0 AND ID(t) = '+data.tid+' RETURN t.title,t.detail,t.startDate,t.endDate,t.status,uc.Name,uc.Avatar,ua.Name,ua.Avatar,ID(ua),ID(p),p.title',
 	},function(err,results){
@@ -505,8 +506,17 @@ socket.on('task:get',function(data,rs){
 		if(!results || err){
 			rs(false)
 		}else{
-			rs(results)
+			//query comments
+			db.cypher({
+				query:'MATCH (u:Users)-[:Comment]->(c:Comments)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN u.Name,u.Avatar,c.Text,c.date,c.type ORDER BY ID(c) DESC',
+			},function(err,rs_comment){
+				if (err) console.log(err);
+				if(!err && rs_comment){
+					comments = rs_comment;
+				}
+			})
 
+			rs({task:results,comments:comments})
 		}
 	})
 });

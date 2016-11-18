@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import auth from './Module/Auth';
+import Redirect from 'react-router/Redirect'
 class Logout extends Component {
 	componentDidMount() {
 		auth.logout()
-		this.props.router.replace('/')
+		
 	}
 	render() {
-		return <p>You are now logged out</p>
+		return <Redirect to="/login"/>
 	}
 }
 export default Logout;

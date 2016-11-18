@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import auth from './Module/Auth';
-import {Link} from 'react-router';
+import Router from 'react-router/BrowserRouter'
+import Match from 'react-router/Match'
+import Miss from 'react-router/Miss'
+import Link from 'react-router/Link'
+import Redirect from 'react-router/Redirect'
 import tasks from './Module/Task';
 import moment from 'moment';
 var _ = require('lodash')
@@ -71,7 +75,7 @@ class Task extends Component {
 			<div className="sort-task" key={"box-"+this.state.projectId} id={"box-"+this.state.projectId}>
 			{ this.state.listTasks.map((task_item, i) =>
 				<div className="task-box" id={"task-"+task_item.id} key={i}>
-				<Link to={`/task/${this.state.projectId}/${task_item.id}`}>
+				<Link to={`/task/${task_item.id}`}>
 				<div className="task-assign">
 				{task_item.user_name && task_item.user_avatar ?
 					<img src={"/"+task_item.user_avatar} width="50" height="50" className="circle responsive-img" />

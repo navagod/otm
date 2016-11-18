@@ -7,10 +7,11 @@ class PopupPage extends Component {
 		super(props)
 		this.state = {
 			error: false,
-			projectId:this.props.params.projectId,
+			projectId:"",
 			taskId:this.props.params.taskId,
 			taskData:[],
-			socket:this.props.socket
+			socket:this.props.socket,
+			comments:[]
 		}
 	}
 	componentDidMount(){
@@ -18,12 +19,15 @@ class PopupPage extends Component {
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด ไม่พบ Task นี้", 4000)
 			}else{
+				console.log(rs)
 				var {taskData} = this.state
-				taskData = rs
-				this.setState({taskData})
+				taskData = rs["task"][0]
+				this.setState({taskData,projectId:rs[0]["task"]["ID(p)"],comments:rs["comments"]})
+				this.props.onRender(rs[0]["task"]["ID(p)"])
 			}
 		})
 	}
+
 	render() {
 		return (
 			<div>
@@ -46,8 +50,8 @@ class PopupPage extends Component {
 			<hr/>
 			<div className="row">
 			<div className="col s8">
-			<textarea className="hiddenInput title" defaultValue="If true, the dropdown will open on hover. Default: false"></textarea>
-			<textarea className="hiddenInput detail" defaultValue="If true, the dropdown will open on hover. Default: false" placeholder="No detail."></textarea>
+			<textarea className="hiddenInput title" value={this.state.taskData["t.title"]}></textarea>
+			<textarea className="hiddenInput detail" value={this.state.taskData["t.detail"]} placeholder="No detail."></textarea>
 			<div id="todoList">
 			<div className="addSubject"><i className="material-icons">note_add</i> Add Checklist Itme</div>
 			</div>
@@ -63,23 +67,19 @@ class PopupPage extends Component {
 			</form>
 			<div className="clear"></div>
 			</div>
-			<div className="activity-item">
-			<div className="activity-avatar">
-			A
-			</div>
-			<div className="activity-detail">
-			bla bal bla
-			</div>
-			</div>
-			<div className="activity-item">
-			<div className="activity-avatar">
-			A
-			</div>
-			<div className="activity-detail">
-			bla bal bla
-			</div>
-			</div>
 
+			{ this.state.comments.map((c_item,ic)=>
+				<div className="activity-item">
+				<div className="activity-avatar">
+
+				</div>
+				<div className="activity-detail">
+				<div>Posted : {timeConverter(c_item["c.date"])}</div>
+				{c_item["c.text"]}
+				</div>
+				</div>
+				)}
+			
 			<div>
 			
 			</div>

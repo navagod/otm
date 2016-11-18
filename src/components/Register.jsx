@@ -1,10 +1,11 @@
-import React, { Component } from 'react';
-import auth from './Module/Auth';
+import React, { Component } from 'react'
+import auth from './Module/Auth'
+import Redirect from 'react-router/Redirect'
 class Register extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			error: false
+			registerSuccess: false
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
 	}
@@ -15,23 +16,20 @@ class Register extends Component {
 		const pass = this.refs.pass.value
 		const name = this.refs.name.value
 		auth.register(this.props.socket,email, pass, name, (loggedIn) => {
-			if (!loggedIn)
-				return this.setState({ error: true })
-			const { location } = this.props
-			if (location.state && location.state.nextPathname) {
-				this.props.router.replace(location.state.nextPathname)
-			} else {
-				this.props.router.replace('/')
+			if (!loggedIn){
+				return Materialize.toast("อีเมล์นี้ถูกใช้งานแล้ว", 4000)
+			}else{
+				this.setState({registerSuccess:true})
 			}
+			
 		})
 	}
 	render() {
-		{this.state.error && (
-					Materialize.toast("อีเมล์นี้ถูกใช้งานแล้ว", 4000)
-					)}
 		return (
+			
 
 			<div className="row">
+			{this.state.registerSuccess&&(<Redirect to='/dashboard'/>)}
 			<div className="col s6 offset-s3">
 			<form className="col s12" onSubmit={this.handleSubmit}>
 			<div className="text-center"><h3>REGISTER</h3></div>

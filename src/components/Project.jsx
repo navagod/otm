@@ -3,14 +3,28 @@ import auth from './Module/Auth';
 import {Link} from 'react-router';
 import projects from './Module/Project'
 import Task from './Task'
+import PopupPage from './PopupPage'
+import Router from 'react-router/BrowserRouter'
+import Match from 'react-router/Match'
+import Redirect from 'react-router/Redirect'
+import NavigationPrompt from 'react-router/NavigationPrompt'
 var _ = require('lodash')
+const MatchWhenAuthorized = ({ component: Component, ...rest }) => (
+	<Match {...rest} render={props => (
+		auth.loggedIn() ? (
+			<Component {...props} {...rest} />
+			) : (
+			<Redirect to='/login'/>
+			)
+			)}/>
+	)
 class Project extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			error: false,
 			errorMsg:"",
-			projectId:this.props.params.projectId,
+			projectId:this.props.params.projectId || "",
 			cardList:[],
 			addCardEnable:false,
 			mouseDownInput:false,
@@ -27,18 +41,14 @@ class Project extends Component {
 		// window.addEventListener('mousedown', this.inputClick.bind(this), false);
 		$( "#card-sort" ).sortable({update: this.handleSortCardUpdate.bind(this)
 		}).disableSelection();
-		projects.listCard(this.props.socket,this.state.projectId,(rs)=>{
-			if(!rs){
-
-			}else{
-				this.setState({projectTitle:rs.board,cardList:rs.lists});
-			}
-		})
-
+		this.projectsListCard.bind(this)()
 		this.props.socket.on('card:updateSort', this._updateSortCardList.bind(this));
 		this.props.socket.on('card:updateAddList', this._updateAddCardList.bind(this));
 		this.props.socket.on('card:updateEditCard', this._updateEditCard.bind(this));
 		cal_list();
+	}
+	componentWillMount() {
+		
 	}
 	componentDidUpdate(prevProps, prevState){
 		cal_list();
@@ -68,6 +78,17 @@ class Project extends Component {
 			cardEditId:"",
 			cardEditPosition:0
 		});
+	}
+	projectsListCard(){
+		if(this.state.projectId !==""){
+			projects.listCard(this.props.socket,this.state.projectId,(rs)=>{
+				if(!rs){
+
+				}else{
+					this.setState({projectTitle:rs.board,cardList:rs.lists});
+				}
+			})
+		}
 	}
 	handleSortCardUpdate(event, ui){
 		var newItems = this.state.cardList;
@@ -206,7 +227,10 @@ class Project extends Component {
 	}
 	deletePanel(event){
 		event.preventDefault()
-		console.log("deleted")
+	}
+	RerenderProject(pid){
+		this.setState({projectId:pid})
+		this.projectsListCard.bind(this)()
 	}
 	render() {
 		var card_items = this.state.cardList
@@ -215,7 +239,7 @@ class Project extends Component {
 		var colors = ["red","blue","pink","yellow","green","orange","black","purple"]
 		var icons = ["info_outline","input","label","language","query_builder","perm_media","power_settings_new","print","textsms","web","today","translate","settings","my_location","report_problem","pageview","verified_user","stars","error_outline","loyalty","mode_edit"]
 		return (
-
+			<Router>
 			<div id="project-page">
 			<nav>
 			<div className="nav-wrapper blue">
@@ -302,14 +326,9 @@ class Project extends Component {
 					</div>
 					:null
 				}
-				{ 
-					(typeof this.props.params.taskId == "undefined")?
-					this.props.children
-					:
-					React.cloneElement(this.props.children, {socket: this.props.socket})
-				}
+				<MatchWhenAuthorized pattern="/task/:taskId" onRender={this.RerenderProject.bind(this)} socket={this.props.socket} component={PopupPage} />
 				</div>
-
+				</Router>
 				);
 	}
 

@@ -1,41 +1,82 @@
 import React, { Component } from 'react';
 import {Link} from 'react-router';
 import auth from './Module/Auth';
+import Router from 'react-router/BrowserRouter'
+import Match from 'react-router/Match'
+import Redirect from 'react-router/Redirect'
+import Miss from 'react-router/Miss'
+
+
+import Dashboard from './Dashboard'
+import Project from './Project'
+import Login from './Login'
+import Logout from './Logout'
+import Profile from './Profile'
+import Nopage from './Nopage'
+import Register from './Register'
+import Timeline from './Timelines'
+import PopupPage from './PopupPage'
+
+var socket = io.connect()
+
+const MatchWhenAuthorized = ({ component: Component, ...rest }) => (
+  <Match {...rest} render={props => (
+    auth.loggedIn() ? (
+      <Component {...props} {...rest} socket={socket} />
+    ) : (
+      <Redirect to='/login'/>
+    )
+  )}/>
+)
 
 class Navbar extends Component {
-  componentWillMount() {
-    var socket = io.connect()
-    this.setState({socket: socket})
-  }
+	componentWillMount() {
+		this.setState({socket: socket})
+	}
 	render() {
 		return (
-			<div>
-			<nav className="light-blue lighten-1" role="navigation" id="navbar">
-			<div className="nav-wrapper container"><Link to="/" id="logo-container" className="brand-logo">OTM</Link>
+			<Router>
+			{({ router }) => (
+				<div>
+				<nav className="light-blue lighten-1" role="navigation" id="navbar">
+				<div className="nav-wrapper container"><Link to="/" id="logo-container" className="brand-logo">OTM</Link>
 
 
-			{ auth.loggedIn() ?
-				<ul className="right hide-on-med-and-down">
-				<li><Link to="/dashboard"><i className="large material-icons">dashboard</i></Link></li>
-				<li><Link to="/timeline"><i className="large material-icons">clear_all</i></Link></li>
-				<li><Link to="/profile"><i className="large material-icons">perm_identity</i></Link></li>
-				<li className="relative"><a href="#"><i className="large material-icons">info</i> <span className="notify">4</span></a></li>
-				<li><Link to="/logout"><i className="large material-icons">power_settings_new</i></Link></li>
-				</ul>
-				:
-				<ul className="right hide-on-med-and-down">
-				<li><Link to="register">Register</Link></li>
-				<li><Link to="login">Login</Link></li>
-				</ul>
-			}
-			</div>
-			</nav>
-			<div>
-			{ React.cloneElement(this.props.children, {socket: this.state.socket}) }
-			</div>
-			</div>
-			);
+				{ auth.loggedIn() ?
+					<ul className="right hide-on-med-and-down">
+					<li><Link to="/dashboard"><i className="large material-icons">dashboard</i></Link></li>
+					<li><Link to="/timeline"><i className="large material-icons">clear_all</i></Link></li>
+					<li><Link to="/profile"><i className="large material-icons">perm_identity</i></Link></li>
+					<li className="relative"><a href="#"><i className="large material-icons">info</i> <span className="notify">4</span></a></li>
+					<li><Link to="/logout"><i className="large material-icons">power_settings_new</i></Link></li>
+					</ul>
+					:
+					<ul className="right hide-on-med-and-down">
+					<li><Link to="register">Register</Link></li>
+					<li><Link to="login">Login</Link></li>
+					</ul>
+				}
+				</div>
+				</nav>
+				<div>
+				<MatchWhenAuthorized pattern="/dashboard"  component={Dashboard} />
+				<Match pattern="/login" render={({ pathname }) => <Login socket={this.state.socket} /> }/>
+				<MatchWhenAuthorized pattern="/logout" component={Logout}/>
+				<MatchWhenAuthorized pattern="/profile" component={Profile}/>
+				<Match pattern="/Register" render={({ pathname }) => <Register socket={this.state.socket} /> }/>
+				<MatchWhenAuthorized pattern="/timeline" component={Timeline}/>
+				<MatchWhenAuthorized pattern="/project/:projectId" component={Project} />
+				<MatchWhenAuthorized pattern="/task/:taskId"  component={Project} />
+				<Miss  render={({ pathname }) => <Nopage socket={this.state.socket} /> }/>
+				</div>
+				</div>
+				)}
+			</Router>
+
+			)
 	}
 }
+
+
 
 export default Navbar;

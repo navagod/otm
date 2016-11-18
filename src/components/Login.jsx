@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import auth from './Module/Auth';
+import Redirect from 'react-router/Redirect'
 class Login extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			error: false,
-			errorMsg:""
+			errorMsg:"",
+			redirectToReferrer: false
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
 	}
@@ -18,22 +20,17 @@ class Login extends Component {
 
 		auth.login(this.props.socket,email, pass, (loggedIn) => {
 			if (!loggedIn){
-				// return this.setState({ error: true,errorMsg:"ข้อมูลเข้าสู่ระบบไม่ถูกต้อง" })
-  			return Materialize.toast("ข้อมูลเข้าสู่ระบบไม่ถูกต้อง", 4000)
-      }
-			const { location } = this.props
-
-			if (location.state && location.state.nextPathname) {
-				this.props.router.replace(location.state.nextPathname)
-			} else {
-				this.props.router.replace('/')
+				return Materialize.toast("ข้อมูลเข้าสู่ระบบไม่ถูกต้อง", 4000)
+			}else{
+				this.setState({ redirectToReferrer: true })
 			}
 		})
 	}
 	render() {
+		const { redirectToReferrer } = this.state
 		return (
-
 			<div className="row">
+			{redirectToReferrer && ( <Redirect to='/dashboard'/>)}
 			<div className="col s6 offset-s3">
 			<form className="col s12" onSubmit={this.handleSubmit}>
 			<div className="text-center"><h3>LOGIN</h3></div>
@@ -61,7 +58,7 @@ class Login extends Component {
 			</div>
 
 			);
-		}
 	}
+}
 
-	export default Login;
+export default Login;
