@@ -17,6 +17,16 @@ module.exports = {
 			}
 		});
 	},
+	save(socket,data,tid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('task:save', {tid:tid,data:data}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
 	list(socket,cid,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:list', {cid:cid}, (result) => {
@@ -28,13 +38,36 @@ module.exports = {
 		});
 	},
 	get(socket,pid,tid,cb){
-		console.log(pid,tid)
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:get', {pid:pid,tid:tid}, (result) => {
 			if(!result){
 				cb(false)
 			}else{
-				console.log(result)
+				cb(result)
+			}
+		});
+	},
+	listComment(socket,pid,tid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('comment:list', {tid:tid}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	addComment(socket,text,tid, cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('comment:add', {
+			uid:localStorage.uid,
+			tid:tid,
+			text:text,
+			at_create:new Date().getTime()
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
 				cb(result)
 			}
 		});

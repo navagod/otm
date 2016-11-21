@@ -4,9 +4,6 @@ import Redirect from 'react-router/Redirect'
 class Register extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			registerSuccess: false
-		}
 		this.handleSubmit = this.handleSubmit.bind(this);
 	}
 
@@ -19,7 +16,7 @@ class Register extends Component {
 			if (!loggedIn){
 				return Materialize.toast("อีเมล์นี้ถูกใช้งานแล้ว", 4000)
 			}else{
-				this.setState({registerSuccess:true})
+				this.context.router.transitionTo('/dashboard')
 			}
 			
 		})
@@ -29,7 +26,6 @@ class Register extends Component {
 			
 
 			<div className="row">
-			{this.state.registerSuccess&&(<Redirect to='/dashboard'/>)}
 			<div className="col s6 offset-s3">
 			<form className="col s12" onSubmit={this.handleSubmit}>
 			<div className="text-center"><h3>REGISTER</h3></div>
@@ -66,5 +62,7 @@ class Register extends Component {
 			);
 	}
 }
-
+Register.contextTypes = {
+  router: React.PropTypes.object.isRequired
+}
 export default Register;

@@ -22,7 +22,8 @@ class Login extends Component {
 			if (!loggedIn){
 				return Materialize.toast("ข้อมูลเข้าสู่ระบบไม่ถูกต้อง", 4000)
 			}else{
-				this.setState({ redirectToReferrer: true })
+				// this.setState({ redirectToReferrer: true })
+				this.context.router.transitionTo('/dashboard')
 			}
 		})
 	}
@@ -30,7 +31,6 @@ class Login extends Component {
 		const { redirectToReferrer } = this.state
 		return (
 			<div className="row">
-			{redirectToReferrer && ( <Redirect to='/dashboard'/>)}
 			<div className="col s6 offset-s3">
 			<form className="col s12" onSubmit={this.handleSubmit}>
 			<div className="text-center"><h3>LOGIN</h3></div>
@@ -59,6 +59,9 @@ class Login extends Component {
 
 			);
 	}
+}
+Login.contextTypes = {
+  router: React.PropTypes.object.isRequired
 }
 
 export default Login;

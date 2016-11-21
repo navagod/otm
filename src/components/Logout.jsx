@@ -4,10 +4,14 @@ import Redirect from 'react-router/Redirect'
 class Logout extends Component {
 	componentDidMount() {
 		auth.logout()
-		
+		this.context.router.transitionTo('/')
 	}
 	render() {
-		return <Redirect to="/login"/>
+		return null
 	}
 }
+Logout.contextTypes = {
+  router: React.PropTypes.object.isRequired
+}
+
 export default Logout;

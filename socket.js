@@ -497,8 +497,7 @@ socket.on('task:changePosition', function (data,fn) {
 	});
 
 });
-socket.on('task:get',function(data,rs){
-	var comments = [],labels = [];
+socket.on('task:get',function(data,rs){	
 	db.cypher({
 		query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (uc:Users)-[:CREATE_BY]->(t)  MATCH (p:Projects)<-[:LIVE_IN]-(t) OPTIONAL MATCH (ua:Users)-[:Assigned]->(t) WHERE ID(ua) <> 0 AND ID(t) = '+data.tid+' RETURN t.title,t.detail,t.startDate,t.endDate,t.status,uc.Name,uc.Avatar,ua.Name,ua.Avatar,ID(ua),ID(p),p.title',
 	},function(err,results){
@@ -506,22 +505,61 @@ socket.on('task:get',function(data,rs){
 		if(!results || err){
 			rs(false)
 		}else{
-			//query comments
-			db.cypher({
-				query:'MATCH (u:Users)-[:Comment]->(c:Comments)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN u.Name,u.Avatar,c.Text,c.date,c.type ORDER BY ID(c) DESC',
-			},function(err,rs_comment){
-				if (err) console.log(err);
-				if(!err && rs_comment){
-					comments = rs_comment;
-				}
-			})
+			rs(results)
+		}
+	})
+});
+socket.on('task:save',function(data,rs){	
 
-			rs({task:results,comments:comments})
+	db.cypher({
+		query:'MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' SET t.title = "'+data["data"]["t.title"]+'",t.detail = "'+data["data"]["t.detail"]+'",t.startDate = "'+data["data"]["t.startDate"]+'",t.endDate = "'+data["data"]["t.endDate"]+'",t.status = "'+data["data"]["t.status"]+'" RETURN t',
+	},function(err,results){
+		if (err) console.log(err);
+		if(!results || err){
+			rs(false)
+		}else{
+			rs(results)
 		}
 	})
 });
 //Task===============//
 
+
+//Comments====//
+
+socket.on('comment:list',function(data,rs){
+	db.cypher({
+		query:'MATCH (u:Users)-[:Comment]->(c:Comments)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN u.Name,u.Avatar,c.text,c.date,c.type ORDER BY ID(c) DESC',
+	},function(err,rs_comment){
+		if (err){ console.log(err);
+			rs(false)
+		}else{
+			rs(rs_comment)
+		}
+	})
+});
+
+socket.on('comment:add',function(data,rs){
+	db.cypher({
+		query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' CREATE (c:Comments {date:"'+data.at_create+'",text:"'+data.text+'",type:"user"}) CREATE (u)-[:Comment]->(c)-[:IN]->(t) RETURN c',
+	},function(err,result){
+		if (err){ console.log(err);
+			rs(false)
+		}else{
+			db.cypher({
+				query:'MATCH (u:Users)-[:Comment]->(c:Comments)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN u.Name,u.Avatar,c.text,c.date,c.type ORDER BY ID(c) DESC',
+			},function(err,rs_comment){
+				if (err){ console.log(err);
+					rs(false)
+				}else{
+					rs(rs_comment)
+				}
+			})
+		}
+	})
+});
+
+//comments====///
 
 	//users============//
 	socket.on('user:register',function(data,rs){

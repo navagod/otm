@@ -36,7 +36,6 @@ module.exports = {
 		});
 	},
 	changePosition(socket,pid,tid,time_start,time_end,group,cb){
-		console.log(pid,tid,time_start,time_end,group)
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:changePosition', {
 			pid:pid,
