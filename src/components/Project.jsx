@@ -90,6 +90,9 @@ class Project extends Component {
 			})
 		}
 	}
+	componentWillReceiveProps(nextProps){
+		console.log(nextProps)
+	}
 	handleSortCardUpdate(event, ui){
 		var newItems = this.state.cardList;
 		var $node = $('#card-sort');
@@ -100,11 +103,12 @@ class Project extends Component {
 			item.position = index;
 		});
 		$node.sortable('cancel');
+		let store_state = this.state.cardList
+		this.setState({ cardList: newItems });
 		projects.updateCard(this.props.socket,this.state.projectId,newItems,(rs)=>{
 			if(!rs){
+				this.setState({ cardList: store_state });
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
-			}else{
-				this.setState({ cardList: newItems });
 			}
 		})
 	}
@@ -253,15 +257,19 @@ class Project extends Component {
 			<div id="card-sort">
 			{ card_items.map((card_item, i) =>
 				<div className="card-item connectedSortable" id={"c-"+card_item.id} data-id={card_item.id} key={i}>
-				<div className={"card-header " + card_item.color}>
-				<div className="card-icon"><i className="material-icons">{card_item.icon}</i></div>
-				<div className="card-title">{card_item.title}</div>
-				<div className="card-menu" onClick={this.editCard.bind(this,card_item.id)}><i className="material-icons tiny">mode_edit</i></div>
-				</div>
-				<div className="card-body"><Task projectId={this.state.projectId} socket={this.props.socket} cardId={card_item.id} /></div>
+					<div className={"card-header " + card_item.color}>
+						<div className="card-icon"><i className="material-icons">{card_item.icon}</i></div>
+						<div className="card-title">{card_item.title}</div>
+						<div className="card-menu" onClick={this.editCard.bind(this,card_item.id)}><i className="material-icons tiny">mode_edit</i></div>
+					</div>
+					<div className="card-body"><Task projectId={this.state.projectId} socket={this.props.socket} cardId={card_item.id} /></div>
 				</div>
 				)}
 			</div>
+
+
+
+			
 			{this.state.addCardEnable?
 				<div className="card-item" id="add-item">
 				<div className="card-header black">

@@ -37,6 +37,16 @@ module.exports = {
 			}
 		});
 	},
+	listUpdate(socket,cid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('task:listUpdate', {cid:cid}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
 	get(socket,pid,tid,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:get', {pid:pid,tid:tid}, (result) => {
@@ -66,6 +76,126 @@ module.exports = {
 			at_create:new Date().getTime()
 		}, (result) => {
 			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	changeStartDate(socket,tid,tm,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('task:setStartDate', {
+			uid:localStorage.uid,
+			tid:tid,
+			time:tm,
+			at_create:new Date().getTime()
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	changeEndDate(socket,tid,tm,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('task:setEndDate', {
+			uid:localStorage.uid,
+			tid:tid,
+			time:tm,
+			at_create:new Date().getTime()
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	listTodo(socket,tid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('todo:list', {tid:tid}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	addTodo(socket,tid,text,position,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('todo:add', {tid:tid,text:text,position:position}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	statusTodo(socket,id,status,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('todo:status', {id:id,status:status}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	deleteTodo(socket,id,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('todo:delete', {id:id}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	editTodo(socket,id,text,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('todo:edit', {id:id,text:text}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	listUsers(socket,pid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('user:listAssign', {pid:pid}, (result) => {
+			if(result && result.length > 0){
+				cb(result.filter(cleanArray))
+			}else{
+				cb(false)
+			}
+		});
+	},
+	assignUser(socket,uid,tid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('task:assignUser', {uid:uid,tid:tid}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	setStatusTask(socket,status,tid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('task:changeStatus', {status:status,tid:tid}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	sortTask(socket,items,tid,cid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('task:changeSort', {items:items,tid:tid,cid:cid}, (result) => {
+			if(!result){
 				cb(false)
 			}else{
 				cb(result)

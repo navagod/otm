@@ -22,21 +22,31 @@ class Task extends Component {
 		}
 	}
 	componentDidMount(){
-		$( ".sort-task" ).sortable({connectWith: ".sort-task"
-	}).disableSelection();
-
 		tasks.list(this.props.socket,this.state.cardId,(rs)=>{
 			if(!rs){
 
 			}else{
-				this.setState({listTasks:rs});
+				this.setState({listTasks:rs });
+				$( ".sort-task" ).sortable({connectWith: ".sort-task",update: this.handleSortTaskUpdate.bind(this)}).disableSelection();
 			}
 		})
 		
 		this.props.socket.on('task:updateAddTaskList', this._updateAddTaskList.bind(this));
+		this.props.socket.on('task:reUpdateList', this._updateList.bind(this));
 	}
 	componentDidUpdate(prevProps, prevState){
 		calTeatarea()
+	}
+	componentWillReceiveProps(nextProps){
+		this.setState({cardId:nextProps.cardId})
+		$( ".sort-task" ).sortable({connectWith: ".sort-task",update: this.handleSortTaskUpdate.bind(this)}).disableSelection();
+		tasks.list(this.props.socket,nextProps.cardId,(rs)=>{
+			if(!rs){
+
+			}else{
+				this.setState({listTasks:rs });
+			}
+		})
 	}
 	_updateAddTaskList(data){
 		if(data.pid == this.state.projectId && data.lists.cid == this.state.cardId){
@@ -44,6 +54,13 @@ class Task extends Component {
 			listTasks.push(data.lists);
 			this.setState({listTasks});
 		}
+	}
+	_updateList(data){
+		this.context.router.transitionTo('/project/'+this.state.projectId)
+		// console.log(this.state.cardId,data)
+		// if(data.cid == this.state.cardId){
+		// 	this.setState({listTasks:data.lists});
+		// }
 	}
 	esc(e){
 		if(e.key=="Escape"){
@@ -54,6 +71,42 @@ class Task extends Component {
 	}
 	openAddTaskDialog(){
 		this.setState({openAddTask:true});
+	}
+	handleSortTaskUpdate(event, ui){
+		let item_div = document.getElementsByClassName("sort-task");
+		for(let i = 0; i < item_div.length; i++)
+		{
+			let div = item_div.item(i);
+			let ids = $(div).sortable('toArray', { attribute: 'data-id' })
+			let items = []
+			ids.forEach(function (i, index) {
+				if(i!=''){
+					items.push(i)
+				}
+			})
+			
+			let store_state = this.state.cardList
+			let cid = div.dataset.cid
+			tasks.sortTask(this.props.socket,items,this.state.projectId,div.dataset.cid,(rs)=>{
+				if(!rs){
+					$(div).sortable('cancel');
+					this.setState({ listTasks: store_state });
+				}else{
+					this.reupdateList.bind(this,cid)()
+				}
+			})
+		}
+	}
+	reupdateList(cid){
+		// this.context.router.transitionTo('/project/'+this.state.projectId)
+		// tasks.listUpdate(this.props.socket,cid,(rs)=>{
+		// 	if(!rs){
+		// 		console.log('False',rs)
+		// 	}else{
+		// 		console.log(rs)
+		// 		this.setState({ listTasks: rs });
+		// 	}
+		// })
 	}
 	submitAddTask(event){
 		event.preventDefault()
@@ -72,9 +125,10 @@ class Task extends Component {
 	}
 	render() {
 		return (
-			<div className="sort-task" key={"box-"+this.state.projectId} id={"box-"+this.state.projectId}>
+			<div className="sort-task" data-cid={this.state.cardId}>
+			
 			{ this.state.listTasks.map((task_item, i) =>
-				<div className="task-box" id={"task-"+task_item.id} key={i}>
+				<div className={"task-box " + task_item.status} data-id={task_item.id} id={"task-"+task_item.id} key={i}>
 				<Link to={`/task/${task_item.id}`}>
 				<div className="task-assign">
 				{task_item.user_name && task_item.user_avatar ?
@@ -109,7 +163,7 @@ class Task extends Component {
 							)}
 
 			{this.state.openAddTask ?
-				<div className="task-box">
+				<div className="task-box" id="taskBoxAdd">
 				<form onSubmit={this.submitAddTask.bind(this)}>
 				<input type="text" ref="addTaskTitle" onKeyDown={this.esc.bind(this)} maxLength="100" required />
 				</form>
@@ -123,5 +177,7 @@ class Task extends Component {
 	}
 
 }
-
+Task.contextTypes = {
+  router: React.PropTypes.object.isRequired
+}
 export default Task;

@@ -99,7 +99,8 @@ module.exports = {
 			if(!result) {
 				cb(false)
 			}else{
-				cb(true)
+
+				cb(result)
 			}
 		});
 	},
