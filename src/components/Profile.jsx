@@ -14,14 +14,17 @@ class Profile extends Component {
 			U_name:""
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
-		this.onDropFile = this.onDropFile.bind(this);
+		this.onDrop = this.onDrop.bind(this);
 	}
 	componentDidMount(){
 		auth.getProfile(this.props.socket,localStorage.uid,(ds)=>{
 			if(!ds){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
-				return this.setState({error: false,U_email:ds.email, U_name :ds.name, U_avatar :ds.avatar});
+				if(ds.avatar == ""){
+					ds.avatar = "images/default-avatar.jpg";
+				}
+				return this.setState({error: false,U_email:ds.email, U_name :ds.name, U_avatar :ds.avatar, U_avatar_url : "uploads/" + ds.avatar});
 			}
 		})
 	}
@@ -51,7 +54,7 @@ class Profile extends Component {
 	onDragLeave(e) {
 	    this.setState({ isReceiverOpen: false });
 	}
-	onDropFile(acceptedFiles, rejectedFiles) {
+	onDrop(acceptedFiles) {
 		const uid = localStorage.uid
 		var _this = this;
 		var reader = new window.FileReader();
@@ -64,8 +67,8 @@ class Profile extends Component {
 				if (file_name == ""){
 					return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 				}else{
-					_this.setState({U_avatar:file_name});
-					return Materialize.toast("อัฑโหลดรูปโปรไฟล์เรียบร้อยแล้ว", 4000)
+					_this.setState({U_avatar:file_name, U_avatar_url : "uploads/" + file_name});
+					return Materialize.toast("อัพโหลดรูปโปรไฟล์เรียบร้อยแล้ว", 4000)
 				}
 			})
 		}
@@ -81,7 +84,9 @@ class Profile extends Component {
 			<div className="input-field col s12">
 			<div id="dropdown-upload">
 				<input id="avatar" ref="avatar" type="hidden" value={this.state.U_avatar} />
-				<Dropzone ref="dropzone" onDrop={this.onDropFile} socket={this.socket}>
+				<img className="img-responsive" src={this.state.U_avatar_url} />
+				Drag & Drop image avatar
+				<Dropzone ref="dropzone" onDrop={this.onDrop} socket={this.socket}>
                     <div>Try dropping some files here, or click to select files to upload.</div>
                 </Dropzone>
 			</div>

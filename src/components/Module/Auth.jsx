@@ -46,7 +46,7 @@ module.exports = {
     if (localStorage.token) {
       pretendGetProfile(socket,uid,(res) => {
         if(res.process){
-          cb({name:res.name,email:res.email})
+          cb({name:res.name,email:res.email,avatar:res.avatar})
         }else{
           cb(false)
         }
@@ -96,7 +96,7 @@ function pretendGetProfile(socket,uid, cb) {
     if(!result) {
       cb({ process: false })
     }else{
-      cb({ process: true,name:result['u']['properties']['Name'],email:result['u']['properties']['Email'] })
+      cb({ process: true,name:result['u']['properties']['Name'],email:result['u']['properties']['Email'],avatar:result['u']['properties']['Avatar'] })
     }
   });
 }
