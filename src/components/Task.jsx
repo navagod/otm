@@ -27,7 +27,7 @@ class Task extends Component {
 
 			}else{
 				this.setState({listTasks:rs });
-				$( ".sort-task" ).sortable({connectWith: ".sort-task",update: this.handleSortTaskUpdate.bind(this)}).disableSelection();
+				// $( ".sort-task" ).sortable({connectWith: ".sort-task",update: this.handleSortTaskUpdate.bind(this)}).disableSelection();
 			}
 		})
 		
@@ -39,7 +39,7 @@ class Task extends Component {
 	}
 	componentWillReceiveProps(nextProps){
 		this.setState({cardId:nextProps.cardId})
-		$( ".sort-task" ).sortable({connectWith: ".sort-task",update: this.handleSortTaskUpdate.bind(this)}).disableSelection();
+		// $( ".sort-task" ).sortable({connectWith: ".sort-task",update: this.handleSortTaskUpdate.bind(this)}).disableSelection();
 		tasks.list(this.props.socket,nextProps.cardId,(rs)=>{
 			if(!rs){
 
@@ -140,27 +140,20 @@ class Task extends Component {
 
 				<div className="task-title">{task_item.title}</div>
 				<div className="clear"></div>
-				{task_item.total_comment >0 ?
-					<div className="task-comment-mini"><i className="material-icons tiny">comment</i> {task_item.total_comment}</div>
-					:null}
-					{task_item.total_task != "0/0"?
-					<div className="task-todo-mini"><i className="material-icons tiny">toc</i> {task_item.total_task}</div>
-					:null}
-					{task_item.duedate?
-						<div className="task-duedate-mini"><i className="material-icons tiny">web</i> {timeConverter(task_item.duedate)}</div>
-						:null}
-						{task_item.tags_name?
-							<div className="task-label-mini">
-							<span className="red">Tag 01</span>
-							<span className="green">Tag 02</span>
-							<span className="yellow">Tag 03</span>
-							<span className="blue">Tag 04</span>
-							<span className="orange">Tag 05</span>
-							</div>
-							:null}
-							</Link>
-							</div>
-							)}
+				{task_item.total_comment >0&&<div className="task-comment-mini"><i className="material-icons tiny">comment</i> {task_item.total_comment}</div>}
+				{task_item.total_task != "0/0"&&<div className="task-todo-mini"><i className="material-icons tiny">toc</i> {task_item.total_task}</div>}
+				{task_item.duedate&&<div className="task-duedate-mini"><i className="material-icons tiny">web</i> {timeConverter(task_item.duedate)}</div>}
+				{task_item.tags[0].title&&
+					<div className="task-label-mini">
+					{task_item.tags.map((tag, tg) =>
+						<div key={"tag-show-"+tg} className={"tagColor "+tag.color}>{tag.title}</div>
+						)}
+					<div className="clear"></div>
+					</div>
+				}
+				</Link>
+				</div>
+				)}
 
 			{this.state.openAddTask ?
 				<div className="task-box" id="taskBoxAdd">
@@ -178,6 +171,6 @@ class Task extends Component {
 
 }
 Task.contextTypes = {
-  router: React.PropTypes.object.isRequired
+	router: React.PropTypes.object.isRequired
 }
 export default Task;

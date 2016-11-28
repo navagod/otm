@@ -1,4 +1,3 @@
-
 module.exports = {
 
 	add(socket,title,detail, cb) {
@@ -165,5 +164,67 @@ module.exports = {
 				}
 			});
 		}
-	}
+	},
+	listTag(socket,pid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('tag:list', {pid:pid}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	addTag(socket,pid,text,color,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('tag:add', {
+			text:text,
+			pid:pid,
+			color:color
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	colorTag(socket,color,tid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('tag:setColor', {
+			tid:tid,
+			color:color
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	editTag(socket,id,text,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('tag:edit', {
+			id:id,
+			text:text
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	deleteTag(socket,id,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('tag:delete', {
+			id:id
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
 }
