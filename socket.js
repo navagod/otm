@@ -383,31 +383,35 @@ socket.on('task:add',function(data,rs){
 });
 socket.on('task:list',function(data,rs){
 	db.cypher({
-		query:'MATCH (t:Tasks)-[n:LIVE_IN]->(c:Cards)-[n2:LIVE_IN]->(p:Projects)  WHERE ID(c) = '+data.cid+' AND t.status <> "archive" AND t.status <> "trash" OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in1:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (lb:Labels)-[in4:IN]->(t)  OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) WHERE tdc.status="success" RETURN u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.endDate,t.detail,t.status,count(distinct cm) AS total_comment,lb.Title as tag_name,lb.Color as tag_color,ID(p) AS pid,ID(c) AS cid,count(distinct td) AS total_todo,count(distinct tdc) AS todo_success ORDER BY t.position ASC',
+		query:'MATCH (t:Tasks)-[n:LIVE_IN]->(c:Cards)-[n2:LIVE_IN]->(p:Projects)  WHERE ID(c) = '+data.cid+' AND t.status <> "archive" AND t.status <> "trash" OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in1:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (lb:Labels)-[in4:IN]->(t)  OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) WHERE tdc.status="success" RETURN u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.endDate,t.detail,t.status,count(distinct cm) AS total_comment,lb.text as tag_name,lb.color as tag_color,ID(p) AS pid,ID(c) AS cid,count(distinct td) AS total_todo,count(distinct tdc) AS todo_success ORDER BY t.position ASC',
 	},function(err,results){
 		if (err) console.log(err);
 		var res = [];
 		if(results){
-			results.forEach(function(value,index){
-				var push_arr =
-				{
-					id:value['tid'],
-					title:value['t.title'],
-					detail:value['t.detail'],
-					position:value['t.position'],
-					duedate:value['t.endDate'],
-					pid:value['pid'],
-					cid:value['cid'],
-					total_comment:value['total_comment'],
-					total_task:value['todo_success'] +"/"+value['total_todo'],
-					user_avatar:value['u.Avatar'],
-					user_name:value['u.Name'],
-					tags:value['tag_name'],
-					tags_color:value['tag_color'],
-					status:value['t.status']
+			for (var k in results) {
+				var id = results[k]['tid'];
+				if (res[id] === undefined) {
+					res[id] = {
+						'id': id,
+						"title": results[k]['t.title'],
+						"detail": results[k]['t.detail'],
+						"position": results[k]['t.position'],
+						"duedate": results[k]['t.endDate'],
+						"pid": results[k]['pid'],
+						"cid": results[k]['cid'],
+						"total_comment": results[k]['total_comment'],
+						"total_task": results[k]['todo_success']+"/"+results[k]['total_todo'],
+						"user_avatar": results[k]['u.Avatar'],
+						"user_name": results[k]['u.Name'],
+						"status": results[k]['t.status'],
+						"tags": []
+					}
 				}
-				res.push(push_arr);
-			});
+				res[id]['tags'].push({
+					'title':results[k]['tag_name'],
+					'color':results[k]['tag_color']
+				})
+			};
 		}
 		rs(res);
 	});
@@ -420,26 +424,30 @@ socket.on('task:listUpdate',function(data,rs){
 		if (err) console.log(err);
 		let res = [];
 		if(results){
-			results.forEach(function(value,index){
-				let push_arr =
-				{
-					id:value['tid'],
-					title:value['t.title'],
-					detail:value['t.detail'],
-					position:value['t.position'],
-					duedate:value['t.endDate'],
-					pid:value['pid'],
-					cid:value['cid'],
-					total_comment:value['total_comment'],
-					total_task:value['todo_success'] +"/"+value['total_todo'],
-					user_avatar:value['u.Avatar'],
-					user_name:value['u.Name'],
-					tags:value['tag_name'],
-					tags_color:value['tag_color'],
-					status:value['t.status']
+			for (var k in results) {
+				var id = results[k]['tid'];
+				if (res[id] === undefined) {
+					res[id] = {
+						'id': id,
+						"title": results[k]['t.title'],
+						"detail": results[k]['t.detail'],
+						"position": results[k]['t.position'],
+						"duedate": results[k]['t.endDate'],
+						"pid": results[k]['pid'],
+						"cid": results[k]['cid'],
+						"total_comment": results[k]['total_comment'],
+						"total_task": results[k]['todo_success']+"/"+results[k]['total_todo'],
+						"user_avatar": results[k]['u.Avatar'],
+						"user_name": results[k]['u.Name'],
+						"status": results[k]['t.status'],
+						"tags": []
+					}
 				}
-				res.push(push_arr);
-			});
+				res[id]['tags'].push({
+					'title':results[k]['tag_name'],
+					'color':results[k]['tag_color']
+				})
+			};
 		}
 
 		rs(res);
@@ -716,6 +724,96 @@ socket.on('todo:edit',function(data,rs){
 	})
 });
 //Todo============//
+
+//Tags ===========//
+socket.on('tag:list',function(data,rs){
+	db.cypher({
+		query:'MATCH (t:Labels)-[:IN]->(p:Projects) WHERE ID(p) = '+data.pid+' RETURN ID(t),t.text,t.color',
+	},function(err,result){
+		if (err){ console.log(err);
+			rs(false)
+		}else{
+			rs(result)
+		}
+	})
+});
+socket.on('tag:add',function(data,rs){
+	db.cypher({
+		query:'MATCH (p:Projects) WHERE ID(p) = '+data.pid+' CREATE (t:Labels {text:"'+data.text+'",color:"'+data.color+'"}) CREATE (t)-[:IN]->(p) RETURN ID(t)',
+	},function(err,result){
+		if (err){ console.log(err);
+			rs(false)
+		}else{
+			rs(result)
+		}
+	})
+});
+socket.on('tag:setColor',function(data,rs){
+	db.cypher({
+		query:'MATCH (t:Labels) WHERE ID(t) = '+data.tid+' SET t.color="'+data.color+'" RETURN ID(t)',
+	},function(err,result){
+		if (err){ console.log(err);
+			rs(false)
+		}else{
+			rs(result)
+		}
+	})
+});
+socket.on('tag:delete',function(data,rs){
+	db.cypher({
+		query:'MATCH (t:Labels) WHERE ID(t) = '+data.id+' MATCH (t)-[n:IN]->() DELETE n DELETE t RETURN t',
+	},function(err,result){
+		if (err){ console.log(err);
+			rs(false)
+		}else{
+			rs(result)
+		}
+	})
+});
+socket.on('tag:edit',function(data,rs){
+	db.cypher({
+		query:'MATCH (t:Labels) WHERE ID(t) = '+data.id+' SET t.text = "'+data.text+'" RETURN t',
+	},function(err,result){
+		if (err){ console.log(err);
+			rs(false)
+		}else{
+			rs(result)
+		}
+	})
+});
+socket.on('tag:current',function(data,rs){
+	db.cypher({
+		query:'MATCH (t:Tasks)<-[:IN]-(l:Labels)  WHERE ID(t) = '+data.tid+' RETURN ID(l),l.text,l.color',
+	},function(err,result_labels){
+		if (err) console.log(err);
+		if(!result_labels || err){
+			rs(false)
+		}else{
+			rs(result_labels)
+		}
+	})
+
+})
+socket.on('tag:assign',function(data,rs){
+	let sql = ''
+	if(data.mode=='add'){
+		sql = 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (l:Labels) WHERE ID(l)='+data.id+' CREATE (l)-[n:IN]->(t) RETURN t'
+	}else{
+		sql = 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (l:Labels) WHERE ID(l)='+data.id+' MATCH (l)-[n:IN]->(t) DELETE n RETURN t'
+	}
+	db.cypher({
+		query:sql,
+	},function(err,result_labels){
+		if (err) console.log(err);
+		if(!result_labels || err){
+			rs(false)
+		}else{
+			rs(result_labels)
+		}
+	})
+
+})
+//Tags ===========//
 
 //Comments====//
 

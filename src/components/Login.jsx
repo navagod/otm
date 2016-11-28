@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
 import auth from './Module/Auth';
-import Redirect from 'react-router/Redirect'
 class Login extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			error: false,
-			errorMsg:"",
-			redirectToReferrer: false
+			errorMsg:""
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
 	}
@@ -28,7 +26,6 @@ class Login extends Component {
 		})
 	}
 	render() {
-		const { redirectToReferrer } = this.state
 		return (
 			<div className="row">
 			<div className="col s6 offset-s3">

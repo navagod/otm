@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import {Link} from 'react-router'
-import {Button, Dropdown,NavItem} from 'react-materialize'
+import {Dropdown,NavItem} from 'react-materialize'
 import Tasks from './Module/Task'
 import Todo from './Todo'
+import Tags from './Tags'
 var Datetime = require('react-datetime');
 class PopupPage extends Component {
 	constructor(props) {
@@ -16,9 +17,16 @@ class PopupPage extends Component {
 			comments:[],
 			showTodo:false,
 			selectUser:false,
-			listUsers:[]
+			listUsers:[],
+			dropdownIsActive: false,
+			dropdownIsVisible: false,
+			currentTags:[],
+			allTags:[],
+			showTag:false
 		}
+		this._hideDropdown = this._hideDropdown.bind(this);
 	}
+
 	componentDidMount(){
 		Tasks.get(this.state.socket,this.state.projectId,this.state.taskId,(rs)=>{
 			if(!rs){
@@ -49,9 +57,56 @@ class PopupPage extends Component {
 						this.setState({listUsers})
 					}
 				})
+				Tasks.currentTag(this.state.socket,this.state.taskId,(rs)=>{
+					if(!rs){
+						
+					}else{
+						var {currentTags} = this.state
+						currentTags = rs
+						this.setState({currentTags})
+					}
+				})
+				Tasks.allTag(this.state.socket,this.state.projectId,(rs)=>{
+					if(!rs){
+						
+					}else{
+						var {allTags} = this.state
+						allTags = rs
+						this.setState({allTags})
+					}
+				})
 			}
 		})
-		
+		window.addEventListener('click', this._hideDropdown, false);
+	}
+	componentWillUnmount() {
+		window.removeEventListener('click', this._hideDropdown, false);
+	}
+	_stopPropagation(e) {
+		e.stopPropagation();
+	}
+
+	_toggleDropdown() {
+		this.setState({ dropdownIsVisible: true });
+	}
+
+
+	_hideDropdown() {
+		const { dropdownIsActive } = this.state;
+		if (!dropdownIsActive) {
+			this.setState({ dropdownIsVisible: false });
+		}
+	}
+
+
+	_handleFocus() {
+		this.setState({ dropdownIsActive: true });
+	}
+
+	_handleBlur() {
+		this.setState({
+			dropdownIsActive: false,
+		});
 	}
 	changeTitle(event){
 		var {taskData} = this.state
@@ -104,7 +159,7 @@ class PopupPage extends Component {
 	}
 	selectStartDate(data){
 		var tm = moment(data).valueOf()
-		
+
 		Tasks.changeStartDate(this.state.socket,this.state.taskId,tm,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด กรุณารีเฟรสหน้าใหม่", 4000)
@@ -152,6 +207,48 @@ class PopupPage extends Component {
 			}
 		})
 	}
+	clickTag(id,color,text){
+		var index = _.findIndex(this.state.currentTags,{'ID(l)':id})
+		let mode = ''
+		if(index >= 0){
+			mode = 'remove'
+		}else{
+			mode = 'add'
+		}
+		Tasks.setTagTask(this.state.socket,this.state.taskId,mode,id,(rs)=>{
+			if(!rs){
+				return Materialize.toast("เกิดข้อผิดพลาด กรุณารีเฟรสหน้าใหม่", 4000)
+			}else{
+				if(mode==='add'){
+					let {currentTags} = this.state
+					currentTags.push({
+						'ID(l)':id,
+						'l.color':color,
+						'l.text':text
+					})
+					this.setState({currentTags})
+				}else{
+					let {currentTags} = this.state
+					currentTags.splice(index,1)
+					this.setState({currentTags})
+				}
+			}
+		})
+	}
+	openTags(){
+		this.setState({showTag:true})
+	}
+	closeTags(){
+		this.setState({showTag:false})
+	}
+	classTag(id){
+		let index = _.findIndex(this.state.currentTags,{'ID(l)':id})
+		if(index >= 0){
+			return "tag-item active "
+		}else{
+			return "tag-item "
+		}
+	}
 	render() {
 		return (
 			<div>
@@ -160,12 +257,15 @@ class PopupPage extends Component {
 			<div id="menuPopup">
 			{this.state.taskData["t.status"]=='active'?
 			<div style={{width: '450px'}}>
-			<button type="button" className="btn green"  onClick={this.statusTask.bind(this,'complate')}>Complete</button> 
+			<button type="button" className="btn green"  onClick={this.statusTask.bind(this,'complete')}>Complete</button> 
 			<button type="button" className="btn blue"  onClick={this.statusTask.bind(this,'archive')}>Archive</button> 
 			<button type="button" className="btn red"  onClick={this.statusTask.bind(this,'trash')}>Trash</button> 
 			</div>
 			:
+			<div>
 			<button type="button" className="btn orange"  onClick={this.statusTask.bind(this,'active')}>Make Active</button>
+			<button type="button" className="btn blue"  onClick={this.statusTask.bind(this,'archive')}>Archive</button> 
+			</div>
 		}
 
 
@@ -251,8 +351,31 @@ class PopupPage extends Component {
 		<strong>Due Date : </strong>
 		<Datetime isValidDate={this.validDateEnd.bind(this)} onChange={this.selectEndDate.bind(this)} value={moment.unix(Math.round(parseInt(this.state.taskData['t.endDate']) / 1000))} />
 		</div>
-		<div className="rightBarItem">
-		<strong>Label</strong>
+		<div className="rightBarItem" id="tags"   
+		onMouseOver={this._handleFocus.bind(this)}
+		onMouseLeave={this._handleBlur.bind(this)}
+		onClick={this._toggleDropdown.bind(this)}>
+		<strong>Tags</strong>
+		<div>
+		{this.state.currentTags.map((tag,i)=>
+			<div key={"color-"+i} className={"tagColor "+tag["l.color"]}>{tag["l.text"]}</div>
+			)}
+		<div className="clear"></div>
+		</div>
+
+		{
+			this.state.dropdownIsVisible &&
+			<div id="tagList" className="fade-animation" onMouseOver={this._handleFocus.bind(this)}
+			onMouseLeave={this._handleBlur.bind(this)}>
+			<div id="btn-manage-tag" onClick={this.openTags.bind(this)}>[Manage Tags]</div>
+			{this.state.allTags.map((taga,ti)=>
+				<div className={this.classTag(taga['ID(t)'])} key={"tag-all-"+ti+taga["ID(t)"]} onClick={this.clickTag.bind(this,taga["ID(t)"],taga["t.color"],taga["t.text"])}>
+				<div className={"tagColor "+taga['t.color']}>{taga["t.text"]}</div>
+				<div className="clear"></div>
+				</div>
+				)}
+			</div>
+		}
 		</div>
 		</div>
 
@@ -260,9 +383,10 @@ class PopupPage extends Component {
 		</div>
 		<div id="popup" className="fade-animation">
 		</div>
+		{this.state.showTag?<Tags projectId={this.state.projectId} socket={this.props.socket} closeTags={this.closeTags.bind(this)} />:null}
 		</div>
 		);
-	}
+}
 }
 PopupPage.contextTypes = {
 	router: React.PropTypes.object.isRequired
