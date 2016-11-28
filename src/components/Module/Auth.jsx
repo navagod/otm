@@ -55,15 +55,20 @@ module.exports = {
       cb(false)
     }
   },
-  saveProfile(socket,uid,pass,name,cb){
+  saveProfile(socket,uid,pass,name,avatar,cb){
     cb = arguments[arguments.length - 1]
-    pretendSaveProfile(socket,uid,pass,name, (res) => {
+    pretendSaveProfile(socket,uid,pass,name,avatar, (res) => {
       if (res) {
         localStorage.name = name
         cb(true)
       } else {
         cb(false)
       }
+    })
+  },saveAvatar(socket,uid,file,cb){
+    cb = arguments[arguments.length - 1]
+    pretendSaveAvatar(socket,uid,file, (res) => {
+       cb(res)
     })
   },
   getToken() {
@@ -95,17 +100,26 @@ function pretendGetProfile(socket,uid, cb) {
     }
   });
 }
-function pretendSaveProfile(socket,uid,pass,name, cb) {
+function pretendSaveProfile(socket,uid,pass,name,avatar, cb) {
   socket.emit('user:saveProfile', {
     uid:uid,
     name:name,
-    pass:pass
+    pass:pass,
+    avatar:avatar
   }, (result) => {
     if(!result) {
       cb(false)
     }else{
       cb(true)
     }
+  });
+}
+function pretendSaveAvatar(socket,uid,file, cb) {
+  socket.emit('user:saveAvatar', {
+    uid:uid,
+    file:file,
+  }, (result) => {
+    cb(result);
   });
 }
 function pretendRequest(socket,email, pass, cb) {
