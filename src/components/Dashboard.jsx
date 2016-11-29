@@ -136,7 +136,6 @@ class Dashboard extends Component {
 		projects.delete(this.props.socket,id, (rs) => {
 			if(!rs){
 				Materialize.toast('เกิดข้อผิดพลาด', 4000)
-				
 			}else{
 				var {listProject} = this.state
 				listProject = rs
@@ -172,7 +171,6 @@ class Dashboard extends Component {
 		projects.save(this.props.socket,title, detail, id, (rs) => {
 			if(!rs){
 				Materialize.toast('เกิดข้อผิดพลาด', 4000)
-				
 			}else{
 				var {listProject} = this.state
 				listProject = rs
@@ -190,7 +188,6 @@ class Dashboard extends Component {
 	}
 
 	activeListUser(id){
-		
 		if(_.findIndex(this.state.editUsers,{'uid':id}) >=0){
 			return "chooseUser active"
 		}else{
