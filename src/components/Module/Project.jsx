@@ -165,5 +165,12 @@ module.exports = {
 				}
 			});
 		}
+	},
+	getCount(socket,project,cb) {
+		socket.emit('project:getTaskCount', {
+			pid:project
+		}, function (result) {
+			cb(result);
+		})
 	}
 }

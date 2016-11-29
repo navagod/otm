@@ -34,7 +34,11 @@ class Project extends Component {
 			cardEditColor:"",
 			cardEditIcon:"",
 			cardEditId:"",
-			cardEditPosition:0
+			cardEditPosition:0,
+			activeTask:1,
+			archiveTask:1,
+			trashTask:1,
+
 		}
 	}
 	componentDidMount(){
@@ -42,9 +46,11 @@ class Project extends Component {
 		$( "#card-sort" ).sortable({update: this.handleSortCardUpdate.bind(this)
 		}).disableSelection();
 		this.projectsListCard.bind(this)()
+		this.projectsListStatus.bind(this)();
 		this.props.socket.on('card:updateSort', this._updateSortCardList.bind(this));
 		this.props.socket.on('card:updateAddList', this._updateAddCardList.bind(this));
 		this.props.socket.on('card:updateEditCard', this._updateEditCard.bind(this));
+		this.props.socket.on('project:countStatus', this._countStatus.bind(this));
 		cal_list();
 	}
 	componentWillMount() {
@@ -53,6 +59,9 @@ class Project extends Component {
 	componentDidUpdate(prevProps, prevState){
 		cal_list();
 
+	}
+	_countStatus(data){
+		console.log("data",data);
 	}
 	_updateAddCardList(data){
 		if(data.pid == this.state.projectId){
@@ -89,6 +98,14 @@ class Project extends Component {
 				}
 			})
 		}
+	}
+	projectsListStatus() {
+		projects.getCount(this.props.socket,this.state.projectId, (rs)=>{
+			this.setState({activeTask:rs.active});
+			this.setState({archiveTask:rs.archive});
+			this.setState({trashTask:rs.trash});
+		});
+
 	}
 	componentWillReceiveProps(nextProps){
 		console.log(nextProps)
@@ -247,9 +264,16 @@ class Project extends Component {
 			<div id="project-page">
 			<nav>
 			<div className="nav-wrapper blue">
-			<div className="col s12" id="project-title">
-			{this.state.projectTitle}
-			</div>
+				<div className="col s12" id="project-title">
+					<div className='project_name'>
+						{this.state.projectTitle}
+					</div>
+					<div className='taskCount'>
+						<abbr title='Active'><i className="material-icons inline">play_arrow</i>{this.state.activeTask}</abbr>
+						<abbr title='Archive'><i className="material-icons inline">archive</i>{this.state.archiveTask}</abbr>
+						<abbr title='Trash'><i className="material-icons inline">delete</i>{this.state.trashTask}</abbr>
+					</div>
+				</div>
 			</div>
 			</nav>
 			<div id="list-cards">
