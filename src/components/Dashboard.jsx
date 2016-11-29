@@ -135,7 +135,7 @@ class Dashboard extends Component {
 		projects.delete(this.props.socket,id, (rs) => {
 			if(!rs){
 				Materialize.toast('เกิดข้อผิดพลาด', 4000)
-				
+
 			}else{
 				var {listProject} = this.state
 				listProject = rs
@@ -171,7 +171,7 @@ class Dashboard extends Component {
 		projects.save(this.props.socket,title, detail, id, (rs) => {
 			if(!rs){
 				Materialize.toast('เกิดข้อผิดพลาด', 4000)
-				
+
 			}else{
 				var {listProject} = this.state
 				listProject = rs
@@ -189,7 +189,7 @@ class Dashboard extends Component {
 	}
 
 	activeListUser(id){
-		
+
 		if(_.findIndex(this.state.editUsers,{'uid':id}) >=0){
 			return "chooseUser active"
 		}else{
@@ -258,7 +258,7 @@ class Dashboard extends Component {
 					{u.user_name
 						? <div>
 						{u.user_avatar
-							? <img  src={"/"+u.user_avatar} className=" responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
+							? <img  src={"uploads/"+u.user_avatar} className=" responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
 							: <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.user_name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className=" responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
 						}
 						</div>
@@ -335,7 +335,7 @@ class Dashboard extends Component {
 				{u.name?
 					<div>
 					{u.avatar?
-						<img  src={"/"+u.avatar} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
+						<img  src={"uploads/"+u.avatar} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
 						:
 						<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
 					}
@@ -369,7 +369,7 @@ class Dashboard extends Component {
 
 				<div key={i} className={this.activeListUser(user.id)} onClick={this.selectUserActive.bind(this,user.id)}>
 				{user.avatar?
-					<img src={"/"+user.avatar} className="circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
+					<img src={"uploads/"+user.avatar} className="circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
 					:
 					<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+user.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
 				}
