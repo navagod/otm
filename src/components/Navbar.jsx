@@ -15,7 +15,7 @@ import Profile from './Profile'
 import Nopage from './Nopage'
 import Register from './Register'
 import Timeline from './Timelines'
-import PopupPage from './PopupPage'
+
 
 var socket = io.connect()
 
@@ -76,7 +76,4 @@ class Navbar extends Component {
 			)
 	}
 }
-
-
-
 export default Navbar;

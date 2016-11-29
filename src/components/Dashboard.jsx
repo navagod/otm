@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import {Link} from 'react-router'
 import projects from './Module/Project'
-
+import Tags from './Tags'
 var _ = require('lodash')
 class Dashboard extends Component {
 	constructor(props) {
@@ -17,7 +17,8 @@ class Dashboard extends Component {
 			editUsers:[],
 			selectUser:false,
 			listProject:[],
-			listUsers:[]
+			listUsers:[],
+			showTag:false
 		}
 	}
 	componentDidMount(){
@@ -207,8 +208,8 @@ class Dashboard extends Component {
 			if(!rs){
 				Materialize.toast('เกิดข้อผิดพลาด', 4000)
 			}else{
+				var {editUsers} = this.state
 				if(mode=="add"){
-					var {editUsers} = this.state
 					editUsers.push({
 						uid:rs.id,
 						name:rs.name,
@@ -217,13 +218,18 @@ class Dashboard extends Component {
 					this.setState({editUsers})
 
 				}else{
-					var {editUsers} = this.state
 					var index = _.findIndex(editUsers,{uid:uid})
 					editUsers.splice(index, 1)
 					this.setState({editUsers})
 				}
 			}
 		})
+	}
+	openTags(){
+		this.setState({showTag:true,dialogEdit:false})
+	}
+	closeTags(){
+		this.setState({showTag:false,dialogEdit:false})
 	}
 	render() {
 		var items = this.state.listProject
@@ -258,7 +264,7 @@ class Dashboard extends Component {
 					{u.user_name
 						? <div>
 						{u.user_avatar
-							? <img  src={"/"+u.user_avatar} className=" responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
+							? <img  src={"/uploads/"+u.user_avatar} className=" responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
 							: <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.user_name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className=" responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
 						}
 						</div>
@@ -275,7 +281,7 @@ class Dashboard extends Component {
 		</div>
 		</div>
 
-		{this.state.dialogAdd ?
+		{this.state.dialogAdd&&
 			<div>
 			<div id="addProject" className="modal modal-fixed-footer open">
 			<form onSubmit={this.submitAddProject.bind(this)}>
@@ -305,15 +311,15 @@ class Dashboard extends Component {
 			</div>
 			<div className="lean-overlay" id="materialize-lean-overlay-1"></div>
 			</div>
-			:null
 		}
 
-		{this.state.dialogEdit ?
+		{this.state.dialogEdit&&
 			<div>
 			<div id="editProject" className="modal modal-fixed-footer open">
 			<form onSubmit={this.submitEditProject.bind(this)}>
 			<div className="modal-content">
-			<h4>Edit Project</h4>
+			<h5 className="left">Edit Project</h5>
+			<div className="manage-tags-btn right" onClick={this.openTags.bind(this)}>Manage Tags</div>
 			<div>
 
 			<div className="row">
@@ -332,17 +338,17 @@ class Dashboard extends Component {
 			<div className="">
 			{this.state.editUsers.map((u, ui) =>
 				<div className="col s1 no-padding" key={ui}>
-				{u.name?
+				{u.name&&
 					<div>
 					{u.avatar?
-						<img  src={"/"+u.avatar} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
+						<img  src={"/uploads/"+u.avatar} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
 						:
 						<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
 					}
 					</div>
-					:null}
-					</div>
-					)}
+				}
+				</div>
+				)}
 			</div>
 			<button type="button" className="box-assign-user waves-effect waves-blue btn" id="assign-btn" onClick={this.openSelectUser.bind(this)}>+</button>
 			</div>
@@ -357,9 +363,9 @@ class Dashboard extends Component {
 			</div>
 			<div className="lean-overlay" id="materialize-lean-overlay-2"></div>
 			</div>
-			:null
 		}
-		{this.state.selectUser ?
+		{this.state.showTag&&<Tags projectId={this.state.editId} socket={this.props.socket} closeTags={this.closeTags.bind(this)} />}
+		{this.state.selectUser&&
 			<div id="user-list" className="modal modal-fixed-footer open">
 			<div className="modal-content">
 			<h4>Select Uses</h4>
@@ -369,7 +375,7 @@ class Dashboard extends Component {
 
 				<div key={i} className={this.activeListUser(user.id)} onClick={this.selectUserActive.bind(this,user.id)}>
 				{user.avatar?
-					<img src={"/"+user.avatar} className="circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
+					<img src={"/uploads/"+user.avatar} className="circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
 					:
 					<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+user.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
 				}
@@ -382,7 +388,7 @@ class Dashboard extends Component {
 			<button type="button" className="waves-effect waves-green green btn-flat" onClick={this.closeSelectUser.bind(this)}>OK</button>
 			</div>
 			</div>
-			:null}
+			}
 			</div>
 			)
 }

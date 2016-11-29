@@ -46,7 +46,7 @@ module.exports = {
     if (localStorage.token) {
       pretendGetProfile(socket,uid,(res) => {
         if(res.process){
-          cb({name:res.name,email:res.email})
+          cb({name:res.name,email:res.email,avatar:res.avatar})
         }else{
           cb(false)
         }
@@ -55,15 +55,20 @@ module.exports = {
       cb(false)
     }
   },
-  saveProfile(socket,uid,pass,name,cb){
+  saveProfile(socket,uid,pass,name,avatar,cb){
     cb = arguments[arguments.length - 1]
-    pretendSaveProfile(socket,uid,pass,name, (res) => {
+    pretendSaveProfile(socket,uid,pass,name,avatar, (res) => {
       if (res) {
         localStorage.name = name
         cb(true)
       } else {
         cb(false)
       }
+    })
+  },saveAvatar(socket,uid,file,cb){
+    cb = arguments[arguments.length - 1]
+    pretendSaveAvatar(socket,uid,file, (res) => {
+       cb(res)
     })
   },
   getToken() {
@@ -91,21 +96,30 @@ function pretendGetProfile(socket,uid, cb) {
     if(!result) {
       cb({ process: false })
     }else{
-      cb({ process: true,name:result['u']['properties']['Name'],email:result['u']['properties']['Email'] })
+      cb({ process: true,name:result['u']['properties']['Name'],email:result['u']['properties']['Email'],avatar:result['u']['properties']['Avatar'] })
     }
   });
 }
-function pretendSaveProfile(socket,uid,pass,name, cb) {
+function pretendSaveProfile(socket,uid,pass,name,avatar, cb) {
   socket.emit('user:saveProfile', {
     uid:uid,
     name:name,
-    pass:pass
+    pass:pass,
+    avatar:avatar
   }, (result) => {
     if(!result) {
       cb(false)
     }else{
       cb(true)
     }
+  });
+}
+function pretendSaveAvatar(socket,uid,file, cb) {
+  socket.emit('user:saveAvatar', {
+    uid:uid,
+    file:file,
+  }, (result) => {
+    cb(result);
   });
 }
 function pretendRequest(socket,email, pass, cb) {
