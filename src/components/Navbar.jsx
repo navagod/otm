@@ -44,7 +44,6 @@ class Navbar extends Component {
 
 				{ auth.loggedIn() ?
 					<ul className="right hide-on-med-and-down">
-					<li><Link to="/dashboard"><i className="large material-icons">dashboard</i></Link></li>
 					<li><Link to="/timeline"><i className="large material-icons">clear_all</i></Link></li>
 					<li><Link to="/profile"><i className="large material-icons">perm_identity</i></Link></li>
 					<li className="relative"><a href="#"><i className="large material-icons">info</i> <span className="notify">4</span></a></li>
@@ -59,14 +58,14 @@ class Navbar extends Component {
 				</div>
 				</nav>
 				<div>
-				<MatchWhenAuthorized pattern="/dashboard"  component={Dashboard} />
-				<Match pattern="/login" render={({ pathname }) => <Login socket={this.state.socket} /> }/>
-				<MatchWhenAuthorized pattern="/logout" component={Logout}/>
-				<MatchWhenAuthorized pattern="/profile" component={Profile}/>
-				<Match pattern="/Register" render={({ pathname }) => <Register socket={this.state.socket} /> }/>
-				<MatchWhenAuthorized pattern="/timeline" component={Timeline}/>
-				<MatchWhenAuthorized pattern="/project/:projectId" component={Project} />
-				<MatchWhenAuthorized pattern="/task/:taskId"  component={Project} />
+				<MatchWhenAuthorized pattern="/" exactly component={Dashboard} />
+				<Match pattern="/login" exactly render={({ pathname }) => <Login socket={this.state.socket} /> }/>
+				<MatchWhenAuthorized pattern="/logout" exactly component={Logout}/>
+				<MatchWhenAuthorized pattern="/profile" exactly component={Profile}/>
+				<Match pattern="/Register" exactly render={({ pathname }) => <Register socket={this.state.socket} /> }/>
+				<MatchWhenAuthorized pattern="/timeline" exactly component={Timeline}/>
+				<MatchWhenAuthorized pattern="/project/:projectId" exactly component={Project} />
+				<MatchWhenAuthorized pattern="/task/:taskId" exactly component={Project} />
 				<Miss  render={({ pathname }) => <Nopage socket={this.state.socket} /> }/>
 				</div>
 				</div>

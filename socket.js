@@ -45,14 +45,14 @@ module.exports = function (socket) {
 		return time;
 	}
 
-function guid() {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-  }
-  return s4() + s4() + s4();
-}
+	function guid() {
+		function s4() {
+			return Math.floor((1 + Math.random()) * 0x10000)
+			.toString(16)
+			.substring(1);
+		}
+		return s4() + s4() + s4();
+	}
 
 //project============//
 socket.on('project:listArr',function(data,rs){
@@ -356,7 +356,10 @@ socket.on('task:add',function(data,rs){
 					total_task:"0/0",
 					user_avatar:"",
 					user_name:"",
-					tags:"",
+					tags:[{
+						'title':null,
+						'color':null
+					}],
 					tags_color:""
 				}
 			});
@@ -374,7 +377,10 @@ socket.on('task:add',function(data,rs){
 					total_task:"0/0",
 					user_avatar:"",
 					user_name:"",
-					tags:"",
+					tags:[{
+						'title':null,
+						'color':null
+					}],
 					tags_color:""
 				}
 			});
@@ -915,14 +921,14 @@ socket.on('comment:add',function(data,rs){
 		var file_name = guid() + ".jpg";
 		var full_path_name = dir_file + file_name;
 
-	    fs.writeFile(full_path_name, data.file, 'binary', function(err) {
-	        if (err){
-	        	console.log('Save Avatar Error : ',err);
-	        	rs("");
-	        }else{
+		fs.writeFile(full_path_name, data.file, 'binary', function(err) {
+			if (err){
+				console.log('Save Avatar Error : ',err);
+				rs("");
+			}else{
 				rs(file_name);
-	        }
-	    });
+			}
+		});
 
 	});
 	socket.on('user:list',function(data,rs){
