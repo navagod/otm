@@ -18,7 +18,10 @@ class Task extends Component {
 			projectId:this.props.projectId || this.props.params.projectId,
 			cardId:this.props.cardId,
 			openAddTask:false,
-			listTasks:[]
+			listTasks:[],
+			looped:false,
+			totalCard:0,
+			currentLoop:-1
 		}
 	}
 	componentDidMount(){
@@ -33,9 +36,14 @@ class Task extends Component {
 		
 		this.props.socket.on('task:updateAddTaskList', this._updateAddTaskList.bind(this));
 		this.props.socket.on('task:reUpdateList', this._updateList.bind(this));
+		this.setState({totalCard:document.getElementsByClassName("sort-task").length})
 	}
 	componentDidUpdate(prevProps, prevState){
 		calTeatarea()
+		if(this.state.totalCard === this.state.currentLoop){
+			console.log('update list')
+			this.setState({currentLoop: -1})
+		}
 	}
 	componentWillReceiveProps(nextProps){
 		this.setState({cardId:nextProps.cardId})
@@ -73,28 +81,37 @@ class Task extends Component {
 		this.setState({openAddTask:true});
 	}
 	handleSortTaskUpdate(event, ui){
-		let item_div = document.getElementsByClassName("sort-task");
-		for(let i = 0; i < item_div.length; i++)
-		{
-			let div = item_div.item(i);
-			let ids = $(div).sortable('toArray', { attribute: 'data-id' })
-			let items = []
-			ids.forEach(function (i, index) {
-				if(i!=''){
-					items.push(i)
-				}
-			})
-			
-			let store_state = this.state.cardList
-			let cid = div.dataset.cid
-			tasks.sortTask(this.props.socket,items,this.state.projectId,div.dataset.cid,(rs)=>{
-				if(!rs){
-					$(div).sortable('cancel');
-					this.setState({ listTasks: store_state });
-				}else{
-					this.reupdateList.bind(this,cid)()
-				}
-			})
+		if(!this.state.looped){
+			console.log(event,ui)
+			let item_div = document.getElementsByClassName("sort-task");
+			for(let i = 0; i < item_div.length; i++)
+			{
+				let div = item_div.item(i);
+				let ids = $(div).sortable('toArray', { attribute: 'data-id' })
+				let items = []
+				ids.forEach(function (i, index) {
+					if(i){
+						items.push(i)
+					}
+				})
+
+				let store_state = this.state.cardList
+				let cid = div.dataset.cid
+				console.log(items)
+				tasks.sortTask(this.props.socket,items,this.state.projectId,div.dataset.cid,(rs)=>{
+					// if(!rs){
+					// 	$(div).sortable('cancel');
+					// 	this.setState({ listTasks: store_state });
+					// }else{
+					// 	var {currentLoop} = this.state
+					// 	currentLoop = currentLoop + 1
+					// 	this.setState({currentLoop})
+					// }
+				})
+			}
+			this.setState({looped:true})
+		}else{
+			this.setState({looped:false})
 		}
 	}
 	reupdateList(cid){
@@ -111,8 +128,11 @@ class Task extends Component {
 	submitAddTask(event){
 		event.preventDefault()
 		const title = this.refs.addTaskTitle.value
-		const sortNum = this.state.listTasks.length + 1
-		tasks.add(this.props.socket,localStorage.uid,this.state.projectId,this.state.cardId,title,sortNum,(rs)=>{
+		let parent = ""
+		if(this.state.listTasks[this.state.listTasks.length - 1] !== undefined){
+			parent = this.state.listTasks[this.state.listTasks.length - 1]['id']
+		}
+		tasks.add(this.props.socket,localStorage.uid,this.state.projectId,this.state.cardId,title,parent,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
@@ -120,7 +140,7 @@ class Task extends Component {
 				listTasks.push(rs.lists);
 				this.setState({listTasks,openAddTask: false});
 			}
-			
+
 		})
 	}
 	render() {
@@ -132,7 +152,7 @@ class Task extends Component {
 				<Link to={`/task/${task_item.id}`}>
 				<div className="task-assign">
 				{task_item.user_name && task_item.user_avatar ?
-					<img src={"/"+task_item.user_avatar} width="50" height="50" className="circle responsive-img" />
+					<img src={"/uploads/"+task_item.user_avatar} width="50" height="50" className="avatar circle responsive-img" />
 					:
 					<img src="https://placeholdit.imgix.net/~text?txtsize=20&txt=%3F&w=50&h=50&txttrack=0" className="circle responsive-img" />
 				}
@@ -140,27 +160,20 @@ class Task extends Component {
 
 				<div className="task-title">{task_item.title}</div>
 				<div className="clear"></div>
-				{task_item.total_comment >0 ?
-					<div className="task-comment-mini"><i className="material-icons tiny">comment</i> {task_item.total_comment}</div>
-					:null}
-					{task_item.total_task != "0/0"?
-					<div className="task-todo-mini"><i className="material-icons tiny">toc</i> {task_item.total_task}</div>
-					:null}
-					{task_item.duedate?
-						<div className="task-duedate-mini"><i className="material-icons tiny">web</i> {timeConverter(task_item.duedate)}</div>
-						:null}
-						{task_item.tags_name?
-							<div className="task-label-mini">
-							<span className="red">Tag 01</span>
-							<span className="green">Tag 02</span>
-							<span className="yellow">Tag 03</span>
-							<span className="blue">Tag 04</span>
-							<span className="orange">Tag 05</span>
-							</div>
-							:null}
-							</Link>
-							</div>
-							)}
+				{task_item.total_comment >0&&<div className="task-comment-mini"><i className="material-icons tiny">comment</i> {task_item.total_comment}</div>}
+				{task_item.total_task != "0/0"&&<div className="task-todo-mini"><i className="material-icons tiny">toc</i> {task_item.total_task}</div>}
+				{task_item.duedate&&<div className="task-duedate-mini"><i className="material-icons tiny">web</i> {timeConverter(task_item.duedate)}</div>}
+				{task_item.tags[0].title&&
+					<div className="task-label-mini">
+					{task_item.tags.map((tag, tg) =>
+						<div key={"tag-show-"+tg} className={"tagColor "+tag.color}>{tag.title}</div>
+						)}
+					<div className="clear"></div>
+					</div>
+				}
+				</Link>
+				</div>
+				)}
 
 			{this.state.openAddTask ?
 				<div className="task-box" id="taskBoxAdd">
@@ -178,6 +191,6 @@ class Task extends Component {
 
 }
 Task.contextTypes = {
-  router: React.PropTypes.object.isRequired
+	router: React.PropTypes.object.isRequired
 }
 export default Task;

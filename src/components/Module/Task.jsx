@@ -1,13 +1,12 @@
-
 module.exports = {
-	add(socket,uid,pid,cid,title,sortNum, cb) {
+	add(socket,uid,pid,cid,title,parent, cb) {
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:add', {
 			uid:uid,
 			pid:pid,
 			cid:cid,
-			sortNum:sortNum,
 			title:title,
+			parent:parent,
 			at_create:new Date().getTime()
 		}, (result) => {
 			if(!result) {
@@ -33,7 +32,7 @@ module.exports = {
 			if(!result){
 				cb(false)
 			}else{
-				cb(result)
+				cb(result.filter(cleanArray))
 			}
 		});
 	},
@@ -43,7 +42,7 @@ module.exports = {
 			if(!result){
 				cb(false)
 			}else{
-				cb(result)
+				cb(result.filter(cleanArray))
 			}
 		});
 	},
@@ -195,6 +194,36 @@ module.exports = {
 	sortTask(socket,items,tid,cid,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:changeSort', {items:items,tid:tid,cid:cid}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	currentTag(socket,tid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('tag:current', {tid:tid}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	allTag(socket,pid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('tag:list', {pid:pid}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	setTagTask(socket,tid,mode,id,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('tag:assign', {tid:tid,id:id,mode:mode}, (result) => {
 			if(!result){
 				cb(false)
 			}else{

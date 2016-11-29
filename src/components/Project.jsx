@@ -241,9 +241,9 @@ class Project extends Component {
 	}
 	classColor(color){
 		if(color == this.state.cardEditColor){
-			return "color-select active " + color;
+			return 'color-select active ' + color
 		}else{
-			return "color-select "+color;
+			return 'color-select ' + color
 		}
 	}
 	deletePanel(event){
@@ -293,7 +293,7 @@ class Project extends Component {
 
 
 
-			
+
 			{this.state.addCardEnable?
 				<div className="card-item" id="add-item">
 				<div className="card-header black">
