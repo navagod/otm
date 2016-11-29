@@ -82,6 +82,7 @@ class Task extends Component {
 	}
 	handleSortTaskUpdate(event, ui){
 		if(!this.state.looped){
+			console.log(event,ui)
 			let item_div = document.getElementsByClassName("sort-task");
 			for(let i = 0; i < item_div.length; i++)
 			{
@@ -98,14 +99,14 @@ class Task extends Component {
 				let cid = div.dataset.cid
 				console.log(items)
 				tasks.sortTask(this.props.socket,items,this.state.projectId,div.dataset.cid,(rs)=>{
-					if(!rs){
-						$(div).sortable('cancel');
-						this.setState({ listTasks: store_state });
-					}else{
-						var {currentLoop} = this.state
-						currentLoop = currentLoop + 1
-						this.setState({currentLoop})
-					}
+					// if(!rs){
+					// 	$(div).sortable('cancel');
+					// 	this.setState({ listTasks: store_state });
+					// }else{
+					// 	var {currentLoop} = this.state
+					// 	currentLoop = currentLoop + 1
+					// 	this.setState({currentLoop})
+					// }
 				})
 			}
 			this.setState({looped:true})
@@ -127,8 +128,11 @@ class Task extends Component {
 	submitAddTask(event){
 		event.preventDefault()
 		const title = this.refs.addTaskTitle.value
-		const sortNum = this.state.listTasks.length + 1
-		tasks.add(this.props.socket,localStorage.uid,this.state.projectId,this.state.cardId,title,sortNum,(rs)=>{
+		let parent = ""
+		if(this.state.listTasks[this.state.listTasks.length - 1] !== undefined){
+			parent = this.state.listTasks[this.state.listTasks.length - 1]['id']
+		}
+		tasks.add(this.props.socket,localStorage.uid,this.state.projectId,this.state.cardId,title,parent,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
@@ -136,7 +140,7 @@ class Task extends Component {
 				listTasks.push(rs.lists);
 				this.setState({listTasks,openAddTask: false});
 			}
-			
+
 		})
 	}
 	render() {

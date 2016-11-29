@@ -1,12 +1,12 @@
 module.exports = {
-	add(socket,uid,pid,cid,title,sortNum, cb) {
+	add(socket,uid,pid,cid,title,parent, cb) {
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:add', {
 			uid:uid,
 			pid:pid,
 			cid:cid,
-			sortNum:sortNum,
 			title:title,
+			parent:parent,
 			at_create:new Date().getTime()
 		}, (result) => {
 			if(!result) {
