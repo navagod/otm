@@ -303,7 +303,7 @@ class PopupPage extends Component {
 			<div className="activity-avatar">
 
 			{c_item["u.Avatar"]
-			? <img  src={"/"+c_item["u.Avatar"]} className="circle responsive-img" width="40" height="40" />
+			? <img  src={"/uploads/"+c_item["u.Avatar"]} className="avatar-mini circle responsive-img" width="40" height="40" />
 			: <img src={"https://placeholdit.imgix.net/~text?txtsize=15&txt="+c_item["u.Name"].charAt(0).toUpperCase()+"&w=40&h=40&txttrack=0"} className="circle  responsive-img" />
 		}
 
@@ -330,7 +330,7 @@ class PopupPage extends Component {
 			<span>Assigned to </span>
 			{
 				this.state.taskData['ua.Name'] && this.state.taskData['ua.Avatar'] ?
-				<img src={"/"+this.state.taskData['ua.Avatar']} width="50" height="50" className="circle responsive-img" />
+				<img src={"/uploads/"+this.state.taskData['ua.Avatar']} width="50" height="50" className="avatar circle responsive-img" />
 				:
 				<img src="https://placeholdit.imgix.net/~text?txtsize=20&txt=%3F&w=50&h=50&txttrack=0" className="circle responsive-img" />
 			}
