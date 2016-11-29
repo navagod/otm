@@ -851,6 +851,42 @@ socket.on('comment:add',function(data,rs){
 
 //comments====///
 
+
+//Attachment====///
+socket.on('attachment:add',function(data,rs){
+	var Files = {};
+	var dir_file = "dist/uploads/attachment/";
+	var file_name = guid() + "." + data.file_ext;
+	var full_path_name = dir_file + file_name;
+	if (!fs.existsSync(dir_file)) {
+        fs.mkdir(dir_file, 0777, function(e) {})
+    }
+	fs.writeFile(full_path_name, data.file, 'binary', function(err) {
+        if (err){
+        	console.log('Save Avatar Error : ',err);
+        	rs("");
+        }else{
+			db.cypher({
+				query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' CREATE (a:Attachment {date:"'+data.at_create+'",file_name:"'+file_name+'",type:"user"}) CREATE (u)-[:Attachment]->(a)-[:IN]->(t) RETURN a',
+			},function(err,result){
+				if (err){ console.log(err);
+					rs(false)
+				}else{
+					db.cypher({
+						query:'MATCH (u:Users)-[:Attachment]->(a:Attachment)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN u.Name,u.Avatar,a.file_name,a.date,a.type ORDER BY ID(a) DESC',
+					},function(err,rs_comment){
+						if (err){ console.log(err);
+							rs(false)
+						}else{
+							rs(rs_attachment)
+						}
+					})
+				}
+			})
+        }
+    });
+});
+//Attachment====///
 	//users============//
 	socket.on('user:register',function(data,rs){
 		db.cypher({
@@ -914,7 +950,9 @@ socket.on('comment:add',function(data,rs){
 		var dir_file = "dist/uploads/";
 		var file_name = guid() + ".jpg";
 		var full_path_name = dir_file + file_name;
-
+		if (!fs.existsSync(dir_file)) {
+	        fs.mkdir(dir_file, 0777, function(e) {})
+	    }
 	    fs.writeFile(full_path_name, data.file, 'binary', function(err) {
 	        if (err){
 	        	console.log('Save Avatar Error : ',err);

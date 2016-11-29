@@ -5,6 +5,7 @@ import Tasks from './Module/Task'
 import Todo from './Todo'
 import Tags from './Tags'
 var Datetime = require('react-datetime');
+var Dropzone = require('react-dynamic-dropzone');
 class PopupPage extends Component {
 	constructor(props) {
 		super(props)
@@ -15,6 +16,7 @@ class PopupPage extends Component {
 			taskData:[],
 			socket:this.props.socket,
 			comments:[],
+			attachments:[],
 			showTodo:false,
 			selectUser:false,
 			listUsers:[],
@@ -25,6 +27,8 @@ class PopupPage extends Component {
 			showTag:false
 		}
 		this._hideDropdown = this._hideDropdown.bind(this);
+		this.onDrop = this.onDrop.bind(this);
+		this.onOpenClick = this.onOpenClick.bind(this);
 	}
 
 	componentDidMount(){
@@ -249,6 +253,45 @@ class PopupPage extends Component {
 			return "tag-item "
 		}
 	}
+	onChangeName(e){
+		this.setState({U_name:e.target.value});
+	}
+	onDragEnter(e) {
+	    this.setState({ isReceiverOpen: true });
+	}
+	onDragOver(e) {
+	    // your codes here
+	}
+	onDragLeave(e) {
+	    this.setState({ isReceiverOpen: false });
+	}
+	onOpenClick(e){
+      this.refs.dropzone.open();
+    }
+	onDrop(acceptedFiles) {
+		const uid = localStorage.uid
+		var _this = this;
+		var files = acceptedFiles;
+		 files.forEach((file)=> {
+			var reader = new window.FileReader();
+			var socket_send = this.props.socket;
+			reader.fileName = file.name;
+			reader.readAsBinaryString(file);
+			reader.onload = function(event) {
+		        var binary_file = event.target.result;
+				var extension = event.target.fileName.split('.').pop().toLowerCase();
+		        Tasks.addAttachment(socket_send,binary_file,extension,_this.state.taskId,(list_attachment)=>{
+		        	console.log(1111)
+					if (file_name == ""){
+						return Materialize.toast("เกิดข้อผิดพลาด", 4000)
+					}else{
+						this.state.attachments(list_attachment);
+						return Materialize.toast("อัพโหลดรูปโปรไฟล์เรียบร้อยแล้ว", 4000)
+					}
+				})
+			}
+        });
+    }
 	render() {
 		return (
 			<div>
@@ -286,7 +329,17 @@ class PopupPage extends Component {
 
 		</div>
 		<div id="fileList">
-		<div className="addSubject"><i className="material-icons">note_add</i> Attachment</div>
+		<div className="addSubject" onClick={this.onOpenClick}><i className="material-icons">note_add</i> Attachment</div>
+		<Dropzone ref="dropzone" onDrop={this.onDrop} socket={this.socket}>
+            <div>Try dropping some files here, or click to select files to upload.</div>
+        </Dropzone>
+        <div id="attachment-detail">
+	        { this.state.attachments.map((at_item,ic)=>
+				<div className="attachemnt-item" key={"attachemnt-"+this.state.taskId+"-"+ic}>
+					<img src={"uploads/attachment/"+c_item["u.file_name"]} />
+				</div>
+			)}
+		</div>
 		</div>
 		<div id="activity">
 		<h5>Activity</h5>

@@ -59,11 +59,11 @@ class Profile extends Component {
 		var _this = this;
 		var reader = new window.FileReader();
 		var first_file = acceptedFiles[0];
-		 reader.readAsBinaryString(first_file);
-		 var socket_send = this.props.socket;
-		 reader.onload = function(event) {
-	        var base64data = event.target.result;
-			auth.saveAvatar(socket_send,uid, base64data, (file_name) => {
+		var socket_send = this.props.socket;
+		reader.readAsBinaryString(first_file);
+		reader.onload = function(event) {
+	        var binary_file = event.target.result;
+			auth.saveAvatar(socket_send,uid, binary_file, (file_name) => {
 				if (file_name == ""){
 					return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 				}else{

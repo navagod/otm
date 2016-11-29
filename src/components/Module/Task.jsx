@@ -231,4 +231,21 @@ module.exports = {
 			}
 		});
 	},
+	addAttachment(socket,file,file_ext,tid, cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('attachment:add', {
+			uid:localStorage.uid,
+			tid:tid,
+			file:file,
+			file_ext:file_ext,
+			at_create:new Date().getTime()
+		}, (result) => {
+			console.log("result",result)
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
 }
