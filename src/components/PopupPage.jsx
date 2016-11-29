@@ -59,7 +59,7 @@ class PopupPage extends Component {
 				})
 				Tasks.currentTag(this.state.socket,this.state.taskId,(rs)=>{
 					if(!rs){
-						
+
 					}else{
 						var {currentTags} = this.state
 						currentTags = rs
@@ -68,7 +68,7 @@ class PopupPage extends Component {
 				})
 				Tasks.allTag(this.state.socket,this.state.projectId,(rs)=>{
 					if(!rs){
-						
+
 					}else{
 						var {allTags} = this.state
 						allTags = rs
@@ -121,7 +121,7 @@ class PopupPage extends Component {
 	updateTask(event){
 		var v = this.state.taskData["t.title"]
 		if(v===""){
-			this.refs.taskTitle.focus(); 
+			this.refs.taskTitle.focus();
 			return Materialize.toast("กรุณาใส่ข้อหัว", 4000)
 		}else{
 			Tasks.save(this.state.socket,this.state.taskData,this.state.taskId,(rs)=>{
@@ -135,7 +135,7 @@ class PopupPage extends Component {
 		event.preventDefault()
 		var c = this.refs.commentInput.value
 		if(c===""){
-			this.refs.commentInput.focus(); 
+			this.refs.commentInput.focus();
 			return Materialize.toast("กรุณาใส่ข้อความ", 4000)
 		}else{
 			Tasks.addComment(this.state.socket,c,this.state.taskId,(rs)=>{
@@ -257,14 +257,14 @@ class PopupPage extends Component {
 			<div id="menuPopup">
 			{this.state.taskData["t.status"]=='active'?
 			<div style={{width: '450px'}}>
-			<button type="button" className="btn green"  onClick={this.statusTask.bind(this,'complete')}>Complete</button> 
-			<button type="button" className="btn blue"  onClick={this.statusTask.bind(this,'archive')}>Archive</button> 
-			<button type="button" className="btn red"  onClick={this.statusTask.bind(this,'trash')}>Trash</button> 
+			<button type="button" className="btn green"  onClick={this.statusTask.bind(this,'complete')}>Complete</button>
+			<button type="button" className="btn blue"  onClick={this.statusTask.bind(this,'archive')}>Archive</button>
+			<button type="button" className="btn red"  onClick={this.statusTask.bind(this,'trash')}>Trash</button>
 			</div>
 			:
 			<div>
 			<button type="button" className="btn orange"  onClick={this.statusTask.bind(this,'active')}>Make Active</button>
-			<button type="button" className="btn blue"  onClick={this.statusTask.bind(this,'archive')}>Archive</button> 
+			<button type="button" className="btn blue"  onClick={this.statusTask.bind(this,'archive')}>Archive</button>
 			</div>
 		}
 
@@ -303,8 +303,8 @@ class PopupPage extends Component {
 			<div className="activity-avatar">
 
 			{c_item["u.Avatar"]
-			? <img  src={"/"+c_item["u.Avatar"]} className="circle responsive-img" width="40" height="40" />
-			: <img src={"https://placeholdit.imgix.net/~text?txtsize=15&txt="+c_item["u.Name"].charAt(0).toUpperCase()+"&w=40&h=40&txttrack=0"} className="circle  responsive-img" />
+			? <img  src={"uploads/"+c_item["u.Avatar"]} className="circle img-50 responsive-img" width="40" height="40" />
+			: <img src={"https://placeholdit.imgix.net/~text?txtsize=15&txt="+c_item["u.Name"].charAt(0).toUpperCase()+"&w=40&h=40&txttrack=0"} className="circle img-50  responsive-img" />
 		}
 
 		</div>
@@ -314,7 +314,7 @@ class PopupPage extends Component {
 		</div>
 		</div>
 		)}
-		</div>	
+		</div>
 		<div>
 
 		</div>
@@ -330,9 +330,9 @@ class PopupPage extends Component {
 			<span>Assigned to </span>
 			{
 				this.state.taskData['ua.Name'] && this.state.taskData['ua.Avatar'] ?
-				<img src={"/"+this.state.taskData['ua.Avatar']} width="50" height="50" className="circle responsive-img" />
+				<img src={"uploads/"+this.state.taskData['ua.Avatar']}  className="circle img-50 responsive-img" />
 				:
-				<img src="https://placeholdit.imgix.net/~text?txtsize=20&txt=%3F&w=50&h=50&txttrack=0" className="circle responsive-img" />
+				<img src="https://placeholdit.imgix.net/~text?txtsize=20&txt=%3F&w=50&h=50&txttrack=0" className="circle img-50responsive-img" />
 			}
 			<div>{this.state.taskData['ua.Name']}</div>
 			</div>
@@ -351,7 +351,7 @@ class PopupPage extends Component {
 		<strong>Due Date : </strong>
 		<Datetime isValidDate={this.validDateEnd.bind(this)} onChange={this.selectEndDate.bind(this)} value={moment.unix(Math.round(parseInt(this.state.taskData['t.endDate']) / 1000))} />
 		</div>
-		<div className="rightBarItem" id="tags"   
+		<div className="rightBarItem" id="tags"
 		onMouseOver={this._handleFocus.bind(this)}
 		onMouseLeave={this._handleBlur.bind(this)}
 		onClick={this._toggleDropdown.bind(this)}>
