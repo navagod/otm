@@ -271,7 +271,7 @@ class Project extends Component {
 						{this.state.projectTitle}
 					</div>
 					<div className='taskCount'>
-						<abbr title='Active'><i className="material-icons inline">play_arrow</i>{this.state.activeTask}</abbr>
+						<abbr title='Active'><i className="material-icons inline">play_for_work</i>{this.state.activeTask}</abbr>
 						<abbr title='Complete'><i className="material-icons inline">check_circle</i>{this.state.completeTask}</abbr>
 						<abbr title='Archive'><i className="material-icons inline">archive</i>{this.state.archiveTask}</abbr>
 						<abbr title='Trash'><i className="material-icons inline">delete</i>{this.state.trashTask}</abbr>
