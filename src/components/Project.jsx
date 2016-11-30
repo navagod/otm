@@ -46,7 +46,7 @@ class Project extends Component {
 		$( "#card-sort" ).sortable({update: this.handleSortCardUpdate.bind(this)
 		}).disableSelection();
 		this.projectsListCard.bind(this)()
-		this.projectsListStatus.bind(this)();
+		this.taskCount.bind(this)();
 		this.props.socket.on('card:updateSort', this._updateSortCardList.bind(this));
 		this.props.socket.on('card:updateAddList', this._updateAddCardList.bind(this));
 		this.props.socket.on('card:updateEditCard', this._updateEditCard.bind(this));
@@ -99,7 +99,7 @@ class Project extends Component {
 			})
 		}
 	}
-	projectsListStatus() {
+	taskCount() {
 		projects.getCount(this.props.socket,this.state.projectId, (rs)=>{
 			this.setState({activeTask:rs.active});
 			this.setState({archiveTask:rs.archive});
@@ -286,7 +286,7 @@ class Project extends Component {
 						<div className="card-title">{card_item.title}</div>
 						<div className="card-menu" onClick={this.editCard.bind(this,card_item.id)}><i className="material-icons tiny">mode_edit</i></div>
 					</div>
-					<div className="card-body"><Task projectId={this.state.projectId} socket={this.props.socket} cardId={card_item.id} /></div>
+					<div className="card-body"><Task projectId={this.state.projectId} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} cardId={card_item.id} /></div>
 				</div>
 				)}
 			</div>
@@ -358,7 +358,7 @@ class Project extends Component {
 					</div>
 					:null
 				}
-				<MatchWhenAuthorized pattern="/task/:taskId" onRender={this.RerenderProject.bind(this)} socket={this.props.socket} component={PopupPage} />
+				<MatchWhenAuthorized pattern="/task/:taskId" onRender={this.RerenderProject.bind(this)} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} component={PopupPage} />
 				</div>
 				</Router>
 				);
