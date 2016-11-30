@@ -35,9 +35,10 @@ class Project extends Component {
 			cardEditIcon:"",
 			cardEditId:"",
 			cardEditPosition:0,
-			activeTask:1,
-			archiveTask:1,
-			trashTask:1,
+			activeTask:0,
+			archiveTask:0,
+			trashTask:0,
+			completeTask:0,
 
 		}
 	}
@@ -101,9 +102,10 @@ class Project extends Component {
 	}
 	taskCount() {
 		projects.getCount(this.props.socket,this.state.projectId, (rs)=>{
-			this.setState({activeTask:rs.active});
-			this.setState({archiveTask:rs.archive});
-			this.setState({trashTask:rs.trash});
+			this.setState({activeTask:(rs.active > 0 ? rs.active : 0)});
+			this.setState({archiveTask:(rs.archive > 0 ? rs.archive : 0)});
+			this.setState({trashTask:(rs.trash > 0 ? rs.trash : 0)});
+			this.setState({completeTask:(rs.complete > 0 ? rs.complete : 0)});
 		});
 
 	}
@@ -270,6 +272,7 @@ class Project extends Component {
 					</div>
 					<div className='taskCount'>
 						<abbr title='Active'><i className="material-icons inline">play_arrow</i>{this.state.activeTask}</abbr>
+						<abbr title='Complete'><i className="material-icons inline">check_circle</i>{this.state.completeTask}</abbr>
 						<abbr title='Archive'><i className="material-icons inline">archive</i>{this.state.archiveTask}</abbr>
 						<abbr title='Trash'><i className="material-icons inline">delete</i>{this.state.trashTask}</abbr>
 					</div>
