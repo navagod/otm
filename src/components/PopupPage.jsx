@@ -206,6 +206,7 @@ class PopupPage extends Component {
 				this.context.router.transitionTo('/project/'+this.state.projectId)
 			}
 		})
+		this.props.updateTaskCount();
 	}
 	clickTag(id,color,text){
 		var index = _.findIndex(this.state.currentTags,{'ID(l)':id})
