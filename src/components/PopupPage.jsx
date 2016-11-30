@@ -4,6 +4,7 @@ import {Dropdown,NavItem} from 'react-materialize'
 import Tasks from './Module/Task'
 import Todo from './Todo'
 import Tags from './Tags'
+import Loading from './Loading';
 var Datetime = require('react-datetime');
 var Dropzone = require('react-dynamic-dropzone');
 class PopupPage extends Component {
@@ -280,12 +281,12 @@ class PopupPage extends Component {
       this.refs.dropzone.open();
     }
 	onDrop(acceptedFiles) {
+		this.setState({loading:true});
 		const uid = localStorage.uid
 		var _this = this;
 		var files = acceptedFiles;
 		var file_count = files.length;
 		var file_list_count = 0;
-		_this.setState({loading:true});
 		 files.forEach((file)=> {
 			var reader = new window.FileReader();
 			var socket_send = this.props.socket;
@@ -480,21 +481,7 @@ class PopupPage extends Component {
 		</div>
 		<div id="popup" className="fade-animation">
 		</div>
-		<div className={this.state.loading? "loading-panel active": "loading-panel" } >
-			<div className="loading-panel-wrapper">
-				<div className="preloader-wrapper big active">
-				    <div className="spinner-layer spinner-blue-only">
-				      <div className="circle-clipper left">
-				        <div className="circle"></div>
-				      </div><div className="gap-patch">
-				        <div className="circle"></div>
-				      </div><div className="circle-clipper right">
-				        <div className="circle"></div>
-				      </div>
-				    </div>
-				</div>
-			</div>
-		</div>
+		{this.state.loading?<Loading loading={this.state.loading}/>:null}
 		{this.state.showTag?<Tags projectId={this.state.projectId} socket={this.props.socket} closeTags={this.closeTags.bind(this)} />:null}
 		</div>
 		);
