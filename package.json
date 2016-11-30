@@ -8,6 +8,7 @@
     "start": "node server.js",
     "lint": "eslint --ext .js,.jsx src",
     "lintfix": "eslint --ext .js,.jsx src --fix",
+    "preinstall": "cp .env.sample .env",
     "postinstall": "webpack -p --config webpack.prod.config.js"
   },
   "author": "",
