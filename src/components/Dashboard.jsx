@@ -261,8 +261,8 @@ class Dashboard extends Component {
 					{u.user_name
 						? <div>
 						{u.user_avatar
-							? <img  src={"/uploads/"+u.user_avatar} className="circle responsive-img img-50 tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
-							: <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.user_name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img img-50 tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
+							? <img  src={"/uploads/"+u.user_avatar} className="avatar responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
+							: <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.user_name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="avatar  responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
 						}
 						</div>
 						:null}
@@ -338,9 +338,9 @@ class Dashboard extends Component {
 				{u.name&&
 					<div>
 					{u.avatar?
-						<img  src={"/uploads/"+u.avatar} className="circle responsive-img img-50 tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
+						<img  src={"/uploads/"+u.avatar} className="avatar circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
 						:
-						<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img img-50 tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
+						<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
 					}
 					</div>
 				}
@@ -372,9 +372,9 @@ class Dashboard extends Component {
 
 				<div key={i} className={this.activeListUser(user.id)} onClick={this.selectUserActive.bind(this,user.id)}>
 				{user.avatar?
-					<img src={"/uploads/"+user.avatar} className="circle responsive-img img-50" data-position="top" data-delay="50" data-tooltip={user.name} />
+					<img src={"/uploads/"+user.avatar} className="avatar circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
 					:
-					<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+user.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img img-50" data-position="top" data-delay="50" data-tooltip={user.name} />
+					<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+user.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
 				}
 				</div>
 				)}

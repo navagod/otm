@@ -1,8 +1,3 @@
-.img-responsive{
-	display: block;
-	max-width: 100%;
-	width: auto;
-}
 .text-center{
 	text-align: center;
 }
@@ -60,6 +55,30 @@
 #project-title{
 	color:#fff;
 	padding-left: 10px;
+	.project_name {
+		color:#fff;
+		display:inline-block;
+		float:left;
+		line-height: 64px;
+		font-size: 32px;
+	}
+	.taskCount {
+		margin-right:10px;
+		color:#fff;
+		display:inline-block;
+		float:right;
+		line-height: 64px;
+		font-size: 18px;
+		abbr {
+			border-bottom: 0px;
+			.inline {
+				display: inline-block;
+				vertical-align: middle;
+				margin-left: 20px;
+				margin-bottom:3px;
+			}
+		}
+	}
 }
 .card-item{
 	float: left;
@@ -950,6 +969,9 @@ hr{
  		background: #ccc;
  		border:2px #aaa dashed;
  	}
+ 	img{
+ 		max-width: 170px;
+ 	}
  }
  .manage-tags-btn{
  	cursor: pointer;
@@ -1302,5 +1324,20 @@ hr{
 	&.active{
 		top: 0;
 		left: 0;
+	}
+}
+img.avatar{
+	width: 50px;
+	height: 50px;
+}
+img.avatar-mini{
+	width: 40px;
+	height: 40px;
+}
+
+nav {
+	.brand-logo {
+		margin-top:10px;
+		margin-left:10px;
 	}
 }

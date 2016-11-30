@@ -1,3 +1,4 @@
+var tempTaskCount = new Array();
 module.exports = function (socket) {
 	var request = require("request");
 	var neo4j = require('neo4j');
@@ -45,14 +46,14 @@ module.exports = function (socket) {
 		return time;
 	}
 
-function guid() {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-  }
-  return s4() + s4() + s4();
-}
+	function guid() {
+		function s4() {
+			return Math.floor((1 + Math.random()) * 0x10000)
+			.toString(16)
+			.substring(1);
+		}
+		return s4() + s4() + s4();
+	}
 
 //project============//
 socket.on('project:listArr',function(data,rs){
@@ -86,7 +87,6 @@ socket.on('project:listArr',function(data,rs){
 	});
 });
 socket.on('project:list',function(data,rs){
-
 	db.cypher({
 		query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name,u.Avatar',
 	},function(err,results){
@@ -106,6 +106,18 @@ socket.on('project:list',function(data,rs){
 			rs(boardList);
 		}
 	});
+});
+socket.on('project:getTaskCount',function(data,rs){
+	var data1 = db.cypher({
+		query:"MATCH (t:Tasks)-->(p:Projects) WHERE id(p) = "+data.pid+" RETURN t.status as status,count(t) as count",
+	},function (err,res) {
+		var return_data = {};
+		for (var i in res) {
+			return_data[res[i].status] = res[i].count;
+		}
+		rs(return_data);
+	});
+	//rs({active:1,archive:2,trash:3});
 });
 socket.on('project:get',function(data,rs){
 	db.cypher({
@@ -337,47 +349,110 @@ socket.on('card:save', function (data,fn) {
 //Task===============//
 socket.on('task:add',function(data,rs){
 	db.cypher({
-		query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' MATCH (c:Cards) WHERE ID(c) = '+data.cid+' MATCH (uz:Users) WHERE ID(uz)=0 CREATE (t:Tasks {title:"'+data.title+'",endDate:"'+(new Date().getTime() + 86400000)+'",startDate:"'+new Date().getTime()+'",detail:"",position:'+data.sortNum+',status:"active"}) CREATE (u)-[:CREATE_BY {date:"'+data.at_create+'"}]->(t)-[:LIVE_IN]->(c) CREATE (t)-[:LIVE_IN]->(p) CREATE (cm:Comments {text:"Create task by "+u.Name,date:"'+data.at_create+'",type:"log"}) CREATE (u)-[:Comment]->(cm)-[:IN]->(t) CREATE (uz)-[:Assigned]->(t) RETURN ID(t)',
+		query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' MATCH (c:Cards) WHERE ID(c) = '+data.cid+' MATCH (uz:Users) WHERE ID(uz)=0 CREATE (t:Tasks {title:"'+data.title+'",endDate:"'+(new Date().getTime() + 86400000)+'",startDate:"'+new Date().getTime()+'",detail:"",status:"active"}) CREATE (u)-[:CREATE_BY {date:"'+data.at_create+'"}]->(t)-[:LIVE_IN]->(c) CREATE (t)-[:LIVE_IN {date:"'+data.at_create+'"}]->(p) CREATE (cm:Comments {text:"Create task by "+u.Name,date:"'+data.at_create+'",type:"log"}) CREATE (u)-[:Comment {date:"'+data.at_create+'"}]->(cm)-[:IN {date:"'+data.at_create+'"}]->(t) CREATE (uz)-[:Assigned {date:"'+data.at_create+'"}]->(t) RETURN ID(t)',
 	},function(err,results){
 		if (err) {
 			console.log(err);
 		}else{
-			socket.broadcast.emit('task:updateAddTaskList', {
-				pid:data.pid,
-				lists:{
-					id:results[0]['ID(t)'],
-					title:data.title,
-					detail:"",
-					position:data.sortNum,
-					duedate:"",
+			if(data.parent){
+				db.cypher({
+					query:'MATCH (pt:Tasks) WHERE ID(pt) = '+data.parent+' MATCH (t:Tasks) WHERE ID(t) = '+results[0]['ID(t)']+' OPTIONAL MATCH (pt)<-[p]-(:Tasks) DELETE p CREATE (t)-[:Parent]->(pt) RETURN t'
+				},function(err,rs_relate){
+					if (err) {
+						console.log(err);
+					}else{
+						socket.broadcast.emit('task:updateAddTaskList', {
+							pid:data.pid,
+							lists:{
+								id:results[0]['ID(t)'],
+								title:data.title,
+								detail:"",
+								parent:data.parent,
+								duedate:(new Date().getTime() + 86400000),
+								pid:data.pid,
+								cid:data.cid,
+								total_comment:0,
+								total_task:"0/0",
+								user_avatar:"",
+								user_name:"",
+								status:"active",
+								tags:[{
+									'title':null,
+									'color':null
+								}],
+								tags_color:""
+							}
+						});
+						rs({
+							pid:data.pid,
+							lists:{
+								id:results[0]['ID(t)'],
+								title:data.title,
+								detail:"",
+								parent:data.parent,
+								duedate:(new Date().getTime() + 86400000),
+								pid:data.pid,
+								cid:data.cid,
+								total_comment:0,
+								total_task:"0/0",
+								user_avatar:"",
+								status:"active",
+								user_name:"",
+								tags:[{
+									'title':null,
+									'color':null
+								}],
+								tags_color:""
+							}
+						});
+					}
+				})
+			}else{
+				socket.broadcast.emit('task:updateAddTaskList', {
 					pid:data.pid,
-					cid:data.cid,
-					total_comment:0,
-					total_task:"0/0",
-					user_avatar:"",
-					user_name:"",
-					tags:"",
-					tags_color:""
-				}
-			});
-			rs({
-				pid:data.pid,
-				lists:{
-					id:results[0]['ID(t)'],
-					title:data.title,
-					detail:"",
-					position:data.sortNum,
-					duedate:"",
+					lists:{
+						id:results[0]['ID(t)'],
+						title:data.title,
+						detail:"",
+						parent:data.parent,
+						duedate:(new Date().getTime() + 86400000),
+						pid:data.pid,
+						cid:data.cid,
+						total_comment:0,
+						total_task:"0/0",
+						user_avatar:"",
+						status:"active",
+						user_name:"",
+						tags:[{
+							'title':null,
+							'color':null
+						}],
+						tags_color:""
+					}
+				});
+				rs({
 					pid:data.pid,
-					cid:data.cid,
-					total_comment:0,
-					total_task:"0/0",
-					user_avatar:"",
-					user_name:"",
-					tags:"",
-					tags_color:""
-				}
-			});
+					lists:{
+						id:results[0]['ID(t)'],
+						title:data.title,
+						detail:"",
+						parent:data.parent,
+						duedate:(new Date().getTime() + 86400000),
+						pid:data.pid,
+						cid:data.cid,
+						total_comment:0,
+						total_task:"0/0",
+						user_avatar:"",
+						status:"active",
+						user_name:"",
+						tags:[{
+							'title':null,
+							'color':null
+						}],
+						tags_color:""
+					}
+				});
+			}
 		}
 	});
 });
