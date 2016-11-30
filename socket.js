@@ -1,3 +1,4 @@
+var tempTaskCount = new Array();
 module.exports = function (socket) {
 	var request = require("request");
 	var neo4j = require('neo4j');
@@ -86,7 +87,6 @@ socket.on('project:listArr',function(data,rs){
 	});
 });
 socket.on('project:list',function(data,rs){
-
 	db.cypher({
 		query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name,u.Avatar',
 	},function(err,results){
@@ -106,6 +106,18 @@ socket.on('project:list',function(data,rs){
 			rs(boardList);
 		}
 	});
+});
+socket.on('project:getTaskCount',function(data,rs){
+	var data1 = db.cypher({
+		query:"MATCH (t:Tasks)-->(p:Projects) WHERE id(p) = "+data.pid+" RETURN t.status as status,count(t) as count",
+	},function (err,res) {
+		var return_data = {};
+		for (var i in res) {
+			return_data[res[i].status] = res[i].count;
+		}
+		rs(return_data);
+	});
+	//rs({active:1,archive:2,trash:3});
 });
 socket.on('project:get',function(data,rs){
 	db.cypher({
