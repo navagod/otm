@@ -24,11 +24,13 @@ class PopupPage extends Component {
 			dropdownIsVisible: false,
 			currentTags:[],
 			allTags:[],
-			showTag:false
+			showTag:false,
+			loading:true
 		}
 		this._hideDropdown = this._hideDropdown.bind(this);
 		this.onDrop = this.onDrop.bind(this);
 		this.onOpenClick = this.onOpenClick.bind(this);
+		this.onAttachmentRemoveClick = this.onAttachmentRemoveClick.bind(this);
 	}
 
 	componentDidMount(){
@@ -79,6 +81,14 @@ class PopupPage extends Component {
 						this.setState({allTags})
 					}
 				})
+				Tasks.listAttachment(this.state.socket,this.state.projectId,this.state.taskId,(list_attachment)=>{
+					if(!list_attachment){
+
+					}else{
+						this.setState({attachments:list_attachment})
+					}
+				})
+				this.setState({loading:false});
 			}
 		})
 		window.addEventListener('click', this._hideDropdown, false);
@@ -272,6 +282,9 @@ class PopupPage extends Component {
 		const uid = localStorage.uid
 		var _this = this;
 		var files = acceptedFiles;
+		var file_count = files.length;
+		var file_list_count = 0;
+		_this.setState({loading:true});
 		 files.forEach((file)=> {
 			var reader = new window.FileReader();
 			var socket_send = this.props.socket;
@@ -279,19 +292,40 @@ class PopupPage extends Component {
 			reader.readAsBinaryString(file);
 			reader.onload = function(event) {
 		        var binary_file = event.target.result;
-				var extension = event.target.fileName.split('.').pop().toLowerCase();
+		        var file_name = event.target.fileName;
+				var extension = file_name.split('.').pop().toLowerCase();
+
 		        Tasks.addAttachment(socket_send,binary_file,extension,_this.state.taskId,(list_attachment)=>{
-		        	console.log(1111)
-					if (file_name == ""){
+					file_list_count++;
+					if (!list_attachment){
 						return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 					}else{
-						this.state.attachments(list_attachment);
-						return Materialize.toast("อัพโหลดรูปโปรไฟล์เรียบร้อยแล้ว", 4000)
+						_this.setState({attachments:list_attachment})
+						if(file_count == file_list_count){
+							_this.setState({loading:false});
+						}
+						return Materialize.toast("อัพโหลดไฟล์เรียบร้อยแล้ว", 4000)
 					}
 				})
 			}
         });
     }
+
+    onAttachmentRemoveClick(attachment_id,file_name){
+    	if (confirm('Do you want to delete?')) {
+    		this.setState({loading:true});
+			Tasks.removeAttachment(this.props.socket,attachment_id,this.state.taskId,file_name,(list_attachment)=>{
+				if (!list_attachment){
+					return Materialize.toast("เกิดข้อผิดพลาด", 4000)
+				}else{
+					this.setState({attachments:list_attachment})
+					this.setState({loading:false});
+					return Materialize.toast("ลบไฟล์เรียบร้อยแล้ว", 4000)
+				}
+			})
+		}
+    }
+
 	render() {
 		return (
 			<div>
@@ -334,11 +368,20 @@ class PopupPage extends Component {
             <div>Try dropping some files here, or click to select files to upload.</div>
         </Dropzone>
         <div id="attachment-detail">
-	        { this.state.attachments.map((at_item,ic)=>
-				<div className="attachemnt-item" key={"attachemnt-"+this.state.taskId+"-"+ic}>
-					<img src={"uploads/attachment/"+c_item["u.file_name"]} />
+	        { this.state.attachments.map((at_item,i)=>
+
+				<div id={"att-" + at_item.id} className="attachemnt-item" key={"attachemnt-"+this.state.taskId+"-"+i}>
+					<a href={"/uploads/attachment/"+at_item["a.file_name"]} target="_blank">
+						{ at_item["a.file_type"] == "png" || at_item["a.file_type"] == "jpg" || at_item["a.file_type"] == "jpeg" || at_item["a.file_type"] == "gif"?
+						<div className="img-picture img-100" style={{backgroundImage: 'url(/uploads/attachment/' + at_item["a.file_name"] + ')'}}></div>
+						: <div className={"img-file img-100 img-"+at_item["a.file_type"]}></div>
+						}
+					</a>
+					<div className="attachment-rm circle" onClick={this.onAttachmentRemoveClick.bind(this,at_item.id,at_item["a.file_name"])} data-id={at_item.id}>x</div>
 				</div>
+				// {i == 0 ? <div className="card-action"></div> : <div></div>}
 			)}
+			<div className="card-action"></div>
 		</div>
 		</div>
 		<div id="activity">
@@ -435,6 +478,21 @@ class PopupPage extends Component {
 		</div>
 		</div>
 		<div id="popup" className="fade-animation">
+		</div>
+		<div className={this.state.loading? "loading-panel active": "loading-panel" } >
+			<div className="loading-panel-wrapper">
+				<div className="preloader-wrapper big active">
+				    <div className="spinner-layer spinner-blue-only">
+				      <div className="circle-clipper left">
+				        <div className="circle"></div>
+				      </div><div className="gap-patch">
+				        <div className="circle"></div>
+				      </div><div className="circle-clipper right">
+				        <div className="circle"></div>
+				      </div>
+				    </div>
+				</div>
+			</div>
 		</div>
 		{this.state.showTag?<Tags projectId={this.state.projectId} socket={this.props.socket} closeTags={this.closeTags.bind(this)} />:null}
 		</div>

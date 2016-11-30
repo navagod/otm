@@ -853,6 +853,18 @@ socket.on('comment:add',function(data,rs){
 
 
 //Attachment====///
+socket.on('attachment:list',function(data,rs){
+	db.cypher({
+		query:'MATCH (u:Users)-[:Attachment]->(a:Attachment)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN u.Name,u.Avatar,a.file_name,ID(a) as id,a.date,a.file_type ORDER BY ID(a) DESC',
+	},function(err,rs_attachment){
+		if (err){ console.log(err);
+			rs(false)
+		}else{
+			rs(rs_attachment)
+		}
+	})
+});
+
 socket.on('attachment:add',function(data,rs){
 	var Files = {};
 	var dir_file = "dist/uploads/attachment/";
@@ -867,14 +879,46 @@ socket.on('attachment:add',function(data,rs){
         	rs("");
         }else{
 			db.cypher({
-				query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' CREATE (a:Attachment {date:"'+data.at_create+'",file_name:"'+file_name+'",type:"user"}) CREATE (u)-[:Attachment]->(a)-[:IN]->(t) RETURN a',
+				query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' CREATE (a:Attachment {date:"'+data.at_create+'",file_name:"'+file_name+'",file_type:"' + data.file_ext + '"}) CREATE (u)-[:Attachment]->(a)-[:IN]->(t) RETURN a',
 			},function(err,result){
 				if (err){ console.log(err);
 					rs(false)
 				}else{
 					db.cypher({
-						query:'MATCH (u:Users)-[:Attachment]->(a:Attachment)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN u.Name,u.Avatar,a.file_name,a.date,a.type ORDER BY ID(a) DESC',
-					},function(err,rs_comment){
+						query:'MATCH (u:Users)-[:Attachment]->(a:Attachment)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN u.Name,u.Avatar,a.file_name,ID(a) as id,a.date,a.file_type ORDER BY ID(a) DESC',
+					},function(err,rs_attachment){
+						if (err){ console.log(err);
+							rs(false)
+						}else{
+							rs(rs_attachment)
+						}
+					})
+				}
+			})
+        }
+    });
+});
+
+socket.on('attachment:delete',function(data,rs){
+	var Files = {};
+	var dir_file = "dist/uploads/attachment/";
+	var file_name = data.file_name;
+	var full_path_name = dir_file + file_name;
+	var attachment_id = data.attachment_id;
+	fs.unlink(full_path_name, function(err) {
+        if (err){
+        	console.log('Save Avatar Error : ',err);
+        	rs("");
+        }else{
+			db.cypher({
+				query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (a:Attachment) WHERE ID(a) = '+attachment_id+' DETACH DELETE a',
+			},function(err,result){
+				if (err){ console.log(err);
+					rs(false)
+				}else{
+					db.cypher({
+						query:'MATCH (u:Users)-[:Attachment]->(a:Attachment)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN u.Name,u.Avatar,a.file_name,ID(a) as id,a.date,a.file_type ORDER BY ID(a) DESC',
+					},function(err,rs_attachment){
 						if (err){ console.log(err);
 							rs(false)
 						}else{

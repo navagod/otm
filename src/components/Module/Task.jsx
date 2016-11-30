@@ -240,8 +240,31 @@ module.exports = {
 			file_ext:file_ext,
 			at_create:new Date().getTime()
 		}, (result) => {
-			console.log("result",result)
 			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},removeAttachment(socket,attachment_id,tid,file_name, cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('attachment:delete', {
+			uid:localStorage.uid,
+			tid:tid,
+			file_name:file_name,
+			attachment_id:attachment_id
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	listAttachment(socket,pid,tid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('attachment:list', {tid:tid}, (result) => {
+			if(!result){
 				cb(false)
 			}else{
 				cb(result)
