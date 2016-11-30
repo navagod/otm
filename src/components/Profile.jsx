@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import auth from './Module/Auth';
+import Loading from './Loading';
 import { Receiver } from 'react-file-uploader';
 var Dropzone = require('react-dynamic-dropzone');
 
@@ -11,13 +12,15 @@ class Profile extends Component {
 			error: false,
 			errorMsg:"",
 			U_email:"",
-			U_name:""
+			U_name:"",
+			loading: true
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.onDrop = this.onDrop.bind(this);
 	}
 	componentDidMount(){
 		auth.getProfile(this.props.socket,localStorage.uid,(ds)=>{
+			this.setState({loading:false});
 			if(!ds){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
@@ -49,24 +52,27 @@ class Profile extends Component {
 	    this.setState({ isReceiverOpen: true });
 	}
 	onDragOver(e) {
+		this.setState({loading:false});
 	    // your codes here
 	}
 	onDragLeave(e) {
 	    this.setState({ isReceiverOpen: false });
 	}
 	onDrop(acceptedFiles) {
+		this.setState({loading:true});
 		const uid = localStorage.uid
 		var _this = this;
 		var reader = new window.FileReader();
 		var first_file = acceptedFiles[0];
-		 reader.readAsBinaryString(first_file);
-		 var socket_send = this.props.socket;
-		 reader.onload = function(event) {
-	        var base64data = event.target.result;
-			auth.saveAvatar(socket_send,uid, base64data, (file_name) => {
+		var socket_send = this.props.socket;
+		reader.readAsBinaryString(first_file);
+		reader.onload = function(event) {
+	        var binary_file = event.target.result;
+			auth.saveAvatar(socket_send,uid, binary_file, (file_name) => {
 				if (file_name == ""){
 					return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 				}else{
+					_this.setState({loading:false});
 					_this.setState({U_avatar:file_name, U_avatar_url : "uploads/" + file_name});
 					return Materialize.toast("อัพโหลดรูปโปรไฟล์เรียบร้อยแล้ว", 4000)
 				}
@@ -121,8 +127,9 @@ class Profile extends Component {
 			</div>
 			</form>
 			</div>
-			</div>
 
+			{this.state.loading?<Loading loading={this.state.loading}/>:null}
+			</div>
 			);
 	}
 }
