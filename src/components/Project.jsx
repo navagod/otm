@@ -257,7 +257,6 @@ class Project extends Component {
 		this.setState({projectId:pid})
 		this.projectsListCard.bind(this)()
 		this.taskCount.bind(this)()
-
 	}
 	render() {
 		var card_items = this.state.cardList
