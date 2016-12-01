@@ -25,7 +25,7 @@ class Task extends Component {
 		}
 	}
 	componentDidMount(){
-		tasks.list(this.props.socket,this.state.cardId,(rs)=>{
+		tasks.list(this.props.socket,this.state.cardId,this.state.projectId,(rs)=>{
 			if(!rs){
 
 			}else{
@@ -149,7 +149,6 @@ class Task extends Component {
 				var {listTasks} = this.state;
 				listTasks.push(rs.lists);
 				this.setState({listTasks,openAddTask: false});
-				this.props.updateTaskCount();
 			}
 
 		})
