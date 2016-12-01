@@ -55,7 +55,7 @@ class Project extends Component {
 		cal_list();
 	}
 	componentWillMount() {
-		
+
 	}
 	componentDidUpdate(prevProps, prevState){
 		cal_list();
@@ -254,6 +254,7 @@ class Project extends Component {
 	RerenderProject(pid){
 		this.setState({projectId:pid})
 		this.projectsListCard.bind(this)()
+
 	}
 	render() {
 		var card_items = this.state.cardList
@@ -353,7 +354,7 @@ class Project extends Component {
 					<button type="submit" className="waves-effect waves-green btn-flat">Save</button>
 					<button type="button" className="waves-effect waves-red btn-flat" id="closeEditCard" onClick={this.closeEditCard.bind(this)}>Close</button>
 					<button type="button" className="waves-effect waves-red btn-flat red" onClick={this.deletePanel.bind(this)}>Delete</button>
-					
+
 					</div>
 					</form>
 					</div>
