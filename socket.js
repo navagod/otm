@@ -227,7 +227,43 @@ socket.on('project:removeAssign', function (data,fn) {
 		}
 	});
 });
-//project============//
+
+socket.on('project:mylist',function(data,rs){
+	db.cypher({
+		query: 'MATCH (u:Users)-->(pj:Projects) WHERE id(u) = '+data.id+' AND pj.status = "active" RETURN DISTINCT pj',
+	},function(err,results){
+		if (err) console.log(err);
+		if(results){
+			let projectName = [];
+			results.forEach(function(item,index){
+				projectName.push({
+					id:item['pj']['_id'],
+					title:item['pj']['properties']['title']
+				});
+			});
+			rs(projectName);
+		}
+	});
+});
+
+//person============//
+socket.on('person:list', function (data,rs) {
+	db.cypher({
+		query:'MATCH (n:Person) RETURN n',
+	},function(err,results){
+		if (err) console.log(err);
+		if(results){
+			let personList = [];
+			results.forEach(function(item,index){
+				personList.push({
+					name:item['n']['properties']['name'],
+					from:item['n']['properties']['from']
+				});
+			});
+			rs(personList);
+		}
+	});
+});
 
 
 //card===============//
