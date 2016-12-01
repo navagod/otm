@@ -34,12 +34,7 @@ class Project extends Component {
 			cardEditColor:"",
 			cardEditIcon:"",
 			cardEditId:"",
-			cardEditPosition:0,
-			activeTask:0,
-			archiveTask:0,
-			trashTask:0,
-			completeTask:0,
-
+			cardEditPosition:0
 		}
 	}
 	componentDidMount(){
@@ -47,22 +42,17 @@ class Project extends Component {
 		$( "#card-sort" ).sortable({update: this.handleSortCardUpdate.bind(this)
 		}).disableSelection();
 		this.projectsListCard.bind(this)()
-		this.taskCount.bind(this)();
 		this.props.socket.on('card:updateSort', this._updateSortCardList.bind(this));
 		this.props.socket.on('card:updateAddList', this._updateAddCardList.bind(this));
 		this.props.socket.on('card:updateEditCard', this._updateEditCard.bind(this));
-		this.props.socket.on('project:countStatus', this._countStatus.bind(this));
 		cal_list();
 	}
 	componentWillMount() {
-
+		
 	}
 	componentDidUpdate(prevProps, prevState){
 		cal_list();
 
-	}
-	_countStatus(data){
-		console.log("data",data);
 	}
 	_updateAddCardList(data){
 		if(data.pid == this.state.projectId){
@@ -99,17 +89,6 @@ class Project extends Component {
 				}
 			})
 		}
-	}
-	taskCount() {
-		if(this.state.projectId !==""){
-			projects.getCount(this.props.socket,this.state.projectId, (rs)=>{
-				this.setState({activeTask:(rs.active > 0 ? rs.active : 0)});
-				this.setState({archiveTask:(rs.archive > 0 ? rs.archive : 0)});
-				this.setState({trashTask:(rs.trash > 0 ? rs.trash : 0)});
-				this.setState({completeTask:(rs.complete > 0 ? rs.complete : 0)});
-			});
-		}
-
 	}
 	componentWillReceiveProps(nextProps){
 		console.log(nextProps)
@@ -256,7 +235,6 @@ class Project extends Component {
 	RerenderProject(pid){
 		this.setState({projectId:pid})
 		this.projectsListCard.bind(this)()
-		this.taskCount.bind(this)()
 	}
 	render() {
 		var card_items = this.state.cardList
@@ -269,17 +247,9 @@ class Project extends Component {
 			<div id="project-page">
 			<nav>
 			<div className="nav-wrapper blue">
-				<div className="col s12" id="project-title">
-					<div className='project_name'>
-						{this.state.projectTitle}
-					</div>
-					<div className='taskCount'>
-						<abbr title='Active'><i className="material-icons inline">play_for_work</i>{this.state.activeTask}</abbr>
-						<abbr title='Complete'><i className="material-icons inline">check_circle</i>{this.state.completeTask}</abbr>
-						<abbr title='Archive'><i className="material-icons inline">archive</i>{this.state.archiveTask}</abbr>
-						<abbr title='Trash'><i className="material-icons inline">delete</i>{this.state.trashTask}</abbr>
-					</div>
-				</div>
+			<div className="col s12" id="project-title">
+			{this.state.projectTitle}
+			</div>
 			</div>
 			</nav>
 			<div id="list-cards">
@@ -292,7 +262,7 @@ class Project extends Component {
 						<div className="card-title">{card_item.title}</div>
 						<div className="card-menu" onClick={this.editCard.bind(this,card_item.id)}><i className="material-icons tiny">mode_edit</i></div>
 					</div>
-					<div className="card-body"><Task projectId={this.state.projectId} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} cardId={card_item.id} /></div>
+					<div className="card-body"><Task projectId={this.state.projectId} socket={this.props.socket} cardId={card_item.id} /></div>
 				</div>
 				)}
 			</div>
@@ -356,7 +326,7 @@ class Project extends Component {
 					<button type="submit" className="waves-effect waves-green btn-flat">Save</button>
 					<button type="button" className="waves-effect waves-red btn-flat" id="closeEditCard" onClick={this.closeEditCard.bind(this)}>Close</button>
 					<button type="button" className="waves-effect waves-red btn-flat red" onClick={this.deletePanel.bind(this)}>Delete</button>
-
+					
 					</div>
 					</form>
 					</div>
@@ -364,7 +334,7 @@ class Project extends Component {
 					</div>
 					:null
 				}
-				<MatchWhenAuthorized pattern="/task/:taskId" onRender={this.RerenderProject.bind(this)} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} component={PopupPage} />
+				<MatchWhenAuthorized pattern="/task/:taskId" onRender={this.RerenderProject.bind(this)} socket={this.props.socket} component={PopupPage} />
 				</div>
 				</Router>
 				);

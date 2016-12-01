@@ -165,13 +165,6 @@ module.exports = {
 			});
 		}
 	},
-	getCount(socket,project,cb) {
-		socket.emit('project:getTaskCount', {
-			pid:project
-		}, function (result) {
-			cb(result);
-		})
-	},
 	listTag(socket,pid,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('tag:list', {pid:pid}, (result) => {
