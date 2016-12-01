@@ -1,4 +1,3 @@
-var tempTaskCount = new Array();
 module.exports = function (socket) {
 	var request = require("request");
 	var neo4j = require('neo4j');
@@ -87,6 +86,7 @@ socket.on('project:listArr',function(data,rs){
 	});
 });
 socket.on('project:list',function(data,rs){
+
 	db.cypher({
 		query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name,u.Avatar',
 	},function(err,results){
@@ -106,18 +106,6 @@ socket.on('project:list',function(data,rs){
 			rs(boardList);
 		}
 	});
-});
-socket.on('project:getTaskCount',function(data,rs){
-	var data1 = db.cypher({
-		query:"MATCH (t:Tasks)-->(p:Projects) WHERE id(p) = "+data.pid+" RETURN t.status as status,count(t) as count",
-	},function (err,res) {
-		var return_data = {};
-		for (var i in res) {
-			return_data[res[i].status] = res[i].count;
-		}
-		rs(return_data);
-	});
-	//rs({active:1,archive:2,trash:3});
 });
 socket.on('project:get',function(data,rs){
 	db.cypher({
@@ -349,7 +337,7 @@ socket.on('card:save', function (data,fn) {
 //Task===============//
 socket.on('task:add',function(data,rs){
 	db.cypher({
-		query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' MATCH (c:Cards) WHERE ID(c) = '+data.cid+' MATCH (uz:Users) WHERE ID(uz)=0 CREATE (t:Tasks {title:"'+data.title+'",endDate:"'+(new Date().getTime() + 86400000)+'",startDate:"'+new Date().getTime()+'",detail:"",status:"active"}) CREATE (u)-[:CREATE_BY {date:"'+data.at_create+'"}]->(t)-[:LIVE_IN]->(c) CREATE (t)-[:LIVE_IN {date:"'+data.at_create+'"}]->(p) CREATE (cm:Comments {text:"Create task by "+u.Name,date:"'+data.at_create+'",type:"log"}) CREATE (u)-[:Comment {date:"'+data.at_create+'"}]->(cm)-[:IN {date:"'+data.at_create+'"}]->(t) CREATE (uz)-[:Assigned {date:"'+data.at_create+'"}]->(t) RETURN ID(t)',
+		query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' MATCH (c:Cards) WHERE ID(c) = '+data.cid+' MATCH (uz:Users) WHERE ID(uz)=0 CREATE (t:Tasks {title:"'+data.title+'",endDate:"'+(new Date().getTime() + 86400000)+'",startDate:"'+new Date().getTime()+'",detail:"",status:"active",cid:'+data.cid+'}) CREATE (u)-[:CREATE_BY {date:"'+data.at_create+'"}]->(t) CREATE (t)-[:LIVE_IN {date:"'+data.at_create+'"}]->(p) CREATE (cm:Comments {text:"Create task by "+u.Name,date:"'+data.at_create+'",type:"log"}) CREATE (u)-[:Comment {date:"'+data.at_create+'"}]->(cm)-[:IN {date:"'+data.at_create+'"}]->(t) CREATE (uz)-[:Assigned {date:"'+data.at_create+'"}]->(t) RETURN ID(t)',
 	},function(err,results){
 		if (err) {
 			console.log(err);
@@ -458,7 +446,7 @@ socket.on('task:add',function(data,rs){
 });
 socket.on('task:list',function(data,rs){
 	db.cypher({
-		query:'MATCH (t:Tasks)-[n:LIVE_IN]->(c:Cards)-[n2:LIVE_IN]->(p:Projects)  WHERE ID(c) = '+data.cid+' AND t.status <> "archive" AND t.status <> "trash" OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in1:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (lb:Labels)-[in4:IN]->(t)  OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) WHERE tdc.status="success" RETURN u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.endDate,t.detail,t.status,count(distinct cm) AS total_comment,lb.text as tag_name,lb.color as tag_color,ID(p) AS pid,ID(c) AS cid,count(distinct td) AS total_todo,count(distinct tdc) AS todo_success ORDER BY t.position ASC',
+		query:'MATCH (t:Tasks {cid:'+data.cid+'})-[p:Parent*]-(t2)  WHERE t.status <> "archive" AND t.status <> "trash" OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in1:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (lb:Labels)-[in4:IN]->(t)  OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) WHERE tdc.status="success" RETURN u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.endDate,t.detail,t.status,count(distinct cm) AS total_comment,lb.text as tag_name,lb.color as tag_color,'+data.cid+' AS cid,count(distinct td) AS total_todo,count(distinct tdc) AS todo_success ORDER BY t.position ASC',
 	},function(err,results){
 		if (err) console.log(err);
 		var res = [];
@@ -472,7 +460,7 @@ socket.on('task:list',function(data,rs){
 						"detail": results[k]['t.detail'],
 						"position": results[k]['t.position'],
 						"duedate": results[k]['t.endDate'],
-						"pid": results[k]['pid'],
+						"pid": data.pid,
 						"cid": results[k]['cid'],
 						"total_comment": results[k]['total_comment'],
 						"total_task": results[k]['todo_success']+"/"+results[k]['total_todo'],
@@ -718,7 +706,7 @@ socket.on('task:changeStatus',function(data,rs){
 socket.on('task:changeSort',function(data,rs){
 	if(data.mode==="sorted"){
 		db.cypher({
-			query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks)  RETURN ID(before),ID(after)'
+			query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) DELETE l1,l2  RETURN ID(before),ID(after)'
 		},function(err,rs_relate){
 			if (err) {
 				console.log(err);
@@ -991,86 +979,6 @@ socket.on('comment:add',function(data,rs){
 
 //comments====///
 
-
-//Attachment====///
-socket.on('attachment:list',function(data,rs){
-	db.cypher({
-		query:'MATCH (u:Users)-[:Attachment]->(a:Attachment)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN u.Name,u.Avatar,a.file_name,ID(a) as id,a.date,a.file_type ORDER BY ID(a) DESC',
-	},function(err,rs_attachment){
-		if (err){ console.log(err);
-			rs(false)
-		}else{
-			rs(rs_attachment)
-		}
-	})
-});
-
-socket.on('attachment:add',function(data,rs){
-	var Files = {};
-	var dir_file = "dist/uploads/attachment/";
-	var file_name = guid() + "." + data.file_ext;
-	var full_path_name = dir_file + file_name;
-	if (!fs.existsSync(dir_file)) {
-        fs.mkdir(dir_file, 0777, function(e) {})
-    }
-	fs.writeFile(full_path_name, data.file, 'binary', function(err) {
-        if (err){
-        	console.log('Save Avatar Error : ',err);
-        	rs("");
-        }else{
-			db.cypher({
-				query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' CREATE (a:Attachment {date:"'+data.at_create+'",file_name:"'+file_name+'",file_type:"' + data.file_ext + '"}) CREATE (u)-[:Attachment]->(a)-[:IN]->(t) RETURN a',
-			},function(err,result){
-				if (err){ console.log(err);
-					rs(false)
-				}else{
-					db.cypher({
-						query:'MATCH (u:Users)-[:Attachment]->(a:Attachment)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN u.Name,u.Avatar,a.file_name,ID(a) as id,a.date,a.file_type ORDER BY ID(a) DESC',
-					},function(err,rs_attachment){
-						if (err){ console.log(err);
-							rs(false)
-						}else{
-							rs(rs_attachment)
-						}
-					})
-				}
-			})
-        }
-    });
-});
-
-socket.on('attachment:delete',function(data,rs){
-	var Files = {};
-	var dir_file = "dist/uploads/attachment/";
-	var file_name = data.file_name;
-	var full_path_name = dir_file + file_name;
-	var attachment_id = data.attachment_id;
-	fs.unlink(full_path_name, function(err) {
-        if (err){
-        	console.log('Save Avatar Error : ',err);
-        	rs("");
-        }else{
-			db.cypher({
-				query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (a:Attachment) WHERE ID(a) = '+attachment_id+' DETACH DELETE a',
-			},function(err,result){
-				if (err){ console.log(err);
-					rs(false)
-				}else{
-					db.cypher({
-						query:'MATCH (u:Users)-[:Attachment]->(a:Attachment)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN u.Name,u.Avatar,a.file_name,ID(a) as id,a.date,a.file_type ORDER BY ID(a) DESC',
-					},function(err,rs_attachment){
-						if (err){ console.log(err);
-							rs(false)
-						}else{
-							rs(rs_attachment)
-						}
-					})
-				}
-			})
-        }
-    });
-});
-//Attachment====///
 	//users============//
 	socket.on('user:register',function(data,rs){
 		db.cypher({
@@ -1134,17 +1042,15 @@ socket.on('attachment:delete',function(data,rs){
 		var dir_file = "dist/uploads/";
 		var file_name = guid() + ".jpg";
 		var full_path_name = dir_file + file_name;
-		if (!fs.existsSync(dir_file)) {
-	        fs.mkdir(dir_file, 0777, function(e) {})
-	    }
-	    fs.writeFile(full_path_name, data.file, 'binary', function(err) {
-	        if (err){
-	        	console.log('Save Avatar Error : ',err);
-	        	rs("");
-	        }else{
+
+		fs.writeFile(full_path_name, data.file, 'binary', function(err) {
+			if (err){
+				console.log('Save Avatar Error : ',err);
+				rs("");
+			}else{
 				rs(file_name);
-	        }
-	    });
+			}
+		});
 
 	});
 	socket.on('user:list',function(data,rs){
