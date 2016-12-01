@@ -711,23 +711,20 @@ socket.on('task:changeSort',function(data,rs){
 			if (err) {
 				console.log(err);
 			}else{
-			
 				if(rs_relate[0]['ID(c)'] && rs_relate[0]['ID(after)']){
-					console.log('bottom to card');
 					 db.cypher({
 					 	query:'MATCH (t:Tasks) WHERE ID(t)='+rs_relate[0]['ID(after)']+' MATCH (c:Cards) WHERE ID(c)='+rs_relate[0]['ID(c)']+' CREATE (t)-[:Parent]->(c)'
 					 },function(err,rs1){ 
 					 	if (err) {console.log(err) }
 					 })
 				}else if(rs_relate[0]['ID(before)'] && rs_relate[0]['ID(after)']){
-					console.log('change inside');
 					db.cypher({
 						query:'MATCH (t:Tasks) WHERE ID(t)='+rs_relate[0]['ID(before)']+' MATCH (t2:Tasks) WHERE ID(t2)='+rs_relate[0]['ID(after)']+' CREATE (t2)-[:Parent]->(t)'
 					},function(err,rs2){
 					 if (err){ console.log(err)} 
 					})
 				}else{
-					console.log('no change')
+					
 				}
 
 

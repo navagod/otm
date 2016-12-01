@@ -21,7 +21,8 @@ class Task extends Component {
 			listTasks:[],
 			looped:false,
 			totalCard:0,
-			currentLoop:-1
+			currentLoop:-1,
+			showAddButton:true
 		}
 	}
 	componentDidMount(){
@@ -43,6 +44,9 @@ class Task extends Component {
 		if(this.state.totalCard === this.state.currentLoop){
 			console.log('update list')
 			this.setState({currentLoop: -1})
+		}
+		if(this.state.openAddTask){
+			this.refs.addTaskTitle.focus()
 		}
 	}
 	componentWillReceiveProps(nextProps){
@@ -69,12 +73,13 @@ class Task extends Component {
 	esc(e){
 		if(e.key=="Escape"){
 			this.setState({
-				openAddTask: false
+				openAddTask: false,
+				showAddButton:true
 			})
 		}
 	}
 	openAddTaskDialog(){
-		this.setState({openAddTask:true});
+		this.setState({openAddTask:true,showAddButton:false});
 	}
 	handleSortTaskUpdate(type,event, ui){
 		if(type=="receive"){
@@ -105,7 +110,7 @@ class Task extends Component {
 					console.log('success : ',rs)
 				}
 			})
-		
+
 		}else if(type=="sort" && !this.state.looped){
 			let id = ui['item'].attr('data-id')
 			let cid = $(event['target']).attr('data-cid')
@@ -193,9 +198,10 @@ class Task extends Component {
 				</form>
 				</div>
 				:
-				<div id="add-task" onClick={this.openAddTaskDialog.bind(this)}>+</div>
+				null
 			}
 
+			{this.state.showAddButton&&<div id="add-task" onClick={this.openAddTaskDialog.bind(this)}>+</div>}
 			</div>
 			)
 	}
