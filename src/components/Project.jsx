@@ -55,7 +55,7 @@ class Project extends Component {
 		cal_list();
 	}
 	componentWillMount() {
-		
+
 	}
 	componentDidUpdate(prevProps, prevState){
 		cal_list();
@@ -101,12 +101,14 @@ class Project extends Component {
 		}
 	}
 	taskCount() {
-		projects.getCount(this.props.socket,this.state.projectId, (rs)=>{
-			this.setState({activeTask:(rs.active > 0 ? rs.active : 0)});
-			this.setState({archiveTask:(rs.archive > 0 ? rs.archive : 0)});
-			this.setState({trashTask:(rs.trash > 0 ? rs.trash : 0)});
-			this.setState({completeTask:(rs.complete > 0 ? rs.complete : 0)});
-		});
+		if(this.state.projectId !==""){
+			projects.getCount(this.props.socket,this.state.projectId, (rs)=>{
+				this.setState({activeTask:(rs.active > 0 ? rs.active : 0)});
+				this.setState({archiveTask:(rs.archive > 0 ? rs.archive : 0)});
+				this.setState({trashTask:(rs.trash > 0 ? rs.trash : 0)});
+				this.setState({completeTask:(rs.complete > 0 ? rs.complete : 0)});
+			});
+		}
 
 	}
 	componentWillReceiveProps(nextProps){
@@ -254,6 +256,7 @@ class Project extends Component {
 	RerenderProject(pid){
 		this.setState({projectId:pid})
 		this.projectsListCard.bind(this)()
+		this.taskCount.bind(this)()
 	}
 	render() {
 		var card_items = this.state.cardList
@@ -353,7 +356,7 @@ class Project extends Component {
 					<button type="submit" className="waves-effect waves-green btn-flat">Save</button>
 					<button type="button" className="waves-effect waves-red btn-flat" id="closeEditCard" onClick={this.closeEditCard.bind(this)}>Close</button>
 					<button type="button" className="waves-effect waves-red btn-flat red" onClick={this.deletePanel.bind(this)}>Delete</button>
-					
+
 					</div>
 					</form>
 					</div>
