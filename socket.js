@@ -246,26 +246,6 @@ socket.on('project:mylist',function(data,rs){
 	});
 });
 
-//person============//
-socket.on('person:list', function (data,rs) {
-	db.cypher({
-		query:'MATCH (n:Person) RETURN n',
-	},function(err,results){
-		if (err) console.log(err);
-		if(results){
-			let personList = [];
-			results.forEach(function(item,index){
-				personList.push({
-					name:item['n']['properties']['name'],
-					from:item['n']['properties']['from']
-				});
-			});
-			rs(personList);
-		}
-	});
-});
-
-
 //card===============//
 socket.on('card:add',function(data,rs){
 	db.cypher({

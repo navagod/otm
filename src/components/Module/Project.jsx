@@ -250,14 +250,4 @@ module.exports = {
 			}
         );
 	},
-
-	getPerson(socket,callback){
-		socket.emit('person:list', {}, (result) => {
-			if(result && result.length > 0){
-				callback(result.filter(cleanArray))
-			}else{
-				callback(false)
-			}
-		});
-	},
 }

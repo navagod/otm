@@ -12,13 +12,6 @@ class Dashboard_na extends Component {
 	}
 
 	componentDidMount(){
-		projects.getPerson(this.props.socket,(rs)=>{
-			if(!rs){
-				return Materialize.toast("Empty Person", 4000)
-			}else{
-				return this.setState({listPerson:rs})
-			}
-		})
 
 		projects.getMyProject(this.props.socket,localStorage.uid,(rs)=>{
 			if(!rs){
@@ -36,17 +29,6 @@ class Dashboard_na extends Component {
 	    	<div className="Dashboard_na">
 	    		<div>
 	    			Hello, { localStorage.name } !!
-	    		</div>
-	    		<div>
-	    		=============================
-	    		Person
-	    		=============================
-	    		{ person.map((item, i) =>
-	    			<div key={i}>
-	    				<div className="name">{item.name}</div>
-	    				<div className="from">{item.from}</div>
-	    			</div>
-	    		)}
 	    		</div>
 	    		<div>
 	    		=============================
