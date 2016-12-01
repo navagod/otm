@@ -38,8 +38,8 @@ class Navbar extends Component {
 			<Router>
 			{({ router }) => (
 				<div>
-				<nav className="light-blue lighten-1" role="navigation" id="navbar">
-				<div className="nav-wrapper container"><Link to="/" id="logo-container" className="brand-logo">OTM</Link>
+				<nav className="black" role="navigation" id="navbar">
+				<div className="nav-wrapper header"><Link to="/" id="logo-container" className="brand-logo"><img src='/images/otm_logo_white.svg'/></Link>
 
 
 				{ auth.loggedIn() ?

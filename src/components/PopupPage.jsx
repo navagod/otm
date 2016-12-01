@@ -4,7 +4,9 @@ import {Dropdown,NavItem} from 'react-materialize'
 import Tasks from './Module/Task'
 import Todo from './Todo'
 import Tags from './Tags'
+import Loading from './Loading';
 var Datetime = require('react-datetime');
+var Dropzone = require('react-dynamic-dropzone');
 class PopupPage extends Component {
 	constructor(props) {
 		super(props)
@@ -15,6 +17,7 @@ class PopupPage extends Component {
 			taskData:[],
 			socket:this.props.socket,
 			comments:[],
+			attachments:[],
 			showTodo:false,
 			selectUser:false,
 			listUsers:[],
@@ -22,9 +25,13 @@ class PopupPage extends Component {
 			dropdownIsVisible: false,
 			currentTags:[],
 			allTags:[],
-			showTag:false
+			showTag:false,
+			loading:true
 		}
 		this._hideDropdown = this._hideDropdown.bind(this);
+		this.onDrop = this.onDrop.bind(this);
+		this.onOpenClick = this.onOpenClick.bind(this);
+		this.onAttachmentRemoveClick = this.onAttachmentRemoveClick.bind(this);
 	}
 
 	componentDidMount(){
@@ -59,7 +66,7 @@ class PopupPage extends Component {
 				})
 				Tasks.currentTag(this.state.socket,this.state.taskId,(rs)=>{
 					if(!rs){
-						
+
 					}else{
 						var {currentTags} = this.state
 						currentTags = rs
@@ -68,13 +75,21 @@ class PopupPage extends Component {
 				})
 				Tasks.allTag(this.state.socket,this.state.projectId,(rs)=>{
 					if(!rs){
-						
+
 					}else{
 						var {allTags} = this.state
 						allTags = rs
 						this.setState({allTags})
 					}
 				})
+				Tasks.listAttachment(this.state.socket,this.state.projectId,this.state.taskId,(list_attachment)=>{
+					if(!list_attachment){
+
+					}else{
+						this.setState({attachments:list_attachment})
+					}
+				})
+				this.setState({loading:false});
 			}
 		})
 		window.addEventListener('click', this._hideDropdown, false);
@@ -121,7 +136,7 @@ class PopupPage extends Component {
 	updateTask(event){
 		var v = this.state.taskData["t.title"]
 		if(v===""){
-			this.refs.taskTitle.focus(); 
+			this.refs.taskTitle.focus();
 			return Materialize.toast("กรุณาใส่ข้อหัว", 4000)
 		}else{
 			Tasks.save(this.state.socket,this.state.taskData,this.state.taskId,(rs)=>{
@@ -135,7 +150,7 @@ class PopupPage extends Component {
 		event.preventDefault()
 		var c = this.refs.commentInput.value
 		if(c===""){
-			this.refs.commentInput.focus(); 
+			this.refs.commentInput.focus();
 			return Materialize.toast("กรุณาใส่ข้อความ", 4000)
 		}else{
 			Tasks.addComment(this.state.socket,c,this.state.taskId,(rs)=>{
@@ -206,6 +221,7 @@ class PopupPage extends Component {
 				this.context.router.transitionTo('/project/'+this.state.projectId)
 			}
 		})
+		this.props.updateTaskCount();
 	}
 	clickTag(id,color,text){
 		var index = _.findIndex(this.state.currentTags,{'ID(l)':id})
@@ -249,6 +265,69 @@ class PopupPage extends Component {
 			return "tag-item "
 		}
 	}
+	onChangeName(e){
+		this.setState({U_name:e.target.value});
+	}
+	onDragEnter(e) {
+	    this.setState({ isReceiverOpen: true });
+	}
+	onDragOver(e) {
+	    // your codes here
+	}
+	onDragLeave(e) {
+	    this.setState({ isReceiverOpen: false });
+	}
+	onOpenClick(e){
+      this.refs.dropzone.open();
+    }
+	onDrop(acceptedFiles) {
+		this.setState({loading:true});
+		const uid = localStorage.uid
+		var _this = this;
+		var files = acceptedFiles;
+		var file_count = files.length;
+		var file_list_count = 0;
+		 files.forEach((file)=> {
+			var reader = new window.FileReader();
+			var socket_send = this.props.socket;
+			reader.fileName = file.name;
+			reader.readAsBinaryString(file);
+			reader.onload = function(event) {
+		        var binary_file = event.target.result;
+		        var file_name = event.target.fileName;
+				var extension = file_name.split('.').pop().toLowerCase();
+
+		        Tasks.addAttachment(socket_send,binary_file,extension,_this.state.taskId,(list_attachment)=>{
+					file_list_count++;
+					if (!list_attachment){
+						return Materialize.toast("เกิดข้อผิดพลาด", 4000)
+					}else{
+						_this.setState({attachments:list_attachment})
+						if(file_count == file_list_count){
+							_this.setState({loading:false});
+						}
+						return Materialize.toast("อัพโหลดไฟล์เรียบร้อยแล้ว", 4000)
+					}
+				})
+			}
+        });
+    }
+
+    onAttachmentRemoveClick(attachment_id,file_name){
+    	if (confirm('Do you want to delete?')) {
+    		this.setState({loading:true});
+			Tasks.removeAttachment(this.props.socket,attachment_id,this.state.taskId,file_name,(list_attachment)=>{
+				if (!list_attachment){
+					return Materialize.toast("เกิดข้อผิดพลาด", 4000)
+				}else{
+					this.setState({attachments:list_attachment})
+					this.setState({loading:false});
+					return Materialize.toast("ลบไฟล์เรียบร้อยแล้ว", 4000)
+				}
+			})
+		}
+    }
+
 	render() {
 		return (
 			<div>
@@ -257,14 +336,14 @@ class PopupPage extends Component {
 			<div id="menuPopup">
 			{this.state.taskData["t.status"]=='active'?
 			<div style={{width: '450px'}}>
-			<button type="button" className="btn green"  onClick={this.statusTask.bind(this,'complete')}>Complete</button> 
-			<button type="button" className="btn blue"  onClick={this.statusTask.bind(this,'archive')}>Archive</button> 
-			<button type="button" className="btn red"  onClick={this.statusTask.bind(this,'trash')}>Trash</button> 
+			<button type="button" className="btn green"  onClick={this.statusTask.bind(this,'complete')}>Complete</button>
+			<button type="button" className="btn blue"  onClick={this.statusTask.bind(this,'archive')}>Archive</button>
+			<button type="button" className="btn red"  onClick={this.statusTask.bind(this,'trash')}>Trash</button>
 			</div>
 			:
 			<div>
 			<button type="button" className="btn orange"  onClick={this.statusTask.bind(this,'active')}>Make Active</button>
-			<button type="button" className="btn blue"  onClick={this.statusTask.bind(this,'archive')}>Archive</button> 
+			<button type="button" className="btn blue"  onClick={this.statusTask.bind(this,'archive')}>Archive</button>
 			</div>
 		}
 
@@ -286,7 +365,26 @@ class PopupPage extends Component {
 
 		</div>
 		<div id="fileList">
-		<div className="addSubject"><i className="material-icons">note_add</i> Attachment</div>
+		<div className="addSubject" onClick={this.onOpenClick}><i className="material-icons">note_add</i> Attachment</div>
+		<Dropzone ref="dropzone" onDrop={this.onDrop} socket={this.socket}>
+            <div>Try dropping some files here, or click to select files to upload.</div>
+        </Dropzone>
+        <div id="attachment-detail">
+	        { this.state.attachments.map((at_item,i)=>
+
+				<div id={"att-" + at_item.id} className="attachemnt-item" key={"attachemnt-"+this.state.taskId+"-"+i}>
+					<a href={"/uploads/attachment/"+at_item["a.file_name"]} target="_blank">
+						{ at_item["a.file_type"] == "png" || at_item["a.file_type"] == "jpg" || at_item["a.file_type"] == "jpeg" || at_item["a.file_type"] == "gif"?
+						<div className="img-picture img-100" style={{backgroundImage: 'url(/uploads/attachment/' + at_item["a.file_name"] + ')'}}></div>
+						: <div className={"img-file img-100 img-"+at_item["a.file_type"]}></div>
+						}
+					</a>
+					<div className="attachment-rm circle" onClick={this.onAttachmentRemoveClick.bind(this,at_item.id,at_item["a.file_name"])} data-id={at_item.id}>x</div>
+				</div>
+				// {i == 0 ? <div className="card-action"></div> : <div></div>}
+			)}
+			<div className="card-action"></div>
+		</div>
 		</div>
 		<div id="activity">
 		<h5>Activity</h5>
@@ -314,7 +412,7 @@ class PopupPage extends Component {
 		</div>
 		</div>
 		)}
-		</div>	
+		</div>
 		<div>
 
 		</div>
@@ -332,7 +430,7 @@ class PopupPage extends Component {
 				this.state.taskData['ua.Name'] && this.state.taskData['ua.Avatar'] ?
 				<img src={"/uploads/"+this.state.taskData['ua.Avatar']} width="50" height="50" className="avatar circle responsive-img" />
 				:
-				<img src="https://placeholdit.imgix.net/~text?txtsize=20&txt=%3F&w=50&h=50&txttrack=0" className="circle responsive-img" />
+				<img src="https://placeholdit.imgix.net/~text?txtsize=20&txt=%3F&w=50&h=50&txttrack=0" className="circle img-50responsive-img" />
 			}
 			<div>{this.state.taskData['ua.Name']}</div>
 			</div>
@@ -351,7 +449,7 @@ class PopupPage extends Component {
 		<strong>Due Date : </strong>
 		<Datetime isValidDate={this.validDateEnd.bind(this)} onChange={this.selectEndDate.bind(this)} value={moment.unix(Math.round(parseInt(this.state.taskData['t.endDate']) / 1000))} />
 		</div>
-		<div className="rightBarItem" id="tags"   
+		<div className="rightBarItem" id="tags"
 		onMouseOver={this._handleFocus.bind(this)}
 		onMouseLeave={this._handleBlur.bind(this)}
 		onClick={this._toggleDropdown.bind(this)}>
@@ -383,6 +481,7 @@ class PopupPage extends Component {
 		</div>
 		<div id="popup" className="fade-animation">
 		</div>
+		{this.state.loading?<Loading loading={this.state.loading}/>:null}
 		{this.state.showTag?<Tags projectId={this.state.projectId} socket={this.props.socket} closeTags={this.closeTags.bind(this)} />:null}
 		</div>
 		);

@@ -1,5 +1,5 @@
 module.exports = {
-	add(socket,uid,pid,cid,title,parent, cb) {
+	add(socket,uid,pid,cid,title,parent,totalTask, cb) {
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:add', {
 			uid:uid,
@@ -7,6 +7,7 @@ module.exports = {
 			cid:cid,
 			title:title,
 			parent:parent,
+			totalTask:totalTask,
 			at_create:new Date().getTime()
 		}, (result) => {
 			if(!result) {
@@ -32,7 +33,7 @@ module.exports = {
 			if(!result){
 				cb(false)
 			}else{
-				cb(result.filter(cleanArray))
+				cb(result)
 			}
 		});
 	},
@@ -191,9 +192,9 @@ module.exports = {
 			}
 		});
 	},
-	sortTask(socket,cid,id,parent,mode,cb){
+	sortTask(socket,cid,id,parent,after,mode,cb){
 		cb = arguments[arguments.length - 1]
-		socket.emit('task:changeSort', {tid:id,cid:cid,parent:parent,mode:mode}, (result) => {
+		socket.emit('task:changeSort', {tid:id,cid:cid,parent:parent,after:after,mode:mode}, (result) => {
 			if(!result){
 				cb(false)
 			}else{
