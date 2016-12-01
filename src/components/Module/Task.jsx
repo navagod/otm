@@ -191,9 +191,9 @@ module.exports = {
 			}
 		});
 	},
-	sortTask(socket,items,tid,cid,cb){
+	sortTask(socket,cid,id,parent,mode,cb){
 		cb = arguments[arguments.length - 1]
-		socket.emit('task:changeSort', {items:items,tid:tid,cid:cid}, (result) => {
+		socket.emit('task:changeSort', {tid:id,cid:cid,parent:parent,mode:mode}, (result) => {
 			if(!result){
 				cb(false)
 			}else{

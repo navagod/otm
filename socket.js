@@ -716,29 +716,94 @@ socket.on('task:changeStatus',function(data,rs){
 	})
 });
 socket.on('task:changeSort',function(data,rs){
-	data.items.map((v,i)=>
+	if(data.mode==="sorted"){
 		db.cypher({
-			query:'MATCH (t:Tasks) WHERE ID(t) = '+v+' MATCH (t)-[n:LIVE_IN]->(c:Cards) SET t.position = '+i+' DELETE n  RETURN t',
-		},function(err,results){
-			if (err) console.log(err);
-			if(!results || err){
-				rs(false)
+			query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks)  RETURN ID(before),ID(after)'
+		},function(err,rs_relate){
+			if (err) {
+				console.log(err);
 			}else{
-				db.cypher({
-					query:'MATCH (t:Tasks) WHERE ID(t) = '+v+'  MATCH (c:Cards) WHERE ID(c) = '+data.cid+' MERGE (t)-[:LIVE_IN]->(c)  RETURN t',
-				},function(err,rs_create){
-					if (err) console.log(err);
-					if(!rs_create || err){
-						rs(false)
-					}else{
-						rs(true)
-					}
-				})
+				console.log('old before : '+rs_relate[0]['ID(before)'],'old after : '+rs_relate[0]['ID(after)'],'new before : '+data.parent,'current card : ',data.cid,'current task : ',data.tid)
+
+				if(data.parent && data.parent !=""){// to last
+					// db.cypher({
+					// 	query:'MATCH (t:Tasks)-[:LIVE_IN]->(c:Cards) WHERE ID(c) = '+data.cid+' AND NOT (t)<-[:Parent]-() AND NOT ID(t)='+data.tid+'  MATCH (old_t:Tasks) WHERE ID(old_t)='+data.tid+' CREATE (t)-[:Parent]->(old_t)  RETURN t'
+					// },function(err,rs_sort_before){
+					// 	if (err) {
+					// 		console.log(err);
+					// 	}else{
+					// 		console.log(rs_sort_before)
+					// 	}
+					// })
+				}else if(!data.parent || data.parent ==""){ // to top
+					// db.cypher({
+					// 	query:'MATCH (t:Tasks)-[:LIVE_IN]->(c:Cards) WHERE ID(c) = '+data.cid+' AND NOT (t)-[:Parent]->() AND NOT ID(t)='+data.tid+'  MATCH (old_t:Tasks) WHERE ID(old_t)='+data.tid+' CREATE (t)-[:Parent]->(old_t)  RETURN t'
+					// },function(err,rs_sort_before){
+					// 	if (err) {
+					// 		console.log(err);
+					// 	}else{
+					// 		console.log(rs_sort_before)
+					// 	}
+					// })
+				}
+				// if(rs_relate[0]['ID(before)'] && rs_relate[0]['ID(after)']){
+
+				// }else if(!rs_relate[0]['ID(before)'] && rs_relate[0]['ID(after)']){
+					//only after MATCH (t:Tasks)-[:LIVE_IN]->(c:Cards) WHERE ID(c) = 360 AND NOT (t)<-[:Parent]-() RETURN t
+
+				// }else if(rs_relate[0]['ID(before)'] && !rs_relate[0]['ID(after)']){
+//only before MATCH (t:Tasks)-[:LIVE_IN]->(c:Cards) WHERE ID(c) = 360 AND NOT (t)-[:Parent]->() RETURN t
+// }
+
+
+				// db.cypher({
+				// 	query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) RETURN ID(before),ID(after)'
+				// },function(err,rs_sort){
+				// 	if (err) {
+				// 		console.log(err);
+				// 	}else{
+				// 		console.log(rs_relate)
+				// 	}
+				// })
 			}
 		})
 
-		)
+	}else{
 
+	}
+	// db.cypher({
+	// 	query:'MATCH (t:Tasks)-[n:LIVE_IN]->(:Cards)  WHERE ID(t) = '+data.tid+' MATCH (c:Cards) WHERE ID(c) = '+data.cid+' DELETE n CREATE (t)-[:LIVE_IN]->(c) RETURN t',
+	// },function(err,results){
+	// 	if (err) console.log(err);
+	// 	if(!results || err){
+	// 		rs(false)
+	// 	}else{
+	// 		console.log(results)
+			//find old before and after
+			// db.cypher({
+			// 	query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) RETURN ID(before),ID(after)'
+			// },function(err,rs_relate){
+			// 	if (err) {
+			// 		console.log(err);
+			// 	}else{
+			// 		console.log(rs_relate)
+			// 	}
+			// })
+
+
+			// if(data.parent){
+			// 	db.cypher({
+			// 		query:'MATCH (pt:Tasks) WHERE ID(pt) = '+data.parent+' MATCH (t:Tasks) WHERE ID(t) = '+results[0]['ID(t)']+' OPTIONAL MATCH (pt)<-[p]-(:Tasks) DELETE p CREATE (t)-[:Parent]->(pt) RETURN t'
+			// 	},function(err,rs_relate){
+			// 		if (err) {
+			// 			console.log(err);
+			// 		}else{
+
+			// 		}
+			// 	})
+			// }
+		// }
+	// })
 });
 //Task===============//
 
