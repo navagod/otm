@@ -30,7 +30,7 @@ class Task extends Component {
 
 			}else{
 				this.setState({listTasks:rs });
-				$( ".sort-task" ).sortable({connectWith: ".sort-task",update: this.handleSortTaskUpdate.bind(this)}).disableSelection();
+				$( ".sort-task" ).sortable({connectWith: ".sort-task",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
 			}
 		})
 		
@@ -47,7 +47,7 @@ class Task extends Component {
 	}
 	componentWillReceiveProps(nextProps){
 		this.setState({cardId:nextProps.cardId})
-		$( ".sort-task" ).sortable({connectWith: ".sort-task",update: this.handleSortTaskUpdate.bind(this)}).disableSelection();
+		$( ".sort-task" ).sortable({connectWith: ".sort-task",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
 		tasks.list(this.props.socket,nextProps.cardId,(rs)=>{
 			if(!rs){
 
@@ -80,38 +80,48 @@ class Task extends Component {
 	openAddTaskDialog(){
 		this.setState({openAddTask:true});
 	}
-	handleSortTaskUpdate(event, ui){
-		if(!this.state.looped){
-			console.log(event,ui)
-			let item_div = document.getElementsByClassName("sort-task");
-			for(let i = 0; i < item_div.length; i++)
-			{
-				let div = item_div.item(i);
-				let ids = $(div).sortable('toArray', { attribute: 'data-id' })
-				let items = []
-				ids.forEach(function (i, index) {
-					if(i){
-						items.push(i)
-					}
-				})
-
-				let store_state = this.state.cardList
-				let cid = div.dataset.cid
-				console.log(items)
-				tasks.sortTask(this.props.socket,items,this.state.projectId,div.dataset.cid,(rs)=>{
-					// if(!rs){
-					// 	$(div).sortable('cancel');
-					// 	this.setState({ listTasks: store_state });
-					// }else{
-					// 	var {currentLoop} = this.state
-					// 	currentLoop = currentLoop + 1
-					// 	this.setState({currentLoop})
-					// }
-				})
-			}
+	handleSortTaskUpdate(type,event, ui){
+		if(type=="receive"){
 			this.setState({looped:true})
-		}else{
-			this.setState({looped:false})
+			let id = ui['item'].attr('data-id')
+			let cid = $(event['target']).attr('data-cid')
+			let arr = $(event['target']).sortable('toArray', { attribute: 'data-id' })
+			let parent = arr.indexOf(id)
+			if(parent > 0){
+				parent = arr[parent - 1]
+			}else{
+				parent = ""
+			}
+			let store_state = this.state.cardList
+			tasks.sortTask(this.props.socket,cid,id,parent,"changed",(rs)=>{
+				if(!rs){
+					$(div).sortable('cancel');
+					this.setState({ listTasks: store_state });
+				}else{
+					this.setState({looped:false})
+					console.log('success : ',rs)
+				}
+			})
+		}else if(type=="sort" && !this.state.looped){
+			let id = ui['item'].attr('data-id')
+			let cid = $(event['target']).attr('data-cid')
+			let arr = $(event['target']).sortable('toArray', { attribute: 'data-id' })
+			let parent = arr.indexOf(id)
+			if(parent > 0){
+				parent = arr[parent - 1]
+			}else{
+				parent = ""
+			}
+			let store_state = this.state.cardList
+			tasks.sortTask(this.props.socket,cid,id,parent,"sorted",(rs)=>{
+				if(!rs){
+					$(div).sortable('cancel');
+					this.setState({ listTasks: store_state });
+				}else{
+					this.setState({looped:false})
+					console.log('success : ',rs)
+				}
+			})
 		}
 	}
 	reupdateList(cid){
