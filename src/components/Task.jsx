@@ -33,7 +33,7 @@ class Task extends Component {
 				$( ".sort-task" ).sortable({connectWith: ".sort-task",update: this.handleSortTaskUpdate.bind(this)}).disableSelection();
 			}
 		})
-		
+
 		this.props.socket.on('task:updateAddTaskList', this._updateAddTaskList.bind(this));
 		this.props.socket.on('task:reUpdateList', this._updateList.bind(this));
 		this.setState({totalCard:document.getElementsByClassName("sort-task").length})
@@ -136,13 +136,13 @@ class Task extends Component {
 				listTasks.push(rs.lists);
 				this.setState({listTasks,openAddTask: false});
 			}
-			
+
 		})
 	}
 	render() {
 		return (
 			<div className="sort-task" data-cid={this.state.cardId}>
-			
+
 			{ this.state.listTasks.map((task_item, i) =>
 				<div className={"task-box " + task_item.status} data-id={task_item.id} id={"task-"+task_item.id} key={i}>
 				<Link to={`/task/${task_item.id}`}>

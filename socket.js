@@ -119,7 +119,6 @@ socket.on('project:get',function(data,rs){
 		}
 	});
 });
-
 socket.on('project:add', function (data,fn) {
 	db.cypher({
 		query: 'MATCH (m:Users) WHERE ID(m) = '+data.uid+' MATCH (u:Users) WHERE ID(u) = 0 CREATE (p:Projects {title:"'+data.title+'",detail:"'+data.detail+'",status:"active"}) CREATE (p)<-[:CREATE_BY {date:"'+data.at_create+'"}]-(m) CREATE (u)-[:Assigned]->(p) RETURN ID(p)'
@@ -146,7 +145,6 @@ socket.on('project:add', function (data,fn) {
 		}
 	});
 });
-
 socket.on('project:save', function (data,fn) {
 	db.cypher({
 		query: 'MATCH (p:Projects) WHERE ID(p) = '+data.id+' SET p.title = "'+data.title+'",p.detail = "'+data.detail+'" RETURN p'
@@ -172,7 +170,6 @@ socket.on('project:save', function (data,fn) {
 
 	});
 });
-
 socket.on('project:delete', function (data,fn) {
 	db.cypher({
 		query: 'MATCH (p:Projects) WHERE ID(p) = '+data.id+' SET p.status = "disabled" RETURN p'
@@ -198,7 +195,6 @@ socket.on('project:delete', function (data,fn) {
 
 	});
 });
-
 socket.on('project:addAssign', function (data,fn) {
 	db.cypher({
 		query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' CREATE (u)-[a:Assigned]->(p) RETURN ID(p),u.Name,u.Avatar'
@@ -227,7 +223,41 @@ socket.on('project:removeAssign', function (data,fn) {
 		}
 	});
 });
-//project============//
+socket.on('project:mylist',function(data,rs){
+	db.cypher({
+		query: 'MATCH (u:Users)-->(pj:Projects) WHERE id(u) = '+data.id+' AND pj.status = "active" RETURN DISTINCT pj',
+	},function(err,results){
+		if (err) console.log(err);
+		if(results){
+			let projectName = [];
+			results.forEach(function(item,index){
+				projectName.push({
+					id:item['pj']['_id'],
+					title:item['pj']['properties']['title']
+				});
+			});
+			rs(projectName);
+		}
+	});
+});
+//person============//
+socket.on('person:list', function (data,rs) {
+	db.cypher({
+		query:'MATCH (n:Person) RETURN n',
+	},function(err,results){
+		if (err) console.log(err);
+		if(results){
+			let personList = [];
+			results.forEach(function(item,index){
+				personList.push({
+					name:item['n']['properties']['name'],
+					from:item['n']['properties']['from']
+				});
+			});
+			rs(personList);
+		}
+	});
+});
 
 
 //card===============//

@@ -8,6 +8,7 @@ import Miss from 'react-router/Miss'
 
 
 import Dashboard from './Dashboard'
+import Dashboard_na from './Dashboard_na'
 import Project from './Project'
 import Login from './Login'
 import Logout from './Logout'
@@ -59,6 +60,7 @@ class Navbar extends Component {
 				</nav>
 				<div>
 				<MatchWhenAuthorized pattern="/" exactly component={Dashboard} />
+				<MatchWhenAuthorized pattern="/dash" exactly component={Dashboard_na} />
 				<Match pattern="/login" exactly render={({ pathname }) => <Login socket={this.state.socket} /> }/>
 				<MatchWhenAuthorized pattern="/logout" exactly component={Logout}/>
 				<MatchWhenAuthorized pattern="/profile" exactly component={Profile}/>

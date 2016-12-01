@@ -33,7 +33,7 @@ module.exports = {
 				cb(false)
 			}else{
 				cb(result)
-				
+
 			}
 		});
 	},
@@ -224,6 +224,32 @@ module.exports = {
 				cb(false)
 			}else{
 				cb(result)
+			}
+		});
+	},
+
+	getMyProject(socket,id,callback){
+		socket.emit(
+            'project:mylist',
+            {
+            	id: id
+            },
+            (result) => {
+				if(!result) {
+					callback(false)
+				}else{
+					callback(result)
+				}
+			}
+        );
+	},
+
+	getPerson(socket,callback){
+		socket.emit('person:list', {}, (result) => {
+			if(result && result.length > 0){
+				callback(result.filter(cleanArray))
+			}else{
+				callback(false)
 			}
 		});
 	},
