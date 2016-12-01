@@ -32,7 +32,7 @@
     "neo4j-transactions": "^1.0.2",
     "node-sass": "^3.4.2",
     "react": "^15.3.2",
-    "react-calendar-timeline": "ssh://git@github.com/dev-orisma/react-calendar-timeline.git",
+    "react-calendar-timeline": "https://github.com/dev-orisma/react-calendar-timeline.git",
     "react-datetime": "^2.7.5",
     "react-dnd": "^2.1.4",
     "react-dnd-html5-backend": "^2.1.2",
