@@ -149,6 +149,7 @@ class Task extends Component {
 				var {listTasks} = this.state;
 				listTasks.push(rs.lists);
 				this.setState({listTasks,openAddTask: false});
+				this.props.updateTaskCount();
 			}
 
 		})
