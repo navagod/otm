@@ -21,16 +21,17 @@ class Task extends Component {
 			listTasks:[],
 			looped:false,
 			totalCard:0,
-			currentLoop:-1
+			currentLoop:-1,
+			showAddButton:true
 		}
 	}
 	componentDidMount(){
-		tasks.list(this.props.socket,this.state.cardId,(rs)=>{
+		tasks.list(this.props.socket,this.state.cardId,this.state.projectId,(rs)=>{
 			if(!rs){
 
 			}else{
 				this.setState({listTasks:rs });
-				$( ".sort-task" ).sortable({connectWith: ".sort-task",update: this.handleSortTaskUpdate.bind(this)}).disableSelection();
+				$( ".sort-task" ).sortable({connectWith: ".sort-task",placeholder: "ui-state-highlight",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
 			}
 		})
 		
@@ -41,13 +42,15 @@ class Task extends Component {
 	componentDidUpdate(prevProps, prevState){
 		calTeatarea()
 		if(this.state.totalCard === this.state.currentLoop){
-			console.log('update list')
 			this.setState({currentLoop: -1})
+		}
+		if(this.state.openAddTask){
+			this.refs.addTaskTitle.focus()
 		}
 	}
 	componentWillReceiveProps(nextProps){
 		this.setState({cardId:nextProps.cardId})
-		$( ".sort-task" ).sortable({connectWith: ".sort-task",update: this.handleSortTaskUpdate.bind(this)}).disableSelection();
+		$( ".sort-task" ).sortable({connectWith: ".sort-task",placeholder: "ui-state-highlight",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
 		tasks.list(this.props.socket,nextProps.cardId,(rs)=>{
 			if(!rs){
 
@@ -65,65 +68,76 @@ class Task extends Component {
 	}
 	_updateList(data){
 		this.context.router.transitionTo('/project/'+this.state.projectId)
-		// console.log(this.state.cardId,data)
-		// if(data.cid == this.state.cardId){
-		// 	this.setState({listTasks:data.lists});
-		// }
 	}
 	esc(e){
 		if(e.key=="Escape"){
 			this.setState({
-				openAddTask: false
+				openAddTask: false,
+				showAddButton:true
 			})
 		}
 	}
 	openAddTaskDialog(){
-		this.setState({openAddTask:true});
+		this.setState({openAddTask:true,showAddButton:false});
 	}
-	handleSortTaskUpdate(event, ui){
-		if(!this.state.looped){
-			console.log(event,ui)
-			let item_div = document.getElementsByClassName("sort-task");
-			for(let i = 0; i < item_div.length; i++)
-			{
-				let div = item_div.item(i);
-				let ids = $(div).sortable('toArray', { attribute: 'data-id' })
-				let items = []
-				ids.forEach(function (i, index) {
-					if(i){
-						items.push(i)
-					}
-				})
-
-				let store_state = this.state.cardList
-				let cid = div.dataset.cid
-				console.log(items)
-				tasks.sortTask(this.props.socket,items,this.state.projectId,div.dataset.cid,(rs)=>{
-					// if(!rs){
-					// 	$(div).sortable('cancel');
-					// 	this.setState({ listTasks: store_state });
-					// }else{
-					// 	var {currentLoop} = this.state
-					// 	currentLoop = currentLoop + 1
-					// 	this.setState({currentLoop})
-					// }
-				})
-			}
+	handleSortTaskUpdate(type,event, ui){
+		if(type=="receive"){
 			this.setState({looped:true})
-		}else{
-			this.setState({looped:false})
+			let id = ui['item'].attr('data-id')
+			let cid = $(event['target']).attr('data-cid')
+			let arr = $(event['target']).sortable('toArray', { attribute: 'data-id' })
+			let parent = arr.indexOf(id)
+			let after = parent
+			if(parent > 0){
+				parent = arr[parent - 1]
+			}else{
+				parent = ""
+			}
+			if(after >= 0){
+				after = arr[after + 1]
+			}else{
+				after = ""
+			}
+
+			let store_state = this.state.cardList
+			tasks.sortTask(this.props.socket,cid,id,parent,after,"sorted",(rs)=>{
+				if(!rs){
+					$(div).sortable('cancel');
+					this.setState({ listTasks: store_state });
+				}else{
+					this.setState({looped:false})
+					console.log('success : ',rs)
+				}
+			})
+
+		}else if(type=="sort" && !this.state.looped){
+			let id = ui['item'].attr('data-id')
+			let cid = $(event['target']).attr('data-cid')
+			let arr = $(event['target']).sortable('toArray', { attribute: 'data-id' })
+			let parent = arr.indexOf(id)
+			let after = parent
+			if(parent > 0){
+				parent = arr[parent - 1]
+			}else{
+				parent = ""
+			}
+			if(after >= 0){
+				after = arr[after + 1]
+			}else{
+				after = ""
+			}
+
+			let store_state = this.state.cardList
+			tasks.sortTask(this.props.socket,cid,id,parent,after,"sorted",(rs)=>{
+				if(!rs){
+					$(div).sortable('cancel');
+					this.setState({ listTasks: store_state });
+				}else{
+					this.setState({looped:false})
+					console.log('success : ',rs)
+				}
+			})
 		}
-	}
-	reupdateList(cid){
-		// this.context.router.transitionTo('/project/'+this.state.projectId)
-		// tasks.listUpdate(this.props.socket,cid,(rs)=>{
-		// 	if(!rs){
-		// 		console.log('False',rs)
-		// 	}else{
-		// 		console.log(rs)
-		// 		this.setState({ listTasks: rs });
-		// 	}
-		// })
 	}
 	submitAddTask(event){
 		event.preventDefault()
@@ -132,20 +146,21 @@ class Task extends Component {
 		if(this.state.listTasks[this.state.listTasks.length - 1] !== undefined){
 			parent = this.state.listTasks[this.state.listTasks.length - 1]['id']
 		}
-		tasks.add(this.props.socket,localStorage.uid,this.state.projectId,this.state.cardId,title,parent,(rs)=>{
+		const totalTask = this.state.listTasks.length
+		tasks.add(this.props.socket,localStorage.uid,this.state.projectId,this.state.cardId,title,parent,totalTask,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
 				var {listTasks} = this.state;
 				listTasks.push(rs.lists);
-				this.setState({listTasks,openAddTask: false});
-				this.props.updateTaskCount();
+				this.setState({listTasks,openAddTask: false,showAddButton:true});
 			}
 
 		})
 	}
 	render() {
 		return (
+			<div>
 			<div className="sort-task" data-cid={this.state.cardId}>
 			
 			{ this.state.listTasks.map((task_item, i) =>
@@ -164,10 +179,10 @@ class Task extends Component {
 				{task_item.total_comment >0&&<div className="task-comment-mini"><i className="material-icons tiny">comment</i> {task_item.total_comment}</div>}
 				{task_item.total_task != "0/0"&&<div className="task-todo-mini"><i className="material-icons tiny">toc</i> {task_item.total_task}</div>}
 				{task_item.duedate&&<div className="task-duedate-mini"><i className="material-icons tiny">web</i> {timeConverter(task_item.duedate)}</div>}
-				{task_item.tags[0].title&&
+				{task_item.tags&&
 					<div className="task-label-mini">
 					{task_item.tags.map((tag, tg) =>
-						<div key={"tag-show-"+tg} className={"tagColor "+tag.color} style={{backgrounColor:tag.bg_color}}>{tag.title}</div>
+						<div key={"tag-show-"+tg} className={"tagColor "+tag.properties.color} style={{backgrounColor:tag.properties.bg_color}}>{tag.title}</div>
 						)}
 					<div className="clear"></div>
 					</div>
@@ -175,7 +190,7 @@ class Task extends Component {
 				</Link>
 				</div>
 				)}
-
+			</div>
 			{this.state.openAddTask ?
 				<div className="task-box" id="taskBoxAdd">
 				<form onSubmit={this.submitAddTask.bind(this)}>
@@ -183,9 +198,10 @@ class Task extends Component {
 				</form>
 				</div>
 				:
-				<div id="add-task" onClick={this.openAddTaskDialog.bind(this)}>+</div>
+				null
 			}
 
+			{this.state.showAddButton&&<div id="add-task" onClick={this.openAddTaskDialog.bind(this)}>+</div>}
 			</div>
 			)
 	}

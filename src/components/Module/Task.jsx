@@ -1,5 +1,5 @@
 module.exports = {
-	add(socket,uid,pid,cid,title,parent, cb) {
+	add(socket,uid,pid,cid,title,parent,totalTask, cb) {
 		cb = arguments[arguments.length - 1]
 		socket.emit('task:add', {
 			uid:uid,
@@ -7,6 +7,7 @@ module.exports = {
 			cid:cid,
 			title:title,
 			parent:parent,
+			totalTask:totalTask,
 			at_create:new Date().getTime()
 		}, (result) => {
 			if(!result) {
@@ -26,13 +27,13 @@ module.exports = {
 			}
 		});
 	},
-	list(socket,cid,cb){
+	list(socket,cid,pid,cb){
 		cb = arguments[arguments.length - 1]
-		socket.emit('task:list', {cid:cid}, (result) => {
+		socket.emit('task:list', {cid:cid,pid:pid}, (result) => {
 			if(!result){
 				cb(false)
 			}else{
-				cb(result.filter(cleanArray))
+				cb(result)
 			}
 		});
 	},
@@ -191,9 +192,9 @@ module.exports = {
 			}
 		});
 	},
-	sortTask(socket,items,tid,cid,cb){
+	sortTask(socket,cid,id,parent,after,mode,cb){
 		cb = arguments[arguments.length - 1]
-		socket.emit('task:changeSort', {items:items,tid:tid,cid:cid}, (result) => {
+		socket.emit('task:changeSort', {tid:id,cid:cid,parent:parent,after:after,mode:mode}, (result) => {
 			if(!result){
 				cb(false)
 			}else{
@@ -224,6 +225,46 @@ module.exports = {
 	setTagTask(socket,tid,mode,id,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('tag:assign', {tid:tid,id:id,mode:mode}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	addAttachment(socket,file,file_ext,tid, cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('attachment:add', {
+			uid:localStorage.uid,
+			tid:tid,
+			file:file,
+			file_ext:file_ext,
+			at_create:new Date().getTime()
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},removeAttachment(socket,attachment_id,tid,file_name, cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('attachment:delete', {
+			uid:localStorage.uid,
+			tid:tid,
+			file_name:file_name,
+			attachment_id:attachment_id
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	listAttachment(socket,pid,tid,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('attachment:list', {tid:tid}, (result) => {
 			if(!result){
 				cb(false)
 			}else{
