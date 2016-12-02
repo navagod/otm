@@ -461,7 +461,7 @@ socket.on('task:add',function(data,rs){
 });
 socket.on('task:list',function(data,rs){
 	db.cypher({
-		query:'MATCH x=(c:Cards)<-[*]-(t:Tasks)  WHERE id(c)='+data.cid+' AND t.status <> "archive" AND t.status <> "trash" OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in1:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) WHERE tdc.status="success" RETURN length(x) as pos,u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.endDate,t.detail,t.status,count(distinct cm) AS total_comment,'+data.cid+' AS cid,count(distinct td) AS total_todo,count(distinct tdc) AS todo_success ORDER BY pos ASC',
+		query:'MATCH x=(c:Cards)<-[*]-(t:Tasks)  WHERE id(c)='+data.cid+' AND t.status <> "archive" AND t.status <> "trash" OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in1:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) WHERE tdc.status="success" OPTIONAL MATCH (l:Labels)-[:IN]->(t) RETURN length(x) as pos,u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.endDate,t.detail,t.status,count(distinct cm) AS total_comment,'+data.cid+' AS cid,count(distinct td) AS total_todo,count(distinct tdc) AS todo_success,collect(distinct l) as tags ORDER BY pos ASC',
 	},function(err,results){
 		if (err) console.log(err);
 		let res = [];
@@ -480,7 +480,7 @@ socket.on('task:list',function(data,rs){
 					"user_avatar": results[k]['u.Avatar'],
 					"user_name": results[k]['u.Name'],
 					"status": results[k]['t.status'],
-					"tags": []
+					"tags": results[k]['tags']
 				})
 			};
 		}
@@ -490,7 +490,7 @@ socket.on('task:list',function(data,rs){
 
 socket.on('task:listUpdate',function(data,rs){
 	db.cypher({
-		query:'MATCH x=(c:Cards)<-[*]-(t:Tasks)  WHERE id(c)='+data.cid+' AND t.status <> "archive" AND t.status <> "trash" OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in1:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) WHERE tdc.status="success" RETURN length(x) as pos,u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.endDate,t.detail,t.status,count(distinct cm) AS total_comment,'+data.cid+' AS cid,count(distinct td) AS total_todo,count(distinct tdc) AS todo_success ORDER BY pos ASC',
+		query:'MATCH x=(c:Cards)<-[*]-(t:Tasks)  WHERE id(c)='+data.cid+' AND t.status <> "archive" AND t.status <> "trash" OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in1:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) WHERE tdc.status="success" OPTIONAL MATCH (l:Labels)-[:IN]->(t) RETURN length(x) as pos,u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.endDate,t.detail,t.status,count(distinct cm) AS total_comment,'+data.cid+' AS cid,count(distinct td) AS total_todo,count(distinct tdc) AS todo_success,collect(distinct l) as tags ORDER BY pos ASC',
 	},function(err,results){
 		if (err) console.log(err);
 		let res = [];
@@ -509,7 +509,7 @@ socket.on('task:listUpdate',function(data,rs){
 					"user_avatar": results[k]['u.Avatar'],
 					"user_name": results[k]['u.Name'],
 					"status": results[k]['t.status'],
-					"tags": []
+					"tags": results[k]['tags']
 				})
 			};
 		}

@@ -30,6 +30,7 @@ class Task extends Component {
 			if(!rs){
 
 			}else{
+				console.log(rs)
 				this.setState({listTasks:rs });
 				$( ".sort-task" ).sortable({connectWith: ".sort-task",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
 			}
@@ -42,7 +43,6 @@ class Task extends Component {
 	componentDidUpdate(prevProps, prevState){
 		calTeatarea()
 		if(this.state.totalCard === this.state.currentLoop){
-			console.log('update list')
 			this.setState({currentLoop: -1})
 		}
 		if(this.state.openAddTask){
@@ -179,14 +179,14 @@ class Task extends Component {
 				{task_item.total_comment >0&&<div className="task-comment-mini"><i className="material-icons tiny">comment</i> {task_item.total_comment}</div>}
 				{task_item.total_task != "0/0"&&<div className="task-todo-mini"><i className="material-icons tiny">toc</i> {task_item.total_task}</div>}
 				{task_item.duedate&&<div className="task-duedate-mini"><i className="material-icons tiny">web</i> {timeConverter(task_item.duedate)}</div>}
-				{/*task_item.tags[0].title&&
+				{task_item.tags&&
 					<div className="task-label-mini">
 					{task_item.tags.map((tag, tg) =>
-						<div key={"tag-show-"+tg} className={"tagColor "+tag.color}>{tag.title}</div>
+						<div key={"tag-show-"+tg} className={"tagColor "+tag.properties.color}>{tag.properties.text}</div>
 						)}
 					<div className="clear"></div>
 					</div>
-				*/}
+				}
 				</Link>
 				</div>
 				)}
