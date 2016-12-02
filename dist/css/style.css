@@ -960,6 +960,7 @@ td.rdtYear:hover {
 .tagItem {
   border-bottom: 1px solid #eee;
   padding: 3px;
+  margin-top: 10px;
 }
 .tagItem:after {
   content: "";
@@ -991,60 +992,72 @@ td.rdtYear:hover {
   height: 15px;
 }
 .tagColorExample {
-  margin-left: 20px;
+  margin-right: 5px;
   padding: 0 10px 0 12px;
   color: #fff;
   text-decoration: none;
-  -moz-border-radius-bottomright: 4px;
-  -webkit-border-bottom-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-  -moz-border-radius-topright: 4px;
-  -webkit-border-top-right-radius: 4px;
-  border-top-right-radius: 4px;
+  -moz-border-radius-bottomright: 6px;
+  -webkit-border-bottom-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  -moz-border-radius-topright: 6px;
+  -webkit-border-top-right-radius: 6px;
+  border-top-right-radius: 6px;
+  -moz-border-radius-topleft: 12px;
+  -webkit-border-top-left-radius: 12px;
+  border-top-left-radius: 12px;
+  -moz-border-radius-bottomleft: 12px;
+  -webkit-border-bottom-left-radius: 12px;
+  border-bottom-left-radius: 12px;
   position: relative;
-  width: 30px;
-  height: 20px;
-}
-.tagColorExample.red:before {
-  border-color: transparent #F44336 transparent transparent;
-}
-.tagColorExample.blue:before {
-  border-color: transparent #2196F3 transparent transparent;
-}
-.tagColorExample.pink:before {
-  border-color: transparent #e91e63 transparent transparent;
-}
-.tagColorExample.yellow:before {
-  border-color: transparent #ffeb3b transparent transparent;
-}
-.tagColorExample.green:before {
-  border-color: transparent #4CAF50 transparent transparent;
-}
-.tagColorExample.orange:before {
-  border-color: transparent #ff9800 transparent transparent;
-}
-.tagColorExample.black:before {
-  border-color: transparent #000 transparent transparent;
-}
-.tagColorExample.purple:before {
-  border-color: transparent #9c27b0 transparent transparent;
-}
-.tagColorExample:before {
-  content: "";
-  float: left;
-  position: absolute;
-  top: 0;
-  left: -12px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 10px 8px 10px 4px;
+  width: 90px;
+  min-height: 20px;
+  padding-left: 20px;
+  /*&.red{
+ 		&:before{
+ 			border-color:transparent #F44336 transparent transparent;
+ 		}
+ 	}
+ 	&.blue{
+ 		&:before{
+ 			border-color:transparent #2196F3 transparent transparent;
+ 		}
+ 	}
+ 	&.pink{
+ 		&:before{
+ 			border-color:transparent #e91e63 transparent transparent;
+ 		}
+ 	}
+ 	&.yellow{
+ 		&:before{
+ 			border-color:transparent #ffeb3b transparent transparent;
+ 		}
+ 	}
+ 	&.green{
+ 		&:before{
+ 			border-color:transparent #4CAF50 transparent transparent;
+ 		}
+ 	}
+ 	&.orange{
+ 		&:before{
+ 			border-color:transparent #ff9800 transparent transparent;
+ 		}
+ 	}
+ 	&.black{
+ 		&:before{
+ 			border-color:transparent #000 transparent transparent;
+ 		}
+ 	}
+ 	&.purple{
+ 		&:before{
+ 			border-color:transparent #9c27b0 transparent transparent;
+ 		}
+ 	}*/
 }
 .tagColorExample:after {
   content: "";
   position: absolute;
   top: 8px;
-  left: 0;
+  left: 10px;
   float: left;
   width: 4px;
   height: 4px;
@@ -1057,37 +1070,33 @@ td.rdtYear:hover {
   box-shadow: -1px -1px 2px #004977;
 }
 .tagColor {
-  margin-left: 20px;
-  padding: 0 10px 0 12px;
+  margin-right: 5px;
+  padding: 0 10px 0 20px;
   color: #fff;
   text-decoration: none;
-  -moz-border-radius-bottomright: 4px;
-  -webkit-border-bottom-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-  -moz-border-radius-topright: 4px;
-  -webkit-border-top-right-radius: 4px;
-  border-top-right-radius: 4px;
+  -moz-border-radius-bottomright: 6px;
+  -webkit-border-bottom-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  -moz-border-radius-topright: 6px;
+  -webkit-border-top-right-radius: 6px;
+  border-top-right-radius: 6px;
+  -moz-border-radius-topleft: 12px;
+  -webkit-border-top-left-radius: 12px;
+  border-top-left-radius: 12px;
+  -moz-border-radius-bottomleft: 12px;
+  -webkit-border-bottom-left-radius: 12px;
+  border-bottom-left-radius: 12px;
   position: relative;
   font-size: 12px;
   float: left;
   margin-top: 5px;
-}
-.tagColor:before {
-  content: "";
-  float: left;
-  position: absolute;
-  top: 0;
-  left: -12px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 9px 8px 9px 4px;
+  min-height: 20px;
 }
 .tagColor:after {
   content: "";
   position: absolute;
   top: 8px;
-  left: 0;
+  left: 9px;
   float: left;
   width: 4px;
   height: 4px;
@@ -1098,30 +1107,6 @@ td.rdtYear:hover {
   -moz-box-shadow: -1px -1px 2px #004977;
   -webkit-box-shadow: -1px -1px 2px #004977;
   box-shadow: -1px -1px 2px #004977;
-}
-.tagColor.red:before {
-  border-color: transparent #F44336 transparent transparent;
-}
-.tagColor.blue:before {
-  border-color: transparent #2196F3 transparent transparent;
-}
-.tagColor.pink:before {
-  border-color: transparent #e91e63 transparent transparent;
-}
-.tagColor.yellow:before {
-  border-color: transparent #ffeb3b transparent transparent;
-}
-.tagColor.green:before {
-  border-color: transparent #4CAF50 transparent transparent;
-}
-.tagColor.orange:before {
-  border-color: transparent #ff9800 transparent transparent;
-}
-.tagColor.black:before {
-  border-color: transparent #000 transparent transparent;
-}
-.tagColor.purple:before {
-  border-color: transparent #9c27b0 transparent transparent;
 }
 #tags {
   position: relative;
@@ -1182,4 +1167,101 @@ img.avatar-mini {
 nav .brand-logo {
   margin-top: 10px;
   margin-left: 10px;
+}
+#tag_color_panel {
+  width: 100%;
+  clear: both;
+  padding: 10px;
+}
+#tag_color_panel input {
+  width: auto;
+  height: auto;
+  margin-bottom: 0px;
+}
+#tag_color_panel .inline_div {
+  display: inline-block;
+  color: #9b9b9b;
+}
+#tag_color_panel .preview_bg {
+  background: url("/images/gray_and_white_checkers.gif");
+  background-position: center center;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  padding: 3px;
+  vertical-align: top;
+  cursor: hand;
+  cursor: pointer;
+  position: relative;
+  margin-left: 5px;
+}
+#tag_color_panel .preview_bg .color_preview {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 9px;
+}
+#tag_color_panel .preview_bg .pickup_panel {
+  position: absolute;
+  z-index: 1;
+}
+#tag_color_panel .preview_f {
+  background: url("/images/gray_and_white_checkers.gif");
+  background-position: center center;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  padding: 3px;
+  vertical-align: top;
+  cursor: hand;
+  cursor: pointer;
+  position: relative;
+  margin-left: 5px;
+}
+#tag_color_panel .preview_f .color_preview {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 9px;
+}
+#tag_color_panel .preview_f .pickup_panel {
+  position: absolute;
+  z-index: 1;
+}
+#tag_color_panel i {
+  vertical-align: top;
+  cursor: hand;
+  cursor: pointer;
+}
+#label_name input {
+  margin-bottom: 0px;
+  line-height: 25px;
+  height: 25px;
+}
+#label_name span {
+  line-height: 25px;
+}
+.red_tag {
+  background-color: #F44336 ;
+}
+.purple_tag {
+  background-color: #9c27b0;
+}
+.pink_tag {
+  background-color: #e91e63;
+}
+.orange_tag {
+  background-color: #ff9800;
+}
+.yellow_tag {
+  background-color: #ffeb3b;
+}
+.green_tag {
+  background-color: #4CAF50;
+}
+.blue_tag {
+  background-color: #2196F3;
+}
+.black_tag {
+  background-color: #000;
 }

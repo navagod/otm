@@ -167,7 +167,7 @@ class Task extends Component {
 				{task_item.tags[0].title&&
 					<div className="task-label-mini">
 					{task_item.tags.map((tag, tg) =>
-						<div key={"tag-show-"+tg} className={"tagColor "+tag.color}>{tag.title}</div>
+						<div key={"tag-show-"+tg} className={"tagColor "+tag.color} style={{backgrounColor:tag.bg_color}}>{tag.title}</div>
 						)}
 					<div className="clear"></div>
 					</div>
