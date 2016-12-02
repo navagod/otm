@@ -689,59 +689,59 @@ socket.on('task:changeStatus',function(data,rs){
 	})
 });
 socket.on('task:changeSort',function(data,rs){
-		db.cypher({
-			query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) OPTIONAL MATCH (t)-[l3:Parent]->(c:Cards) DELETE l1,l2,l3 RETURN ID(before),ID(after),ID(c)'
-		},function(err,rs_relate){
-			if (err) {
-				console.log(err);
+	db.cypher({
+		query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) OPTIONAL MATCH (t)-[l3:Parent]->(c:Cards) DELETE l1,l2,l3 RETURN ID(before),ID(after),ID(c)'
+	},function(err,rs_relate){
+		if (err) {
+			console.log(err);
+		}else{
+			if(rs_relate[0]['ID(c)'] && rs_relate[0]['ID(after)']){
+				db.cypher({
+					query:'MATCH (t:Tasks) WHERE ID(t)='+rs_relate[0]['ID(after)']+' MATCH (c:Cards) WHERE ID(c)='+rs_relate[0]['ID(c)']+' CREATE (t)-[:Parent]->(c)'
+				},function(err,rs1){ 
+					if (err) {console.log(err) }
+				})
+			}else if(rs_relate[0]['ID(before)'] && rs_relate[0]['ID(after)']){
+				db.cypher({
+					query:'MATCH (t:Tasks) WHERE ID(t)='+rs_relate[0]['ID(before)']+' MATCH (t2:Tasks) WHERE ID(t2)='+rs_relate[0]['ID(after)']+' CREATE (t2)-[:Parent]->(t)'
+				},function(err,rs2){
+					if (err){ console.log(err)} 
+				})
 			}else{
-				if(rs_relate[0]['ID(c)'] && rs_relate[0]['ID(after)']){
-					 db.cypher({
-					 	query:'MATCH (t:Tasks) WHERE ID(t)='+rs_relate[0]['ID(after)']+' MATCH (c:Cards) WHERE ID(c)='+rs_relate[0]['ID(c)']+' CREATE (t)-[:Parent]->(c)'
-					 },function(err,rs1){ 
-					 	if (err) {console.log(err) }
-					 })
-				}else if(rs_relate[0]['ID(before)'] && rs_relate[0]['ID(after)']){
-					db.cypher({
-						query:'MATCH (t:Tasks) WHERE ID(t)='+rs_relate[0]['ID(before)']+' MATCH (t2:Tasks) WHERE ID(t2)='+rs_relate[0]['ID(after)']+' CREATE (t2)-[:Parent]->(t)'
-					},function(err,rs2){
-					 if (err){ console.log(err)} 
-					})
-				}else{
-					
-				}
 
-
-				if((!data.parent || data.parent =="") && (!data.after || data.after =="")){
-					db.cypher({
-							query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (c:Cards) WHERE ID(c)='+data.cid+' SET t.cid = '+data.cid+' CREATE (t)-[:Parent]->(c)'
-						},function(err,nrs1){
-						 	if (err){ console.log(err)} 
-						});
-				}
-				if((data.parent && data.parent !="") && (!data.after || data.after =="")){
-					db.cypher({
-							query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (t2:Tasks) WHERE ID(t2)='+data.parent+' SET t.cid = '+data.cid+' CREATE (t)-[:Parent]->(t2)'
-						},function(err,nrs2){
-						 	if (err){ console.log(err)} 
-						});
-				}
-				if((!data.parent || data.parent =="") && (data.after && data.after !="")){
-					db.cypher({
-						query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (c:Cards) WHERE ID(c)='+data.cid+' MATCH (t2:Tasks) WHERE ID(t2)='+data.after+' MATCH (t2)-[r:Parent]->(c) SET t.cid = '+data.cid+' DELETE r CREATE (t2)-[:Parent]->(t)-[:Parent]->(c)'
-					},function(err,nrs3){
-						if (err){ console.log(err)} 
-					});
-				}
-				if((data.parent && data.parent !="") && (data.after && data.after !="")){
-					db.cypher({
-							query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (t2:Tasks) WHERE ID(t2)='+data.parent+' MATCH (t3:Tasks) WHERE ID(t3)='+data.after+' MATCH (t2)-[r:Parent]-(t3) DELETE r SET t.cid = '+data.cid+'  CREATE (t3)-[:Parent]->(t)-[:Parent]->(t2)'
-						},function(err,nrs4){
-						 	if (err){ console.log(err)} 
-						});
-				}
 			}
-		})
+
+
+			if((!data.parent || data.parent =="") && (!data.after || data.after =="")){
+				db.cypher({
+					query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (c:Cards) WHERE ID(c)='+data.cid+' SET t.cid = '+data.cid+' CREATE (t)-[:Parent]->(c)'
+				},function(err,nrs1){
+					if (err){ console.log(err)} 
+				});
+			}
+			if((data.parent && data.parent !="") && (!data.after || data.after =="")){
+				db.cypher({
+					query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (t2:Tasks) WHERE ID(t2)='+data.parent+' SET t.cid = '+data.cid+' CREATE (t)-[:Parent]->(t2)'
+				},function(err,nrs2){
+					if (err){ console.log(err)} 
+				});
+			}
+			if((!data.parent || data.parent =="") && (data.after && data.after !="")){
+				db.cypher({
+					query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (c:Cards) WHERE ID(c)='+data.cid+' MATCH (t2:Tasks) WHERE ID(t2)='+data.after+' MATCH (t2)-[r:Parent]->(c) SET t.cid = '+data.cid+' DELETE r CREATE (t2)-[:Parent]->(t)-[:Parent]->(c)'
+				},function(err,nrs3){
+					if (err){ console.log(err)} 
+				});
+			}
+			if((data.parent && data.parent !="") && (data.after && data.after !="")){
+				db.cypher({
+					query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (t2:Tasks) WHERE ID(t2)='+data.parent+' MATCH (t3:Tasks) WHERE ID(t3)='+data.after+' MATCH (t2)-[r:Parent]-(t3) DELETE r SET t.cid = '+data.cid+'  CREATE (t3)-[:Parent]->(t)-[:Parent]->(t2)'
+				},function(err,nrs4){
+					if (err){ console.log(err)} 
+				});
+			}
+		}
+	})
 });
 //Task===============//
 
@@ -779,6 +779,29 @@ socket.on('todo:status',function(data,rs){
 		}
 	})
 });
+socket.on('todo:sorted',function(data,fn){
+	var process_query = true;
+	data.items.forEach(function(value,index){
+		db.cypher({
+			query: 'MATCH (t:Todos) WHERE ID(t) = '+value['ID(td)']+' SET t.position = '+value['td.position']+' RETURN ID(t)'
+		}, function (err, results) {
+			if (err){
+				console.log(err);
+				process_query = false;
+			}else{
+				if(process_query) {
+					socket.broadcast.emit('todo:updateSort', {
+						tid:data.id,
+						lists:data.items
+					});
+					fn(true);
+				}else{
+					fn(false);
+				}
+			}
+		});
+	});
+});
 socket.on('todo:delete',function(data,rs){
 	db.cypher({
 		query:'MATCH (td:Todos) WHERE ID(td) = '+data.id+' MATCH (td)-[n:IN]->(t:Tasks) DELETE n DELETE td RETURN td',
@@ -806,7 +829,7 @@ socket.on('todo:edit',function(data,rs){
 //Tags ===========//
 socket.on('tag:list',function(data,rs){
 	db.cypher({
-		query:'MATCH (t:Labels)-[:IN]->(p:Projects) WHERE ID(p) = '+data.pid+' RETURN ID(t),t.text,t.color',
+		query:'MATCH (t:Labels)-[:IN]->(p:Projects) WHERE ID(p) = '+data.pid+' RETURN ID(t),t.text,t.color,t.bg_color,t.f_color',
 	},function(err,result){
 		if (err){ console.log(err);
 			rs(false)
@@ -829,6 +852,28 @@ socket.on('tag:add',function(data,rs){
 socket.on('tag:setColor',function(data,rs){
 	db.cypher({
 		query:'MATCH (t:Labels) WHERE ID(t) = '+data.tid+' SET t.color="'+data.color+'" RETURN ID(t)',
+	},function(err,result){
+		if (err){ console.log(err);
+			rs(false)
+		}else{
+			rs(result)
+		}
+	})
+});
+socket.on('tag:setColorCustomBG',function(data,rs){
+	db.cypher({
+		query:'MATCH (t:Labels) WHERE ID(t) = '+data.tid+' SET t.bg_color="'+data.color+'" RETURN ID(t)',
+	},function(err,result){
+		if (err){ console.log(err);
+			rs(false)
+		}else{
+			rs(result)
+		}
+	})
+});
+socket.on('tag:setColorCustomF',function(data,rs){
+	db.cypher({
+		query:'MATCH (t:Labels) WHERE ID(t) = '+data.tid+' SET t.f_color="'+data.color+'" RETURN ID(t)',
 	},function(err,result){
 		if (err){ console.log(err);
 			rs(false)
@@ -861,7 +906,7 @@ socket.on('tag:edit',function(data,rs){
 });
 socket.on('tag:current',function(data,rs){
 	db.cypher({
-		query:'MATCH (t:Tasks)<-[:IN]-(l:Labels)  WHERE ID(t) = '+data.tid+' RETURN ID(l),l.text,l.color',
+		query:'MATCH (t:Tasks)<-[:IN]-(l:Labels)  WHERE ID(t) = '+data.tid+' RETURN ID(l),l.text,l.color,l.bg_color,l.f_color',
 	},function(err,result_labels){
 		if (err) console.log(err);
 		if(!result_labels || err){
@@ -949,13 +994,13 @@ socket.on('attachment:add',function(data,rs){
 	var file_name = guid() + "." + data.file_ext;
 	var full_path_name = dir_file + file_name;
 	if (!fs.existsSync(dir_file)) {
-        fs.mkdir(dir_file, 0777, function(e) {})
-    }
+		fs.mkdir(dir_file, 0777, function(e) {})
+	}
 	fs.writeFile(full_path_name, data.file, 'binary', function(err) {
-        if (err){
-        	console.log('Save Avatar Error : ',err);
-        	rs("");
-        }else{
+		if (err){
+			console.log('Save Avatar Error : ',err);
+			rs("");
+		}else{
 			db.cypher({
 				query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' CREATE (a:Attachment {date:"'+data.at_create+'",file_name:"'+file_name+'",file_type:"' + data.file_ext + '"}) CREATE (u)-[:Attachment]->(a)-[:IN]->(t) RETURN a',
 			},function(err,result){
@@ -973,8 +1018,8 @@ socket.on('attachment:add',function(data,rs){
 					})
 				}
 			})
-        }
-    });
+		}
+	});
 });
 
 socket.on('attachment:delete',function(data,rs){
@@ -984,10 +1029,10 @@ socket.on('attachment:delete',function(data,rs){
 	var full_path_name = dir_file + file_name;
 	var attachment_id = data.attachment_id;
 	fs.unlink(full_path_name, function(err) {
-        if (err){
-        	console.log('Save Avatar Error : ',err);
-        	rs("");
-        }else{
+		if (err){
+			console.log('Save Avatar Error : ',err);
+			rs("");
+		}else{
 			db.cypher({
 				query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (a:Attachment) WHERE ID(a) = '+attachment_id+' DETACH DELETE a',
 			},function(err,result){
@@ -1005,8 +1050,8 @@ socket.on('attachment:delete',function(data,rs){
 					})
 				}
 			})
-        }
-    });
+		}
+	});
 });
 //Attachment====///
 	//users============//
@@ -1073,16 +1118,16 @@ socket.on('attachment:delete',function(data,rs){
 		var file_name = guid() + ".jpg";
 		var full_path_name = dir_file + file_name;
 		if (!fs.existsSync(dir_file)) {
-	        fs.mkdir(dir_file, 0777, function(e) {})
-	    }
-	    fs.writeFile(full_path_name, data.file, 'binary', function(err) {
-	        if (err){
-	        	console.log('Save Avatar Error : ',err);
-	        	rs("");
-	        }else{
+			fs.mkdir(dir_file, 0777, function(e) {})
+		}
+		fs.writeFile(full_path_name, data.file, 'binary', function(err) {
+			if (err){
+				console.log('Save Avatar Error : ',err);
+				rs("");
+			}else{
 				rs(file_name);
-	        }
-	    });
+			}
+		});
 
 	});
 	socket.on('user:list',function(data,rs){
