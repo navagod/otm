@@ -379,11 +379,7 @@ socket.on('task:add',function(data,rs){
 								user_avatar:"",
 								user_name:"",
 								status:"active",
-								tags:[{
-									'title':null,
-									'color':null
-								}],
-								tags_color:""
+								tags:[]
 							}
 						});
 						rs({
@@ -401,11 +397,7 @@ socket.on('task:add',function(data,rs){
 								user_avatar:"",
 								status:"active",
 								user_name:"",
-								tags:[{
-									'title':null,
-									'color':null
-								}],
-								tags_color:""
+								tags:[]
 							}
 						});
 					}
@@ -426,11 +418,7 @@ socket.on('task:add',function(data,rs){
 						user_avatar:"",
 						status:"active",
 						user_name:"",
-						tags:[{
-							'title':null,
-							'color':null
-						}],
-						tags_color:""
+						tags:[]
 					}
 				});
 				rs({
@@ -448,11 +436,7 @@ socket.on('task:add',function(data,rs){
 						user_avatar:"",
 						status:"active",
 						user_name:"",
-						tags:[{
-							'title':null,
-							'color':null
-						}],
-						tags_color:""
+						tags:[]
 					}
 				});
 			}

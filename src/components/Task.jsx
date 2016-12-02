@@ -30,7 +30,6 @@ class Task extends Component {
 			if(!rs){
 
 			}else{
-				console.log(rs)
 				this.setState({listTasks:rs });
 				$( ".sort-task" ).sortable({connectWith: ".sort-task",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
 			}
