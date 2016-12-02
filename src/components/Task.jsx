@@ -21,7 +21,8 @@ class Task extends Component {
 			listTasks:[],
 			looped:false,
 			totalCard:0,
-			currentLoop:-1
+			currentLoop:-1,
+			showAddButton:true
 		}
 	}
 	componentDidMount(){
@@ -29,6 +30,7 @@ class Task extends Component {
 			if(!rs){
 
 			}else{
+				console.log(rs)
 				this.setState({listTasks:rs });
 				$( ".sort-task" ).sortable({connectWith: ".sort-task",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
 			}
@@ -41,8 +43,10 @@ class Task extends Component {
 	componentDidUpdate(prevProps, prevState){
 		calTeatarea()
 		if(this.state.totalCard === this.state.currentLoop){
-			console.log('update list')
 			this.setState({currentLoop: -1})
+		}
+		if(this.state.openAddTask){
+			this.refs.addTaskTitle.focus()
 		}
 	}
 	componentWillReceiveProps(nextProps){
@@ -69,12 +73,13 @@ class Task extends Component {
 	esc(e){
 		if(e.key=="Escape"){
 			this.setState({
-				openAddTask: false
+				openAddTask: false,
+				showAddButton:true
 			})
 		}
 	}
 	openAddTaskDialog(){
-		this.setState({openAddTask:true});
+		this.setState({openAddTask:true,showAddButton:false});
 	}
 	handleSortTaskUpdate(type,event, ui){
 		if(type=="receive"){
@@ -105,7 +110,7 @@ class Task extends Component {
 					console.log('success : ',rs)
 				}
 			})
-		
+
 		}else if(type=="sort" && !this.state.looped){
 			let id = ui['item'].attr('data-id')
 			let cid = $(event['target']).attr('data-cid')
@@ -174,14 +179,14 @@ class Task extends Component {
 				{task_item.total_comment >0&&<div className="task-comment-mini"><i className="material-icons tiny">comment</i> {task_item.total_comment}</div>}
 				{task_item.total_task != "0/0"&&<div className="task-todo-mini"><i className="material-icons tiny">toc</i> {task_item.total_task}</div>}
 				{task_item.duedate&&<div className="task-duedate-mini"><i className="material-icons tiny">web</i> {timeConverter(task_item.duedate)}</div>}
-				{/*task_item.tags[0].title&&
+				{task_item.tags&&
 					<div className="task-label-mini">
 					{task_item.tags.map((tag, tg) =>
-						<div key={"tag-show-"+tg} className={"tagColor "+tag.color}>{tag.title}</div>
+						<div key={"tag-show-"+tg} className={"tagColor "+tag.properties.color}>{tag.properties.text}</div>
 						)}
 					<div className="clear"></div>
 					</div>
-				*/}
+				}
 				</Link>
 				</div>
 				)}
@@ -193,9 +198,10 @@ class Task extends Component {
 				</form>
 				</div>
 				:
-				<div id="add-task" onClick={this.openAddTaskDialog.bind(this)}>+</div>
+				null
 			}
 
+			{this.state.showAddButton&&<div id="add-task" onClick={this.openAddTaskDialog.bind(this)}>+</div>}
 			</div>
 			)
 	}
