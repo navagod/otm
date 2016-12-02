@@ -162,6 +162,16 @@ module.exports = {
 			}
 		});
 	},
+	sortTodo(socket,tid,item,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('todo:sorted', {id:tid,items:item}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
 	listUsers(socket,pid,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('user:listAssign', {pid:pid}, (result) => {
