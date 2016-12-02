@@ -1222,122 +1222,133 @@ hr{
  		}
  	}
  }
-#btn-manage-tag{
-	font-size: 13px;
-	text-align: center;
-	margin-bottom: 10px;
-	cursor: #aaa;
-	&:hover{
-		color: skyblue;
-	}
-}
-#manage-tag-popup{
-	position: absolute;
-	z-index: 99999;
-}
-.img-50{
-	max-height: 50px;
-    min-height: 50px;
-    width: 50px;
-    max-width: 50px;
-    min-width: 50px;
-}
-.img-100{
-	max-height: 100px;
-    min-height: 100px;
-    width: 100px;
-    max-width: 100px;
-    min-width: 100px;
-}
-.attachemnt-item{
-	float: left;
-	margin-top: 5px;
-	margin-right: 5px;
-	position: relative;
-	transition: opacity .5s;
-	&:hover{
-		opacity: .8;
-	}
-}
-.img-picture{
-	background-size: cover;
-	background-position: center;
-}
-.attachment-rm{
-	position: absolute;
-	top: 0px;
-	right: 0px;
-	width: 15px;
-	height: 15px;
-	background-color: red;
-	text-align: center;
-	color: #fff;
-	line-height: 15px;
-	opacity: .5;
-	transition: opacity .5s;
-	cursor: pointer;
-	&:hover{
-		opacity: 1;
-	}
-}
-.img-file{
-	background-image: url("../images/default-file.png");
-	background-position: -127px -499px;
-}
-.img-pdf{
-	background-position: -127px -336px;
-}
-.img-doc,.img-docx{
-	background-position: 0 -336px;
-}
-.img-ppt,.img-pptx{
-	background-position: -252px -336px;
-}
-.img-xls,.img-xlsx{
-	background-position: -377px -336px;
-}
-.img-zip{
-	background-position: -498px -336px;
-}
-.img-csv{
-	background-position: 0 -499px;
-}
-.loading-panel{
-	position: fixed;
-    z-index: 9999;
-    background: rgba(0,0,0,.9);
-    text-align: center;
-    width: 100%;
-    height: 100%;
-    top: -100%;
-    transition: top .5s;
-    color: #fff;
-    .loading-panel-wrapper{
-    	top: 50%;
-    	left: 50%;
-    	position: absolute;
-    	transform: translate(-50%,-50%);
-    	.spinner-layer{
-    		border-color: #fff;
-    	}
-    }
-	&.active{
-		top: 0;
-		left: 0;
-	}
-}
-img.avatar{
-	width: 50px;
-	height: 50px;
-}
-img.avatar-mini{
-	width: 40px;
-	height: 40px;
-}
+ #btn-manage-tag{
+ 	font-size: 13px;
+ 	text-align: center;
+ 	margin-bottom: 10px;
+ 	cursor: #aaa;
+ 	&:hover{
+ 		color: skyblue;
+ 	}
+ }
+ #manage-tag-popup{
+ 	position: absolute;
+ 	z-index: 99999;
+ }
+ .img-50{
+ 	max-height: 50px;
+ 	min-height: 50px;
+ 	width: 50px;
+ 	max-width: 50px;
+ 	min-width: 50px;
+ }
+ .img-100{
+ 	max-height: 100px;
+ 	min-height: 100px;
+ 	width: 100px;
+ 	max-width: 100px;
+ 	min-width: 100px;
+ }
+ .attachemnt-item{
+ 	float: left;
+ 	margin-top: 5px;
+ 	margin-right: 5px;
+ 	position: relative;
+ 	transition: opacity .5s;
+ 	&:hover{
+ 		opacity: .8;
+ 	}
+ }
+ .img-picture{
+ 	background-size: cover;
+ 	background-position: center;
+ }
+ .attachment-rm{
+ 	position: absolute;
+ 	top: 0px;
+ 	right: 0px;
+ 	width: 15px;
+ 	height: 15px;
+ 	background-color: red;
+ 	text-align: center;
+ 	color: #fff;
+ 	line-height: 15px;
+ 	opacity: .5;
+ 	transition: opacity .5s;
+ 	cursor: pointer;
+ 	&:hover{
+ 		opacity: 1;
+ 	}
+ }
+ .img-file{
+ 	background-image: url("../images/default-file.png");
+ 	background-position: -127px -499px;
+ }
+ .img-pdf{
+ 	background-position: -127px -336px;
+ }
+ .img-doc,.img-docx{
+ 	background-position: 0 -336px;
+ }
+ .img-ppt,.img-pptx{
+ 	background-position: -252px -336px;
+ }
+ .img-xls,.img-xlsx{
+ 	background-position: -377px -336px;
+ }
+ .img-zip{
+ 	background-position: -498px -336px;
+ }
+ .img-csv{
+ 	background-position: 0 -499px;
+ }
+ .loading-panel{
+ 	position: fixed;
+ 	z-index: 9999;
+ 	background: rgba(0,0,0,.9);
+ 	text-align: center;
+ 	width: 100%;
+ 	height: 100%;
+ 	top: -100%;
+ 	transition: top .5s;
+ 	color: #fff;
+ 	.loading-panel-wrapper{
+ 		top: 50%;
+ 		left: 50%;
+ 		position: absolute;
+ 		transform: translate(-50%,-50%);
+ 		.spinner-layer{
+ 			border-color: #fff;
+ 		}
+ 	}
+ 	&.active{
+ 		top: 0;
+ 		left: 0;
+ 	}
+ }
+ img.avatar{
+ 	width: 50px;
+ 	height: 50px;
+ }
+ img.avatar-mini{
+ 	width: 40px;
+ 	height: 40px;
+ }
 
-nav {
-	.brand-logo {
-		margin-top:10px;
-		margin-left:10px;
-	}
-}
+ nav {
+ 	.brand-logo {
+ 		margin-top:10px;
+ 		margin-left:10px;
+ 	}
+ }
+ .ui-state-highlight{
+ 	width: 100%;
+ 	height: 100px;
+ 	background: #fffce1;
+ 	border:2px dotted #ccc;
+ 	border-radius: 5px;
+ 	margin-bottom: 10px;
+ }
+ .sort-task{
+ 	min-height: 100px;
+ }

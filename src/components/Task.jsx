@@ -31,7 +31,7 @@ class Task extends Component {
 
 			}else{
 				this.setState({listTasks:rs });
-				$( ".sort-task" ).sortable({connectWith: ".sort-task",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
+				$( ".sort-task" ).sortable({connectWith: ".sort-task",placeholder: "ui-state-highlight",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
 			}
 		})
 		
@@ -50,7 +50,7 @@ class Task extends Component {
 	}
 	componentWillReceiveProps(nextProps){
 		this.setState({cardId:nextProps.cardId})
-		$( ".sort-task" ).sortable({connectWith: ".sort-task",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
+		$( ".sort-task" ).sortable({connectWith: ".sort-task",placeholder: "ui-state-highlight",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
 		tasks.list(this.props.socket,nextProps.cardId,(rs)=>{
 			if(!rs){
 
@@ -153,13 +153,14 @@ class Task extends Component {
 			}else{
 				var {listTasks} = this.state;
 				listTasks.push(rs.lists);
-				this.setState({listTasks,openAddTask: false});
+				this.setState({listTasks,openAddTask: false,showAddButton:true});
 			}
 
 		})
 	}
 	render() {
 		return (
+			<div>
 			<div className="sort-task" data-cid={this.state.cardId}>
 			
 			{ this.state.listTasks.map((task_item, i) =>
@@ -189,7 +190,7 @@ class Task extends Component {
 				</Link>
 				</div>
 				)}
-
+			</div>
 			{this.state.openAddTask ?
 				<div className="task-box" id="taskBoxAdd">
 				<form onSubmit={this.submitAddTask.bind(this)}>
