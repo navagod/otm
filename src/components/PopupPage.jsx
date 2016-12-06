@@ -258,6 +258,24 @@ class PopupPage extends Component {
 	}
 	closeTags(){
 		this.setState({showTag:false})
+		Tasks.currentTag(this.state.socket,this.state.taskId,(rs)=>{
+			if(!rs){
+
+			}else{
+				var {currentTags} = this.state;
+				currentTags = rs
+				this.setState({currentTags})
+			}
+		})
+		Tasks.allTag(this.state.socket,this.state.projectId,(rs)=>{
+			if(!rs){
+
+			}else{
+				var {allTags} = this.state
+				allTags = rs
+				this.setState({allTags})
+			}
+		})
 	}
 	classTag(id){
 		let index = _.findIndex(this.state.currentTags,{'ID(l)':id})

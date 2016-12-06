@@ -2,10 +2,11 @@ import React, { Component } from 'react';
 import Redirect from 'react-router/Redirect'
 import InlineEdit from 'react-edit-inline';
 import projects from './Module/Project'
-import { SketchPicker } from 'react-color';
+import { ChromePicker } from 'react-color';
 class Tags extends Component {
 	state = {
 		tempTagId:null,
+		tempColor:null,
 	};
 	constructor(props) {
 		super(props);
@@ -62,8 +63,14 @@ class Tags extends Component {
 					tagList.push({
 						'ID(t)':rs[0]['ID(t)'],
 						't.text':text,
-						't.color':'black_tag'
-					})
+						't.color':'black_tag',
+						't.bg_color':"",
+						't.f_color':""
+					});
+					this.state.customBgColor[rs[0]['ID(t)']] = "";
+					this.state.customFColor[rs[0]['ID(t)']] = "";
+					this.state.customBgColorPickerDisplay[rs[0]['ID(t)']] = "none";
+					this.state.customFColorPickerDisplay[rs[0]['ID(t)']] = "none";
 					this.setState({tagList})
 					this.refs.tagAddTitile.value = ""
 				}
@@ -116,32 +123,48 @@ class Tags extends Component {
 		})
 	}
 	showBGPickUpColor(tid) {
-		if (tid != this.state.tempTagId || this.state.tempTagId == null) {
+/*		for (var i in this.state.customFColorPickerDisplay) {
+			if (this.state.customFColorPickerDisplay[i] != "none") {
+				this.state.tempTagId = null;
+				this.state.customFColorPickerDisplay[i] = "none";
+			}
+		}*/
+		if (this.state.tempTagId == null) {/*
 			for (var i in this.state.customBgColorPickerDisplay) {
 				this.state.customBgColorPickerDisplay[i] = "none";
-			}
+			}*/
 			this.state.tempTagId = tid;
+			this.state.tempColor = this.state.customBgColor[tid];
 			this.state.customBgColorPickerDisplay[tid] = "block";
-		} else {
+		}/* else {
 			this.state.customBgColorPickerDisplay[tid] = "none";
 			this.state.tempTagId = null;
 			this.setCustomBackground(tid);
-		}
+		}*/
 	}
 	showFPickUpColor(tid) {
-		if (tid != this.state.tempTagId || this.state.tempTagId == null) {
+/*		for (var i in this.state.customBgColorPickerDisplay) {
+			if (this.state.customBgColorPickerDisplay[i] != "none") {
+				this.state.tempTagId = null;
+				this.state.customBgColorPickerDisplay[i] = "none";
+			}
+		}*/
+		if (this.state.tempTagId == null) {/*
 			for (var i in this.state.customFColorPickerDisplay) {
 				this.state.customFColorPickerDisplay[i] = "none";
-			}
+			}*/
 			this.state.tempTagId = tid;
+			this.state.tempColor = this.state.customFColor[tid];
 			this.state.customFColorPickerDisplay[tid] = "block";
-		} else {
+		}/* else {
 			this.state.customFColorPickerDisplay[tid] = "none";
 			this.state.tempTagId = null;
 			this.setCustomFont(tid);
-		}
+		}*/
 	}
 	setCustomBackground(tid) {
+		this.state.customBgColorPickerDisplay[tid] = "none";
+		this.state.tempTagId = null;
 		var color = this.state.customBgColor[tid];
 		projects.colorTagCustomBG(this.props.socket,color,tid,(rs)=>{
 			if(!rs){
@@ -152,9 +175,16 @@ class Tags extends Component {
 				tagList[index]['t.bg_color'] = color;
 				this.setState({tagList})
 			}
-		})
+		});
+	}
+	closeAndReturnCustomBackground(tid) {
+		this.state.customBgColor[tid] = this.state.tempColor;
+		this.state.customBgColorPickerDisplay[tid] = "none";
+		this.state.tempTagId = null;
 	}
 	setCustomFont(tid) {
+		this.state.customFColorPickerDisplay[tid] = "none";
+		this.state.tempTagId = null;
 		var color = this.state.customFColor[tid];
 		projects.colorTagCustomF(this.props.socket,color,tid,(rs)=>{
 			if(!rs){
@@ -165,7 +195,12 @@ class Tags extends Component {
 				tagList[index]['t.f_color'] = color;
 				this.setState({tagList})
 			}
-		})
+		});
+	}
+	closeAndReturnCustomFont(tid) {
+		this.state.customFColor[tid] = this.state.tempColor;
+		this.state.customFColorPickerDisplay[tid] = "none";
+		this.state.tempTagId = null;
 	}
 	clearCustomBackground(tid) {
 		var color = "";
@@ -243,7 +278,13 @@ class Tags extends Component {
 											<div className='preview_bg inline_div'>
 												<div className='color_preview inline_div' style={{backgroundColor:this.state.customBgColor[item["ID(t)"]]}} onClick={this.showBGPickUpColor.bind(this,item["ID(t)"])}></div>
 												<div className='pickup_panel' style={{display:this.state.customBgColorPickerDisplay[item["ID(t)"]]}}>
-													<SketchPicker color={this.state.customBgColor[item["ID(t)"]]} onChange={ this.handleChangeBg } />
+													<ChromePicker color={this.state.customBgColor[item["ID(t)"]]} onChange={ this.handleChangeBg } />
+													<div className='button'>
+														<i className="material-icons" onClick={this.closeAndReturnCustomBackground.bind(this,item["ID(t)"])}>clear</i>
+													</div>
+													<div className='button'>
+														<i className="material-icons" onClick={this.setCustomBackground.bind(this,item["ID(t)"])}>format_color_fill</i>
+													</div>
 												</div>
 											</div>
 											<i className="material-icons" onClick={this.clearCustomBackground.bind(this,item["ID(t)"])}>format_color_reset</i>
@@ -253,7 +294,13 @@ class Tags extends Component {
 											<div className='preview_f inline_div'>
 												<div className='color_preview inline_div' style={{backgroundColor:this.state.customFColor[item["ID(t)"]]}} onClick={this.showFPickUpColor.bind(this,item["ID(t)"])}></div>
 												<div className='pickup_panel' style={{display:this.state.customFColorPickerDisplay[item["ID(t)"]]}}>
-													<SketchPicker color={this.state.customFColor[item["ID(t)"]]} onChange={ this.handleChangeF } />
+													<ChromePicker color={this.state.customFColor[item["ID(t)"]]} onChange={ this.handleChangeF } />
+													<div className='button'>
+														<i className="material-icons" onClick={this.closeAndReturnCustomFont.bind(this,item["ID(t)"])}>clear</i>
+													</div>
+													<div className='button'>
+														<i className="material-icons" onClick={this.setCustomFont.bind(this,item["ID(t)"])}>format_color_text</i>
+													</div>
 												</div>
 											</div>
 											<i className="material-icons" onClick={this.clearCustomFont.bind(this,item["ID(t)"])}>format_color_reset</i>
