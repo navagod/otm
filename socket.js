@@ -14,6 +14,7 @@ module.exports = function (socket) {
 	var users = [];
 	var md5 = require('js-md5');
 	var fs = require('fs');
+	var _ = require('lodash')
 	function timeConverter(date){
 		var today = new Date(parseInt(date));
 		var dd = today.getDate();
@@ -53,7 +54,13 @@ module.exports = function (socket) {
 		}
 		return s4() + s4() + s4();
 	}
-
+	function uniqBy(a, key) {
+		var seen = new Set();
+		return a.filter(item => {
+			var k = key(item);
+			return seen.has(k) ? false : seen.add(k);
+		});
+	}
 //project============//
 socket.on('project:listArr',function(data,rs){
 
@@ -215,6 +222,20 @@ socket.on('project:addAssign', function (data,fn) {
 		query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' CREATE (u)-[a:Assigned]->(p) RETURN ID(p),u.Name,u.Avatar'
 	}, function (err, results) {
 		if (err){ console.log(err); fn(false); }else{
+			//notification
+
+			db.cypher({
+				query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' CREATE (n:Notification {Type:"assigned" ,date:"'+ new Date().getTime() +'",title:u.Name + " Assigned to " + p.title,detail:p.detail,readed:"no"}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+			}, function (err, rs_notify) {
+				if (err){
+					console.log(err); 
+				}else{
+
+				}
+			});
+
+
+			//===
 			socket.broadcast.emit('project:updateAddAssign', {
 				pid:data.pid,
 				id: data.uid,
@@ -445,7 +466,30 @@ socket.on('task:add',function(data,rs){
 });
 socket.on('task:list',function(data,rs){
 	db.cypher({
-		query:'MATCH x=(c:Cards)<-[*]-(t:Tasks)  WHERE id(c)='+data.cid+' AND t.status <> "archive" AND t.status <> "trash" OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in1:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) WHERE tdc.status="success" OPTIONAL MATCH (l:Labels)-[:IN]->(t) RETURN length(x) as pos,u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.endDate,t.detail,t.status,count(distinct cm) AS total_comment,'+data.cid+' AS cid,count(distinct td) AS total_todo,count(distinct tdc) AS todo_success,collect(distinct l) as tags ORDER BY pos ASC',
+		query:'MATCH x=(c:Cards)<-[*]-(t:Tasks)  ' +
+			'WHERE id(c)='+data.cid+' ' +
+			'AND t.status <> "archive" ' +
+			'AND t.status <> "trash" ' +
+		'OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) ' +
+		'OPTIONAL MATCH (cm:Comments)-[in1:IN]->(t) ' +
+			'WHERE cm.type <> "log"  ' +
+		'OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) ' +
+		'OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) ' +
+			'WHERE tdc.status="success" ' +
+		'OPTIONAL MATCH (l:Labels)-[:IN]->(t) ' +
+		'RETURN length(x) as pos,u.Name,u.Avatar,ID(t) ' +
+			'AS tid,' +
+			't.title,' +
+			't.position,' +
+			't.endDate,' +
+			't.detail,' +
+			't.status,' +
+			'count(distinct cm) AS total_comment,' +
+			data.cid+' AS cid,' +
+			'count(distinct td) AS total_todo,' +
+			'count(distinct tdc) AS todo_success,' +
+			'collect(distinct l) as tags ' +
+		'ORDER BY pos ASC',
 	},function(err,results){
 		if (err) console.log(err);
 		let res = [];
@@ -672,18 +716,40 @@ socket.on('task:assignUser',function(data,rs){
 		if(!results || err){
 			rs(false)
 		}else{
+			if(data.uid!="0" || data.uid > 0){
+				db.cypher({
+					query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' CREATE (n:Notification {Type:"assigned" ,date:"'+ new Date().getTime() +'",title:u.Name + " Assigned to " + t.title,detail:t.detail,readed:"no"}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+				}, function (err, rs_notify) {
+					if (err){
+						console.log(err); 
+					}else{
+
+					}
+				});
+			}
 			rs(results)
 		}
 	})
 });
 socket.on('task:changeStatus',function(data,rs){
 	db.cypher({
-		query:'MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' SET t.status = "'+data.status+'" RETURN t',
+		query:'MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' MATCH (u:Users)-[:Assigned]->(t) SET t.status = "'+data.status+'" RETURN t,u.Name,ID(u)',
 	},function(err,results){
 		if (err) console.log(err);
 		if(!results || err){
 			rs(false)
 		}else{
+			if(data.status === "active" || data.status === "complete" || data.status === "archive"){
+				db.cypher({
+					query: 'MATCH (u:Users) WHERE ID(u) = '+results[0]['ID(u)']+' MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' CREATE (n:Notification {Type:"changed" ,date:"'+ new Date().getTime() +'",title:"'+data.user_name+' Change status " + t.title + " to '+data.status+'",detail:t.detail,readed:"no"}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+				}, function (err, rs_notify) {
+					if (err){
+						console.log(err); 
+					}else{
+
+					}
+				});
+			}
 			rs(results)
 		}
 	})
@@ -954,17 +1020,32 @@ socket.on('comment:list',function(data,rs){
 
 socket.on('comment:add',function(data,rs){
 	db.cypher({
-		query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' CREATE (c:Comments {date:"'+data.at_create+'",text:"'+data.text+'",type:"user"}) CREATE (u)-[:Comment]->(c)-[:IN]->(t) RETURN c',
+		query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (us:Users)-[:Assigned]->(t) CREATE (c:Comments {date:"'+data.at_create+'",text:"'+data.text+'",type:"user"}) CREATE (u)-[:Comment]->(c)-[:IN]->(t) RETURN c,ID(us),u.Name',
 	},function(err,result){
 		if (err){ console.log(err);
 			rs(false)
 		}else{
 			db.cypher({
-				query:'MATCH (u:Users)-[:Comment]->(c:Comments)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN u.Name,u.Avatar,c.text,c.date,c.type ORDER BY ID(c) DESC',
+				query:'MATCH (u:Users)-[:Comment]->(c:Comments)-[:IN]->(t:Tasks) WHERE ID(t) = '+data.tid+' RETURN ID(u),u.Name,u.Avatar,c.text,c.date,c.type ORDER BY ID(c) DESC',
 			},function(err,rs_comment){
 				if (err){ console.log(err);
 					rs(false)
 				}else{
+					var uni = _.uniqBy(rs_comment,'ID(u)')
+					
+					uni.forEach(function(item,index){
+						if(data.uid!==item['ID(u)']){
+							db.cypher({
+								query: 'MATCH (u:Users) WHERE ID(u) = '+item['ID(u)']+' MATCH (p:Tasks) WHERE ID(p) = '+data.tid+' CREATE (n:Notification {Type:"comment" ,date:"'+ new Date().getTime() +'",title:"'+result[0]['u.Name']+' post comment",detail:"'+data.text+'",readed:"no"}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+							}, function (err, rs_notify) {
+								if (err){
+									console.log(err); 
+								}else{
+
+								}
+							});
+						}
+					})
 					rs(rs_comment)
 				}
 			})
@@ -1160,6 +1241,22 @@ socket.on('attachment:delete',function(data,rs){
 		});
 	});
 	//users============//
+
+
+	//Notification
+	socket.on('notification:count',function(data,rs){
+		db.cypher({
+			query:'MATCH (u:Users)<-[:TO]-(n:Notification) WHERE ID(u) = '+data.uid+' AND n.readed = "no" RETURN COUNT(distinct n)',
+		},function(err,results){
+			if (err) console.log(err);
+			if(results){
+				rs(results[0]['COUNT(distinct n)']);
+			}
+		});
+	});
+
+
+	//notification
 	socket.on('disconnect', function () {
 
 	});

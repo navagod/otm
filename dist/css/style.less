@@ -166,18 +166,19 @@
 	width: 30px;
 	height: 30px;
 	cursor: pointer;
-	opacity: 0.5;
+	opacity: 0.3;
 	-webkit-transition: all 0.3s ease-in-out;
 	-moz-transition: all 0.3s ease-in-out;
 	-ms-transition: all 0.3s ease-in-out;
 	-o-transition: all 0.3s ease-in-out;
 	transition: all 0.3s ease-in-out;
+	border-radius: 50%;
+	margin-right: 5px;
 }
 .color-select.active,.color-select:hover{
 	opacity: 1;
-	width: 40px;
-	height: 40px;
-	margin-top: -6px;
+	width: 30px;
+	height: 30px;
 }
 .icon-select{
 	float: left;
@@ -199,8 +200,8 @@
 	opacity: 1;
 	background: #aaa;
 	width: 40px;
-	height: 40px;
-	margin-top: -6px;
+	height: 30px;
+	// margin-top: -6px;
 }
 #add-task{
 	background: #ccc;
@@ -443,7 +444,7 @@
 }
 .detail{
 	font-size: 16px;
-	color: #bbb;
+	color: #717171;
 }
 hr{
 	display: block;
@@ -1043,8 +1044,11 @@ hr{
 
  	position: relative;
  	width: 90px;
- 	min-height: 20px;
 	 padding-left: 20px;
+	 min-height:20px;
+	 line-height: 20px;
+
+	 box-shadow: 1px 2px 5px rgba(0,0,0,0.7);
  	/*&.red{
  		&:before{
  			border-color:transparent #F44336 transparent transparent;
@@ -1087,17 +1091,6 @@ hr{
 
  	}*/
 
- 	&:before{
- 		content:"";
- 		float:left;
- 		position:absolute;
- 		top:0;
- 		left:-12px;
- 		width:0;
- 		height:0;
- 		border-style:solid;
- 		border-width: 10px 8px 10px 4px;
- 	}
  	&:after{
  		content:"";
  		position:absolute;
@@ -1143,6 +1136,9 @@ hr{
  	float: left;
  	margin-top: 5px;
 	min-height:20px;
+	 line-height: 20px;
+
+	 box-shadow: 1px 2px 5px rgba(0,0,0,0.7);
  	&:after{
  		content:"";
  		position:absolute;
@@ -1364,6 +1360,8 @@ hr{
 		.pickup_panel {
 			position: absolute;
 			z-index: 1;
+			left: 31px;
+			top: -143px;
 		}
 	}
 	.preview_f {
@@ -1387,12 +1385,23 @@ hr{
 		.pickup_panel {
 			position: absolute;
 			z-index: 1;
+			left: 31px;
+			top: -143px;
 		}
 	}
 	i {
 		vertical-align: top;
 		cursor: hand;
 		cursor: pointer;
+	}
+	.button {
+		background: #FFF;
+		display: inline-block;
+		border-radius: 2px;
+		box-shadow: 1px 4px 5px rgba(0,0,0,0.2),1px 4px 5px rgba(0,0,0,0.2);
+		padding: 2px;
+		margin: 3px 0 5px 3px;
+		float: right;
 	}
 }
 #label_name {
@@ -1431,4 +1440,38 @@ hr{
 }
 .color_preview {
 
+}
+#notify-wrap{
+	z-index: 9000;
+	width: 300px;
+	background: #fff;
+	border-radius: 10px;
+	position: absolute;
+	right: -50px;
+	overflow: hidden;
+	height: auto;
+	line-height: 10px;
+}
+#notify-head{
+	padding: 10px;
+	background: #eee;
+	color: #717171;
+}
+#readed{
+	padding: 5px;
+	background: #ccc;
+	color: #fff;
+	float: right;
+	height: 20px;
+	border-radius: 50%;
+	cursor: pointer;
+}
+#notify-body{
+	.notify-item{
+		cursor: pointer;
+		padding: 10px;
+		margin: 10px;
+		background: #eee;
+		border-radius: 5px;
+	}
 }
