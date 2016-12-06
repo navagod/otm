@@ -158,10 +158,17 @@ class Task extends Component {
 
 		})
 	}
+	styleforInputAddNew(){
+		if(!this.state.showAddButton){
+			return "sort-task"
+		}else{
+			return "sort-task min-height"
+		}
+	}
 	render() {
 		return (
 			<div>
-			<div className="sort-task" data-cid={this.state.cardId}>
+			<div className={this.styleforInputAddNew()} data-cid={this.state.cardId}>
 			
 			{ this.state.listTasks.map((task_item, i) =>
 				<div className={"task-box " + task_item.status} data-id={task_item.id} id={"task-"+task_item.id} key={i}>
@@ -182,7 +189,7 @@ class Task extends Component {
 				{task_item.tags&&
 					<div className="task-label-mini">
 					{task_item.tags.map((tag, tg) =>
-						<div key={"tag-show-"+tg} className={"tagColor "+tag.properties.color} style={{backgrounColor:tag.properties.bg_color}}>{tag.title}</div>
+						<div key={"tag-show-"+tg} className={"tagColor "+tag.properties.color} style={{backgrounColor:tag.properties.bg_color}}>{tag.properties.text}</div>
 						)}
 					<div className="clear"></div>
 					</div>
@@ -194,7 +201,7 @@ class Task extends Component {
 			{this.state.openAddTask ?
 				<div className="task-box" id="taskBoxAdd">
 				<form onSubmit={this.submitAddTask.bind(this)}>
-				<input type="text" ref="addTaskTitle" onKeyDown={this.esc.bind(this)} maxLength="100" required />
+				<input type="text" ref="addTaskTitle" placeholder="Enter task name or ESC to cancel" onKeyDown={this.esc.bind(this)} maxLength="100" required />
 				</form>
 				</div>
 				:
