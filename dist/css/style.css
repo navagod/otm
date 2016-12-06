@@ -1012,6 +1012,7 @@ td.rdtYear:hover {
   width: 90px;
   min-height: 20px;
   padding-left: 20px;
+  box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.7);
   /*&.red{
  		&:before{
  			border-color:transparent #F44336 transparent transparent;
@@ -1054,17 +1055,6 @@ td.rdtYear:hover {
 
  	}*/
 }
-.tagColorExample:before {
-  content: "";
-  float: left;
-  position: absolute;
-  top: 0;
-  left: -12px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 10px 8px 10px 4px;
-}
 .tagColorExample:after {
   content: "";
   position: absolute;
@@ -1103,6 +1093,7 @@ td.rdtYear:hover {
   float: left;
   margin-top: 5px;
   min-height: 20px;
+  box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.7);
 }
 .tagColor:after {
   content: "";
@@ -1321,6 +1312,8 @@ nav .brand-logo {
 #tag_color_panel .preview_bg .pickup_panel {
   position: absolute;
   z-index: 1;
+  left: 31px;
+  top: -143px;
 }
 #tag_color_panel .preview_f {
   background: url("/images/gray_and_white_checkers.gif");
@@ -1344,11 +1337,22 @@ nav .brand-logo {
 #tag_color_panel .preview_f .pickup_panel {
   position: absolute;
   z-index: 1;
+  left: 31px;
+  top: -143px;
 }
 #tag_color_panel i {
   vertical-align: top;
   cursor: hand;
   cursor: pointer;
+}
+#tag_color_panel .button {
+  background: #FFF;
+  display: inline-block;
+  border-radius: 2px;
+  box-shadow: 1px 4px 5px rgba(0, 0, 0, 0.2), 1px 4px 5px rgba(0, 0, 0, 0.2);
+  padding: 2px;
+  margin: 3px 0 5px 3px;
+  float: right;
 }
 #label_name input {
   margin-bottom: 0px;
