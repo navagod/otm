@@ -223,7 +223,7 @@ class PopupPage extends Component {
 		})
 		this.props.updateTaskCount();
 	}
-	clickTag(id,color,text){
+	clickTag(id,color,text,bg,f){
 		var index = _.findIndex(this.state.currentTags,{'ID(l)':id})
 		let mode = ''
 		if(index >= 0){
@@ -240,7 +240,9 @@ class PopupPage extends Component {
 					currentTags.push({
 						'ID(l)':id,
 						'l.color':color,
-						'l.text':text
+						'l.text':text,
+						'l.bg_color':bg,
+						'l.f_color':f
 					})
 					this.setState({currentTags})
 				}else{
@@ -256,6 +258,24 @@ class PopupPage extends Component {
 	}
 	closeTags(){
 		this.setState({showTag:false})
+		Tasks.currentTag(this.state.socket,this.state.taskId,(rs)=>{
+			if(!rs){
+
+			}else{
+				var {currentTags} = this.state;
+				currentTags = rs
+				this.setState({currentTags})
+			}
+		})
+		Tasks.allTag(this.state.socket,this.state.projectId,(rs)=>{
+			if(!rs){
+
+			}else{
+				var {allTags} = this.state
+				allTags = rs
+				this.setState({allTags})
+			}
+		})
 	}
 	classTag(id){
 		let index = _.findIndex(this.state.currentTags,{'ID(l)':id})
@@ -456,7 +476,7 @@ class PopupPage extends Component {
 		<strong>Tags</strong>
 		<div>
 		{this.state.currentTags.map((tag,i)=>
-			<div key={"color-"+i} className={"tagColor "+tag["l.color"]}>{tag["l.text"]}</div>
+			<div key={"color-"+i} className={"tagColor "+tag["l.color"]} style={{backgroundColor:tag["l.bg_color"],color:tag["l.f_color"]}}>{tag["l.text"]}</div>
 			)}
 		<div className="clear"></div>
 		</div>
@@ -467,8 +487,8 @@ class PopupPage extends Component {
 			onMouseLeave={this._handleBlur.bind(this)}>
 			<div id="btn-manage-tag" onClick={this.openTags.bind(this)}>[Manage Tags]</div>
 			{this.state.allTags.map((taga,ti)=>
-				<div className={this.classTag(taga['ID(t)'])} key={"tag-all-"+ti+taga["ID(t)"]} onClick={this.clickTag.bind(this,taga["ID(t)"],taga["t.color"],taga["t.text"])}>
-				<div className={"tagColor "+taga['t.color']}>{taga["t.text"]}</div>
+				<div className={this.classTag(taga['ID(t)'])} key={"tag-all-"+ti+taga["ID(t)"]} onClick={this.clickTag.bind(this,taga["ID(t)"],taga["t.color"],taga["t.text"],taga["t.bg_color"],taga["t.f_color"])}>
+				<div className={"tagColor "+taga['t.color']} style={{backgroundColor:taga['t.bg_color'],color:taga['t.f_color']}}>{taga["t.text"]}</div>
 				<div className="clear"></div>
 				</div>
 				)}

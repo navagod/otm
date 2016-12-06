@@ -211,6 +211,32 @@ module.exports = {
 			}
 		});
 	},
+	colorTagCustomBG(socket,custom_bg,tid,cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('tag:setColorCustomBG', {
+			tid:tid,
+			color:custom_bg
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	colorTagCustomF(socket,custom_bg,tid,cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('tag:setColorCustomF', {
+			tid:tid,
+			color:custom_bg
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
 	editTag(socket,id,text,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('tag:edit', {
