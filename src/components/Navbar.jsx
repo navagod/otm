@@ -16,6 +16,7 @@ import Nopage from './Nopage'
 import Register from './Register'
 import Timeline from './Timelines'
 import Common from './Module/Common'
+import Notification from './Notification'
 
 var socket = io.connect()
 
@@ -37,13 +38,19 @@ class Navbar extends Component {
 		})
 	}
 	componentDidMount() {
-		Common.countNotification(socket,(rs)=>{
-			if(!rs){
+		if(auth.loggedIn()){
+			Common.countNotification(socket,(rs)=>{
+				if(!rs){
 
-			}else{
-				this.setState({notify:rs})
-			}
-		})
+				}else{
+					this.setState({notify:rs})
+				}
+			})
+		}
+	}
+	showNotify(e){
+		e.preventDefault()
+
 	}
 	render() {
 		return (
@@ -58,7 +65,9 @@ class Navbar extends Component {
 					<ul className="right hide-on-med-and-down">
 					<li><Link to="/timeline"><i className="large material-icons">clear_all</i></Link></li>
 					<li><Link to="/profile"><i className="large material-icons">perm_identity</i></Link></li>
-					<li className="relative"><a href="#"><i className="large material-icons">info</i> {this.state.notify > 0 &&<span className="notify">{this.state.notify}</span>}</a></li>
+					<li className="relative"><a href="#" onClick={this.showNotify.bind(this)}><i className="large material-icons">info</i> {this.state.notify > 0 &&<span className="notify">{this.state.notify}</span>}</a>
+					<Notification />
+					</li>
 					<li><Link to="/logout"><i className="large material-icons">power_settings_new</i></Link></li>
 					</ul>
 					:
