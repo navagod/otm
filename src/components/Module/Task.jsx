@@ -194,7 +194,7 @@ module.exports = {
 	},
 	setStatusTask(socket,status,tid,cb){
 		cb = arguments[arguments.length - 1]
-		socket.emit('task:changeStatus', {status:status,tid:tid}, (result) => {
+		socket.emit('task:changeStatus', {status:status,tid:tid,user_name:localStorage.name}, (result) => {
 			if(!result){
 				cb(false)
 			}else{
@@ -257,7 +257,8 @@ module.exports = {
 				cb(result)
 			}
 		});
-	},removeAttachment(socket,attachment_id,tid,file_name, cb) {
+	},
+	removeAttachment(socket,attachment_id,tid,file_name, cb) {
 		cb = arguments[arguments.length - 1]
 		socket.emit('attachment:delete', {
 			uid:localStorage.uid,

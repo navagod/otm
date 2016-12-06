@@ -15,23 +15,35 @@ import Profile from './Profile'
 import Nopage from './Nopage'
 import Register from './Register'
 import Timeline from './Timelines'
-
+import Common from './Module/Common'
 
 var socket = io.connect()
 
 const MatchWhenAuthorized = ({ component: Component, ...rest }) => (
-  <Match {...rest} render={props => (
-    auth.loggedIn() ? (
-      <Component {...props} {...rest} socket={socket} />
-    ) : (
-      <Redirect to='/login'/>
-    )
-  )}/>
-)
+	<Match {...rest} render={props => (
+		auth.loggedIn() ? (
+			<Component {...props} {...rest} socket={socket} />
+			) : (
+			<Redirect to='/login'/>
+			)
+			)}/>
+	)
 
 class Navbar extends Component {
 	componentWillMount() {
-		this.setState({socket: socket})
+		this.setState({
+			socket: socket,
+			notify: 0
+		})
+	}
+	componentDidMount() {
+		Common.countNotification(socket,(rs)=>{
+			if(!rs){
+
+			}else{
+				this.setState({notify:rs})
+			}
+		})
 	}
 	render() {
 		return (
@@ -46,7 +58,7 @@ class Navbar extends Component {
 					<ul className="right hide-on-med-and-down">
 					<li><Link to="/timeline"><i className="large material-icons">clear_all</i></Link></li>
 					<li><Link to="/profile"><i className="large material-icons">perm_identity</i></Link></li>
-					<li className="relative"><a href="#"><i className="large material-icons">info</i> <span className="notify">4</span></a></li>
+					<li className="relative"><a href="#"><i className="large material-icons">info</i> {this.state.notify > 0 &&<span className="notify">{this.state.notify}</span>}</a></li>
 					<li><Link to="/logout"><i className="large material-icons">power_settings_new</i></Link></li>
 					</ul>
 					:
