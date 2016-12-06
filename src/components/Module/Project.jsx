@@ -37,12 +37,13 @@ module.exports = {
 			}
 		});
 	},
-	save(socket,title,detail,id, cb) {
+	save(socket,title,detail,id, uid, cb) {
 		cb = arguments[arguments.length - 1]
 		socket.emit('project:save', {
 			id:id,
 			title:title,
-			detail:detail
+			detail:detail,
+			uid: uid
 		}, (result) => {
 			if(!result) {
 				cb(false)
@@ -51,10 +52,11 @@ module.exports = {
 			}
 		});
 	},
-	delete(socket,id, cb) {
+	delete(socket,id,uid, cb) {
 		cb = arguments[arguments.length - 1]
 		socket.emit('project:delete', {
-			id:id
+			id:id,
+			uid: uid
 		}, (result) => {
 			if(!result) {
 				cb(false)

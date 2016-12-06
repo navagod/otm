@@ -126,13 +126,20 @@ socket.on('project:add', function (data,fn) {
 	}, function (err, results) {
 		if (err){ console.log(err); fn(false); }else{
 			db.cypher({
-				query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name,u.Avatar',
+				// query:'MATCH (m:Users)-->(p:Projects) WHERE  AND p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name,u.Avatar',
+				query: 'MATCH (u:Users)-->(pj:Projects) WHERE id(u) = '+data.uid+' AND pj.status = "active" RETURN DISTINCT pj',
 			},function(err,results){
 				if (err) console.log(err);
 				if(results){
 					boardList = [];
 					results.forEach(function(item,index){
-						boardList.push({id:item['ID(p)'],title:item['p']['properties']['title'],detail:item['p']['properties']['detail'],uid:item['ID(u)'],user_name:item['u.Name'],user_avatar:item['u.Avatar']});
+						boardList.push({
+							id:item['pj']['_id'],
+							title:item['pj']['properties']['title']
+							// uid:item['ID(u)'],
+							// user_name:item['u.Name'],
+							// user_avatar:item['u.Avatar']
+						});
 					});
 					socket.broadcast.emit('project:updateAddList', {
 						list:boardList
@@ -152,15 +159,22 @@ socket.on('project:save', function (data,fn) {
 		query: 'MATCH (p:Projects) WHERE ID(p) = '+data.id+' SET p.title = "'+data.title+'",p.detail = "'+data.detail+'" RETURN p'
 	}, function (err, results) {
 		if (err) console.log(err);
-
 		db.cypher({
-			query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name,u.Avatar',
+			// query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name,u.Avatar',
+			query: 'MATCH (u:Users)-->(p:Projects) WHERE id(u) = '+data.uid+' AND p.status = "active" RETURN DISTINCT p',
 		},function(err,results){
 			if (err) console.log(err);
 			if(results){
 				boardList = [];
 				results.forEach(function(item,index){
-					boardList.push({id:item['ID(p)'],title:item['p']['properties']['title'],detail:item['p']['properties']['detail'],uid:item['ID(u)'],user_name:item['u.Name'],user_avatar:item['u.Avatar']});
+					boardList.push({
+						id:item['p']['_id'],
+						title:item['p']['properties']['title'],
+						detail:item['p']['properties']['detail'],
+						// uid:item['ID(u)'],
+						// user_name:item['u.Name'],
+						// user_avatar:item['u.Avatar']
+					});
 				});
 				socket.broadcast.emit('project:updateEditProject', {
 					pid:data.id,
@@ -180,13 +194,16 @@ socket.on('project:delete', function (data,fn) {
 		if (err) console.log(err);
 
 		db.cypher({
-			query:'MATCH (p:Projects) WHERE p.status = "active" OPTIONAL MATCH (u:Users)-[a:Assigned]->(p) WHERE ID(u)<>0 RETURN ID(p),p,ID(u),u.Name,u.Avatar',
+			query: 'MATCH (u:Users)-->(p:Projects) WHERE id(u) = '+data.uid+' AND p.status = "active" RETURN DISTINCT p',
 		},function(err,results){
 			if (err) console.log(err);
 			if(results){
 				boardList = [];
 				results.forEach(function(item,index){
-					boardList.push({id:item['ID(p)'],title:item['p']['properties']['title'],detail:item['p']['properties']['detail'],uid:item['ID(u)'],user_name:item['u.Name'],user_avatar:item['u.Avatar']});
+					boardList.push({
+						id:item['p']['_id'],
+						title:item['p']['properties']['title']
+					});
 				});
 				socket.broadcast.emit('project:updateEditProject', {
 					pid:data.id,
@@ -230,7 +247,7 @@ socket.on('project:removeAssign', function (data,fn) {
 
 socket.on('project:mylist',function(data,rs){
 	db.cypher({
-		query: 'MATCH (u:Users)-->(pj:Projects) WHERE id(u) = '+data.id+' AND pj.status = "active" RETURN DISTINCT pj',
+		query: 'MATCH (u:Users)-->(pj:Projects) WHERE id(u) = '+data.id+' AND pj.status = "active" RETURN DISTINCT pj,u',
 	},function(err,results){
 		if (err) console.log(err);
 		if(results){
@@ -238,7 +255,10 @@ socket.on('project:mylist',function(data,rs){
 			results.forEach(function(item,index){
 				projectName.push({
 					id:item['pj']['_id'],
-					title:item['pj']['properties']['title']
+					title:item['pj']['properties']['title'],
+					uid:item['u']['_id'],
+					name:item['u']['properties']['Name'],
+					avatar:item['u']['properties']['Avatar'],
 				});
 			});
 			rs(projectName);

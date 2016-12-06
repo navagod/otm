@@ -1,0 +1,70 @@
+.clearfix{
+	clear: both;
+}
+
+.font(@font,@lh:@font){
+	font-size: @font;
+	line-height: @lh;
+}
+
+.dashboard-panel{
+	width: 100%;
+	height: calc(~"100vh" - 64px);
+	background: lightblue;
+	.project-panel{
+		float: left;
+		width: 300px;
+		height: 100%;
+		background: rgba(255, 255, 255, 0.3);
+		position: relative;
+		z-index: 2;
+		// .project-panel-toggle{
+		//     width: 30px;
+		//     height: 30px;
+		//     position: absolute;
+		//     top: 0;
+		//     right: -30px;
+		//     background: rgba(255, 255, 255, 0.3);
+		//     cursor: pointer;
+		// }
+		.project-panel-inner{
+			width: 90%;
+			margin: 0 auto;
+			.project-link-box{
+				padding: 10px 0;
+				border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+				position: relative;
+				.project-name{
+					padding: 0 20px;
+					box-sizing: border-box;
+				}
+				.project-edit{
+				    width: 20px;
+				    height: 20px;
+				    background: rgba(255, 255, 255, 0.3);
+				    position: absolute;
+				    z-index: 3;
+				    right: 0;
+				    top: 30%;
+					opacity: 0;
+					cursor: pointer;
+				}
+				&:hover{
+					.project-edit{
+						opacity: 1;
+					}
+				}
+			}
+		}
+	}
+	.title-panel{
+		float: left;
+		margin: 30px;
+		.title{
+			.font(30px);
+		}
+		.subtitle{
+			.font(24px);
+		}
+	}
+}
