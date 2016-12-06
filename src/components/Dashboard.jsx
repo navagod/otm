@@ -369,7 +369,6 @@ class Dashboard extends Component {
 			<div>
 			<div className="row">
 			{ this.state.listUsers.map((user, i) =>
-
 				<div key={i} className={this.activeListUser(user.id)} onClick={this.selectUserActive.bind(this,user.id)}>
 				{user.avatar?
 					<img src={"/uploads/"+user.avatar} className="avatar circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
