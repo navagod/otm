@@ -1010,9 +1010,8 @@ td.rdtYear:hover {
   border-bottom-left-radius: 12px;
   position: relative;
   width: 90px;
-  padding-left: 20px;
   min-height: 20px;
-  line-height: 20px;
+  padding-left: 20px;
   box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.7);
   /*&.red{
  		&:before{
@@ -1094,7 +1093,6 @@ td.rdtYear:hover {
   float: left;
   margin-top: 5px;
   min-height: 20px;
-  line-height: 20px;
   box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.7);
 }
 .tagColor:after {
@@ -1275,7 +1273,7 @@ nav .brand-logo {
   border-radius: 5px;
   margin-bottom: 10px;
 }
-.min-height {
+.sort-task {
   min-height: 100px;
 }
 #tag_color_panel {
