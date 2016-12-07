@@ -225,7 +225,7 @@ socket.on('project:addAssign', function (data,fn) {
 			//notification
 
 			db.cypher({
-				query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' CREATE (n:Notification {Type:"assigned" ,date:"'+ new Date().getTime() +'",title:u.Name + " Assigned to " + p.title,detail:p.detail,readed:"no"}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+				query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' CREATE (n:Notification {Type:"project" ,date:"'+ new Date().getTime() +'",title:u.Name + " Assigned to " + p.title,detail:p.detail,readed:"no"}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
 			}, function (err, rs_notify) {
 				if (err){
 					console.log(err); 
@@ -718,7 +718,7 @@ socket.on('task:assignUser',function(data,rs){
 		}else{
 			if(data.uid!="0" || data.uid > 0){
 				db.cypher({
-					query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' CREATE (n:Notification {Type:"assigned" ,date:"'+ new Date().getTime() +'",title:u.Name + " Assigned to " + t.title,detail:t.detail,readed:"no"}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+					query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' CREATE (n:Notification {Type:"task" ,date:"'+ new Date().getTime() +'",title:u.Name + " Assigned to " + t.title,detail:t.detail,readed:"no"}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
 				}, function (err, rs_notify) {
 					if (err){
 						console.log(err); 
@@ -1251,6 +1251,18 @@ socket.on('attachment:delete',function(data,rs){
 			if (err) console.log(err);
 			if(results){
 				rs(results[0]['COUNT(distinct n)']);
+			}
+		});
+	});
+	socket.on('notification:lists',function(data,rs){
+		db.cypher({
+			query:'MATCH (u:Users)<-[:TO]-(n:Notification) WHERE ID(u) = '+data.uid+' AND n.readed = "no" RETURN n.Type AS type,n.date AS date,n.title AS title,n.detail AS detail,n.readed AS readed ORDER BY ID(n) DESC SKIP '+data.offset+' LIMIT 1',
+		},function(err,results){
+			if (err) console.log(err);
+			if(results){
+				rs(results)
+			}else{
+				rs(false)
 			}
 		});
 	});
