@@ -9,5 +9,14 @@ module.exports = {
 			}
 		});
 	},
-
+	listNotification(socket,offset,cb){
+		cb = arguments[arguments.length - 1]
+		socket.emit('notification:lists', {uid:localStorage.uid,offset:offset}, (result) => {
+			if(!result){
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
 }
