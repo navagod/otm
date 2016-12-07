@@ -225,7 +225,7 @@ socket.on('project:addAssign', function (data,fn) {
 			//notification
 
 			db.cypher({
-				query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' CREATE (n:Notification {Type:"project" ,date:"'+ new Date().getTime() +'",title:u.Name + " Assigned to " + p.title,detail:p.detail,readed:"no"}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+				query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' CREATE (n:Notification {Type:"project" ,date:"'+ new Date().getTime() +'",title:u.Name + " Assigned to " + p.title,detail:p.detail,readed:"no",pid:ID(p)}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
 			}, function (err, rs_notify) {
 				if (err){
 					console.log(err); 
@@ -467,28 +467,28 @@ socket.on('task:add',function(data,rs){
 socket.on('task:list',function(data,rs){
 	db.cypher({
 		query:'MATCH x=(c:Cards)<-[*]-(t:Tasks)  ' +
-			'WHERE id(c)='+data.cid+' ' +
-			'AND t.status <> "archive" ' +
-			'AND t.status <> "trash" ' +
+		'WHERE id(c)='+data.cid+' ' +
+		'AND t.status <> "archive" ' +
+		'AND t.status <> "trash" ' +
 		'OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) ' +
 		'OPTIONAL MATCH (cm:Comments)-[in1:IN]->(t) ' +
-			'WHERE cm.type <> "log"  ' +
+		'WHERE cm.type <> "log"  ' +
 		'OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) ' +
 		'OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) ' +
-			'WHERE tdc.status="success" ' +
+		'WHERE tdc.status="success" ' +
 		'OPTIONAL MATCH (l:Labels)-[:IN]->(t) ' +
 		'RETURN length(x) as pos,u.Name,u.Avatar,ID(t) ' +
-			'AS tid,' +
-			't.title,' +
-			't.position,' +
-			't.endDate,' +
-			't.detail,' +
-			't.status,' +
-			'count(distinct cm) AS total_comment,' +
-			data.cid+' AS cid,' +
-			'count(distinct td) AS total_todo,' +
-			'count(distinct tdc) AS todo_success,' +
-			'collect(distinct l) as tags ' +
+		'AS tid,' +
+		't.title,' +
+		't.position,' +
+		't.endDate,' +
+		't.detail,' +
+		't.status,' +
+		'count(distinct cm) AS total_comment,' +
+		data.cid+' AS cid,' +
+		'count(distinct td) AS total_todo,' +
+		'count(distinct tdc) AS todo_success,' +
+		'collect(distinct l) as tags ' +
 		'ORDER BY pos ASC',
 	},function(err,results){
 		if (err) console.log(err);
@@ -718,7 +718,7 @@ socket.on('task:assignUser',function(data,rs){
 		}else{
 			if(data.uid!="0" || data.uid > 0){
 				db.cypher({
-					query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' CREATE (n:Notification {Type:"task" ,date:"'+ new Date().getTime() +'",title:u.Name + " Assigned to " + t.title,detail:t.detail,readed:"no"}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+					query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' CREATE (n:Notification {Type:"task" ,date:"'+ new Date().getTime() +'",title:u.Name + " Assigned to " + t.title,detail:t.detail,readed:"no",tid:ID(t)}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
 				}, function (err, rs_notify) {
 					if (err){
 						console.log(err); 
@@ -741,7 +741,7 @@ socket.on('task:changeStatus',function(data,rs){
 		}else{
 			if(data.status === "active" || data.status === "complete" || data.status === "archive"){
 				db.cypher({
-					query: 'MATCH (u:Users) WHERE ID(u) = '+results[0]['ID(u)']+' MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' CREATE (n:Notification {Type:"changed" ,date:"'+ new Date().getTime() +'",title:"'+data.user_name+' Change status " + t.title + " to '+data.status+'",detail:t.detail,readed:"no"}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+					query: 'MATCH (u:Users) WHERE ID(u) = '+results[0]['ID(u)']+' MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' CREATE (n:Notification {Type:"changed" ,date:"'+ new Date().getTime() +'",title:"'+data.user_name+' Change status " + t.title + " to '+data.status+'",detail:t.detail,readed:"no",tid:ID(t)}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
 				}, function (err, rs_notify) {
 					if (err){
 						console.log(err); 
@@ -1036,7 +1036,7 @@ socket.on('comment:add',function(data,rs){
 					uni.forEach(function(item,index){
 						if(data.uid!==item['ID(u)']){
 							db.cypher({
-								query: 'MATCH (u:Users) WHERE ID(u) = '+item['ID(u)']+' MATCH (p:Tasks) WHERE ID(p) = '+data.tid+' CREATE (n:Notification {Type:"comment" ,date:"'+ new Date().getTime() +'",title:"'+result[0]['u.Name']+' post comment",detail:"'+data.text+'",readed:"no"}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+								query: 'MATCH (u:Users) WHERE ID(u) = '+item['ID(u)']+' MATCH (p:Tasks) WHERE ID(p) = '+data.tid+' CREATE (n:Notification {Type:"comment" ,date:"'+ new Date().getTime() +'",title:"'+result[0]['u.Name']+' post comment",detail:"'+data.text+'",readed:"no",tid:ID(p)}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
 							}, function (err, rs_notify) {
 								if (err){
 									console.log(err); 
@@ -1256,7 +1256,7 @@ socket.on('attachment:delete',function(data,rs){
 	});
 	socket.on('notification:lists',function(data,rs){
 		db.cypher({
-			query:'MATCH (u:Users)<-[:TO]-(n:Notification) WHERE ID(u) = '+data.uid+' AND n.readed = "no" RETURN n.Type AS type,n.date AS date,n.title AS title,n.detail AS detail,n.readed AS readed ORDER BY ID(n) DESC SKIP '+data.offset+' LIMIT 1',
+			query:'MATCH (u:Users)<-[:TO]-(n:Notification) WHERE ID(u) = '+data.uid+' RETURN ID(n) AS id, n.Type AS type,n.date AS date,n.title AS title,n.detail AS detail,n.readed AS readed,n.pid AS pid,n.tid AS tid ORDER BY ID(n) DESC SKIP '+data.offset+' LIMIT 4',
 		},function(err,results){
 			if (err) console.log(err);
 			if(results){
@@ -1266,7 +1266,26 @@ socket.on('attachment:delete',function(data,rs){
 			}
 		});
 	});
-
+	socket.on('notification:readed',function(data,rs){
+		db.cypher({
+			query:'MATCH (n:Notification) WHERE ID(n)='+data.id+' SET n.readed = "yes" RETURN n',
+		},function(err,results){
+			if (err) console.log(err);
+			if(results){
+				rs(true);
+			}
+		});
+	});
+	socket.on('notification:allreaded',function(data,rs){
+		db.cypher({
+			query:'MATCH (n:Notification)-[:TO]->(u:Users) WHERE ID(u)='+data.uid+' SET n.readed = "yes" RETURN n',
+		},function(err,results){
+			if (err) console.log(err);
+			if(results){
+				rs(true);
+			}
+		});
+	});
 
 	//notification
 	socket.on('disconnect', function () {

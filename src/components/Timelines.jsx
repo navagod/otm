@@ -130,18 +130,27 @@ class Timelines extends Component {
 			</div>
 			<Timeline groups={this.state.userList}
 			items={this.state.taskAssignList}
-			defaultTimeStart={moment().add(-12, 'hour')}
-			defaultTimeEnd={moment().add(12, 'hour')}
+			defaultTimeStart={moment().add(-7, 'day')}
+			defaultTimeEnd={moment().add(7, 'day')}
 			onItemResize={this.resizeItem.bind(this)}
 			onItemMove={this.moveItem.bind(this)}
 			stackItems={true}
-			dragSnap={60 * 60 * 1000}
+      timeSteps={{
+      second: 0,
+      minute: 0,
+      hour: 6,
+      day: 1,
+      month: 1,
+      year: 1
+    }}
+			dragSnap={60 * 60 * 1000*6}
 
 			/>
+
 			<div>
 
 			</div>
-			
+
 			</div>
 
 			)

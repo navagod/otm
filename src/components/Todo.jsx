@@ -46,6 +46,7 @@ class Todo extends Component {
 		Tasks.sortTodo(this.props.socket,this.state.taskId,newItems,(rs)=>{
 			if(!rs){
 				$node.sortable('cancel');
+				todoList = todoList.sort(function(a,b){return a['td.position'] > b['td.position']})
 				this.setState({ todoList: todoList });
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}
@@ -67,6 +68,7 @@ class Todo extends Component {
 						'td.text':text,
 						'td.position':position
 					})
+					todoList = todoList.sort(function(a,b){return a['td.position'] > b['td.position']})
 					this.setState({todoList})
 					this.refs.todoInputAdd.value = ""
 				}
@@ -119,7 +121,7 @@ class Todo extends Component {
 	}
 	render() {
 		var todoList = this.state.todoList
-		todoList.sort(function(a,b){return a['td.position'] > b['td.position']})
+		
 		return (
 			<div>
 			<div  id="todo-sortable">
