@@ -62,7 +62,7 @@ class Project extends Component {
 
 	}
 	_countStatus(data){
-		console.log("data",data);
+		// console.log("data",data);
 	}
 	_updateAddCardList(data){
 		if(data.pid == this.state.projectId){
@@ -112,7 +112,7 @@ class Project extends Component {
 
 	}
 	componentWillReceiveProps(nextProps){
-		console.log(nextProps)
+		// console.log(nextProps)
 	}
 	handleSortCardUpdate(event, ui){
 		var newItems = this.state.cardList;
