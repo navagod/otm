@@ -90,7 +90,7 @@ class Notification extends Component {
 			<div id="notify-wrap" onMouseOver={this.props.onMouseOver} onMouseLeave={this.props.onMouseLeave}>
 			<div id="notify-head">
 			Notifications
-			<div id="readed" onClick={this.makeAllReaded.bind(this)}>X <span>Make all readed</span></div>
+			<div id="readed" onClick={this.makeAllReaded.bind(this)}>X <span>Make all reade</span></div>
 			<div className="clear"></div>
 			</div>
 			<div id="notify-body" onScroll={this.loadmore.bind(this)}>
