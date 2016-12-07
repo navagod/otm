@@ -34,7 +34,9 @@ class Navbar extends Component {
 	componentWillMount() {
 		this.setState({
 			socket: socket,
-			notify: 0
+			notify: 0,
+			notifyActive:false,
+			notifyVisible:false
 		})
 	}
 	componentDidMount() {
@@ -47,10 +49,29 @@ class Navbar extends Component {
 				}
 			})
 		}
+		window.addEventListener('click', this._hideNotify.bind(this), false);
+	}
+	componentWillUnmount() {
+		window.removeEventListener('click', this._hideNotify.bind(this), false);
 	}
 	showNotify(e){
 		e.preventDefault()
-
+		this.setState({notifyVisible:true})
+	}
+	_stopPropagation(e) {
+		e.stopPropagation();
+	}
+	_handleFocus(){
+		this.setState({notifyActive:true})
+	}
+	_handleBlur(){
+		this.setState({notifyActive:false})
+	}
+	_hideNotify(){
+		const { notifyActive } = this.state;
+		if (!notifyActive) {
+			this.setState({notifyVisible:false})
+		}
 	}
 	render() {
 		return (
@@ -65,8 +86,8 @@ class Navbar extends Component {
 					<ul className="right hide-on-med-and-down">
 					<li><Link to="/timeline"><i className="large material-icons">clear_all</i></Link></li>
 					<li><Link to="/profile"><i className="large material-icons">perm_identity</i></Link></li>
-					<li className="relative"><a href="#" onClick={this.showNotify.bind(this)}><i className="large material-icons">info</i> {this.state.notify > 0 &&<span className="notify">{this.state.notify}</span>}</a>
-					<Notification />
+					<li className="relative"  onMouseOver={this._handleFocus.bind(this)} onMouseLeave={this._handleBlur.bind(this)}><a href="#" onClick={this.showNotify.bind(this)}><i className="large material-icons">info</i> {this.state.notify > 0 &&<span className="notify">{this.state.notify}</span>}</a>
+					{this.state.notifyVisible&&<Notification socket={socket} onMouseOver={this._handleFocus.bind(this)} onMouseLeave={this._handleBlur.bind(this)} />}
 					</li>
 					<li><Link to="/logout"><i className="large material-icons">power_settings_new</i></Link></li>
 					</ul>
