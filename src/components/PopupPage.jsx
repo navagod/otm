@@ -92,10 +92,10 @@ class PopupPage extends Component {
 				this.setState({loading:false});
 			}
 		})
-		window.addEventListener('click', this._hideDropdown, false);
+		
 	}
 	componentWillUnmount() {
-		window.removeEventListener('click', this._hideDropdown, false);
+		
 	}
 	_stopPropagation(e) {
 		e.stopPropagation();
@@ -103,6 +103,7 @@ class PopupPage extends Component {
 
 	_toggleDropdown() {
 		this.setState({ dropdownIsVisible: true });
+		window.addEventListener('click', this._hideDropdown, false);
 	}
 
 
@@ -110,6 +111,7 @@ class PopupPage extends Component {
 		const { dropdownIsActive } = this.state;
 		if (!dropdownIsActive) {
 			this.setState({ dropdownIsVisible: false });
+			window.removeEventListener('click', this._hideDropdown, false);
 		}
 	}
 
