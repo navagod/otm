@@ -8,6 +8,9 @@ import Loading from './Loading';
 var Datetime = require('react-datetime');
 var Dropzone = require('react-dynamic-dropzone');
 class PopupPage extends Component {
+	static propTypes = {
+		submitSuccess: React.PropTypes.bool
+	}
 	constructor(props) {
 		super(props)
 		this.state = {
@@ -291,17 +294,17 @@ class PopupPage extends Component {
 		this.setState({U_name:e.target.value});
 	}
 	onDragEnter(e) {
-	    this.setState({ isReceiverOpen: true });
+		this.setState({ isReceiverOpen: true });
 	}
 	onDragOver(e) {
 	    // your codes here
 	}
 	onDragLeave(e) {
-	    this.setState({ isReceiverOpen: false });
+		this.setState({ isReceiverOpen: false });
 	}
 	onOpenClick(e){
-      this.refs.dropzone.open();
-    }
+		this.refs.dropzone.open();
+	}
 	onDrop(acceptedFiles) {
 		this.setState({loading:true});
 		const uid = localStorage.uid
@@ -309,17 +312,17 @@ class PopupPage extends Component {
 		var files = acceptedFiles;
 		var file_count = files.length;
 		var file_list_count = 0;
-		 files.forEach((file)=> {
+		files.forEach((file)=> {
 			var reader = new window.FileReader();
 			var socket_send = this.props.socket;
 			reader.fileName = file.name;
 			reader.readAsBinaryString(file);
 			reader.onload = function(event) {
-		        var binary_file = event.target.result;
-		        var file_name = event.target.fileName;
+				var binary_file = event.target.result;
+				var file_name = event.target.fileName;
 				var extension = file_name.split('.').pop().toLowerCase();
 
-		        Tasks.addAttachment(socket_send,binary_file,extension,_this.state.taskId,(list_attachment)=>{
+				Tasks.addAttachment(socket_send,binary_file,extension,_this.state.taskId,(list_attachment)=>{
 					file_list_count++;
 					if (!list_attachment){
 						return Materialize.toast("เกิดข้อผิดพลาด", 4000)
@@ -332,12 +335,12 @@ class PopupPage extends Component {
 					}
 				})
 			}
-        });
-    }
+		});
+	}
 
-    onAttachmentRemoveClick(attachment_id,file_name){
-    	if (confirm('Do you want to delete?')) {
-    		this.setState({loading:true});
+	onAttachmentRemoveClick(attachment_id,file_name){
+		if (confirm('Do you want to delete?')) {
+			this.setState({loading:true});
 			Tasks.removeAttachment(this.props.socket,attachment_id,this.state.taskId,file_name,(list_attachment)=>{
 				if (!list_attachment){
 					return Materialize.toast("เกิดข้อผิดพลาด", 4000)
@@ -348,7 +351,7 @@ class PopupPage extends Component {
 				}
 			})
 		}
-    }
+	}
 
 	render() {
 		return (
@@ -389,23 +392,23 @@ class PopupPage extends Component {
 		<div id="fileList">
 		<div className="addSubject" onClick={this.onOpenClick}><i className="material-icons">note_add</i> Attachment</div>
 		<Dropzone ref="dropzone" onDrop={this.onDrop} socket={this.socket}>
-            <div>Try dropping some files here, or click to select files to upload.</div>
-        </Dropzone>
-        <div id="attachment-detail">
-	        { this.state.attachments.map((at_item,i)=>
+		<div>Try dropping some files here, or click to select files to upload.</div>
+		</Dropzone>
+		<div id="attachment-detail">
+		{ this.state.attachments.map((at_item,i)=>
 
-				<div id={"att-" + at_item.id} className="attachemnt-item" key={"attachemnt-"+this.state.taskId+"-"+i}>
-					<a href={"/uploads/attachment/"+at_item["a.file_name"]} target="_blank">
-						{ at_item["a.file_type"] == "png" || at_item["a.file_type"] == "jpg" || at_item["a.file_type"] == "jpeg" || at_item["a.file_type"] == "gif"?
-						<div className="img-picture img-100" style={{backgroundImage: 'url(/uploads/attachment/' + at_item["a.file_name"] + ')'}}></div>
-						: <div className={"img-file img-100 img-"+at_item["a.file_type"]}></div>
-						}
-					</a>
-					<div className="attachment-rm circle" onClick={this.onAttachmentRemoveClick.bind(this,at_item.id,at_item["a.file_name"])} data-id={at_item.id}>x</div>
-				</div>
+			<div id={"att-" + at_item.id} className="attachemnt-item" key={"attachemnt-"+this.state.taskId+"-"+i}>
+			<a href={"/uploads/attachment/"+at_item["a.file_name"]} target="_blank">
+			{ at_item["a.file_type"] == "png" || at_item["a.file_type"] == "jpg" || at_item["a.file_type"] == "jpeg" || at_item["a.file_type"] == "gif"?
+			<div className="img-picture img-100" style={{backgroundImage: 'url(/uploads/attachment/' + at_item["a.file_name"] + ')'}}></div>
+			: <div className={"img-file img-100 img-"+at_item["a.file_type"]}></div>
+		}
+		</a>
+		<div className="attachment-rm circle" onClick={this.onAttachmentRemoveClick.bind(this,at_item.id,at_item["a.file_name"])} data-id={at_item.id}>x</div>
+		</div>
 				// {i == 0 ? <div className="card-action"></div> : <div></div>}
-			)}
-			<div className="card-action"></div>
+				)}
+		<div className="card-action"></div>
 		</div>
 		</div>
 		<div id="activity">

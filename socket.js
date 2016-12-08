@@ -223,17 +223,19 @@ socket.on('project:addAssign', function (data,fn) {
 	}, function (err, results) {
 		if (err){ console.log(err); fn(false); }else{
 			//notification
-
-			db.cypher({
-				query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' CREATE (n:Notification {Type:"project" ,date:"'+ new Date().getTime() +'",title:u.Name + " Assigned to " + p.title,detail:p.detail,readed:"no",pid:ID(p)}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
-			}, function (err, rs_notify) {
-				if (err){
-					console.log(err); 
-				}else{
-
-				}
-			});
-
+			if(parseInt(data.uuid) != parseInt(data.uid)){
+				db.cypher({
+					query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (p:Projects) WHERE ID(p) = '+data.pid+' CREATE (n:Notification {Type:"project" ,date:"'+ new Date().getTime() +'",title:u.Name + " Assigned to " + p.title,detail:p.detail,readed:"no",pid:ID(p)}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+				}, function (err, rs_notify) {
+					if (err){
+						console.log(err); 
+					}else{
+						socket.broadcast.emit('notify:updateCount', {
+							uid:data.uid
+						});
+					}
+				});
+			}
 
 			//===
 			socket.broadcast.emit('project:updateAddAssign', {
@@ -716,14 +718,16 @@ socket.on('task:assignUser',function(data,rs){
 		if(!results || err){
 			rs(false)
 		}else{
-			if(data.uid!="0" || data.uid > 0){
+			if((data.uid!="0" || data.uid > 0) && (parseInt(data.uuid) !== parseInt(data.uid))){
 				db.cypher({
 					query: 'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' CREATE (n:Notification {Type:"task" ,date:"'+ new Date().getTime() +'",title:u.Name + " Assigned to " + t.title,detail:t.detail,readed:"no",tid:ID(t)}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
 				}, function (err, rs_notify) {
 					if (err){
 						console.log(err); 
 					}else{
-
+						socket.broadcast.emit('notify:updateCount', {
+							uid:data.uid
+						});
 					}
 				});
 			}
@@ -739,14 +743,16 @@ socket.on('task:changeStatus',function(data,rs){
 		if(!results || err){
 			rs(false)
 		}else{
-			if(data.status === "active" || data.status === "complete" || data.status === "archive"){
+			if((data.status === "active" || data.status === "complete" || data.status === "archive") && (parseInt(data.uuid) !== parseInt(results[0]['ID(u)']))){
 				db.cypher({
-					query: 'MATCH (u:Users) WHERE ID(u) = '+results[0]['ID(u)']+' MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' CREATE (n:Notification {Type:"changed" ,date:"'+ new Date().getTime() +'",title:"'+data.user_name+' Change status " + t.title + " to '+data.status+'",detail:t.detail,readed:"no",tid:ID(t)}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+					query: 'MATCH (u:Users) WHERE ID(u) = '+results[0]['ID(u)']+' MATCH (t:Tasks)  WHERE ID(t) = '+data.tid+' CREATE (n:Notification {Type:"task" ,date:"'+ new Date().getTime() +'",title:"'+data.user_name+' Change status " + t.title + " to '+data.status+'",detail:t.detail,readed:"no",tid:ID(t)}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
 				}, function (err, rs_notify) {
 					if (err){
 						console.log(err); 
 					}else{
-
+						socket.broadcast.emit('notify:updateCount', {
+							uid:data.uid
+						});
 					}
 				});
 			}
@@ -1031,17 +1037,32 @@ socket.on('comment:add',function(data,rs){
 				if (err){ console.log(err);
 					rs(false)
 				}else{
+					if(parseInt(data.uid)!==parseInt(result[0]['ID(us)'])){
+						db.cypher({
+							query: 'MATCH (u:Users) WHERE ID(u) = '+result[0]['ID(us)']+' MATCH (p:Tasks) WHERE ID(p) = '+data.tid+' CREATE (n:Notification {Type:"comment" ,date:"'+ new Date().getTime() +'",title:"'+result[0]['u.Name']+' post comment",detail:"'+data.text+'",readed:"no",tid:ID(p)}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+						}, function (err, rs_notify) {
+							if (err){
+								console.log(err); 
+							}else{
+								socket.broadcast.emit('notify:updateCount', {
+									uid:data.uid
+								});
+							}
+						});
+					}
 					var uni = _.uniqBy(rs_comment,'ID(u)')
 					
 					uni.forEach(function(item,index){
-						if(data.uid!==item['ID(u)']){
+						if(parseInt(data.uid)!==parseInt(item['ID(u)']) && (parseInt(item['ID(u)'])!==parseInt(result[0]['ID(us)']))){
 							db.cypher({
 								query: 'MATCH (u:Users) WHERE ID(u) = '+item['ID(u)']+' MATCH (p:Tasks) WHERE ID(p) = '+data.tid+' CREATE (n:Notification {Type:"comment" ,date:"'+ new Date().getTime() +'",title:"'+result[0]['u.Name']+' post comment",detail:"'+data.text+'",readed:"no",tid:ID(p)}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
 							}, function (err, rs_notify) {
 								if (err){
 									console.log(err); 
 								}else{
-
+									socket.broadcast.emit('notify:updateCount', {
+										uid:data.uid
+									});
 								}
 							});
 						}
@@ -1083,7 +1104,7 @@ socket.on('attachment:add',function(data,rs){
 			rs("");
 		}else{
 			db.cypher({
-				query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' CREATE (a:Attachment {date:"'+data.at_create+'",file_name:"'+file_name+'",file_type:"' + data.file_ext + '"}) CREATE (u)-[:Attachment]->(a)-[:IN]->(t) RETURN a',
+				query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (us:Users)-[:Assigned]->(t) CREATE (a:Attachment {date:"'+data.at_create+'",file_name:"'+file_name+'",file_type:"' + data.file_ext + '"}) CREATE (u)-[:Attachment]->(a)-[:IN]->(t) RETURN a,ID(us)',
 			},function(err,result){
 				if (err){ console.log(err);
 					rs(false)
@@ -1094,6 +1115,22 @@ socket.on('attachment:add',function(data,rs){
 						if (err){ console.log(err);
 							rs(false)
 						}else{
+							//notify
+							if(parseInt(data.uid) !== parseInt(result[0]['ID(us)'])){
+								db.cypher({
+									query: 'MATCH (u:Users) WHERE ID(u) = '+result[0]['ID(us)']+' MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' CREATE (n:Notification {Type:"comment" ,date:"'+ new Date().getTime() +'",title:"'+result[0]['u.Name']+' Attachment",detail:"'+data.text+'",readed:"no",tid:ID(t)}) CREATE (n)-[:TO {date:"'+ new Date().getTime() +'"}]->(u) RETURN n'
+								}, function (err, rs_notify) {
+									if (err){
+										console.log(err); 
+									}else{
+										socket.broadcast.emit('notify:updateCount', {
+											uid:data.uid
+										});
+									}
+								});
+							}
+
+
 							rs(rs_attachment)
 						}
 					})
@@ -1256,7 +1293,7 @@ socket.on('attachment:delete',function(data,rs){
 	});
 	socket.on('notification:lists',function(data,rs){
 		db.cypher({
-			query:'MATCH (u:Users)<-[:TO]-(n:Notification) WHERE ID(u) = '+data.uid+' RETURN ID(n) AS id, n.Type AS type,n.date AS date,n.title AS title,n.detail AS detail,n.readed AS readed,n.pid AS pid,n.tid AS tid ORDER BY ID(n) DESC SKIP '+data.offset+' LIMIT 4',
+			query:'MATCH (u:Users)<-[:TO]-(n:Notification) WHERE ID(u) = '+data.uid+' RETURN ID(n) AS id, n.Type AS type,n.date AS date,n.title AS title,n.detail AS detail,n.readed AS readed,n.pid AS pid,n.tid AS tid ORDER BY ID(n) DESC SKIP '+data.offset+' LIMIT 5',
 		},function(err,results){
 			if (err) console.log(err);
 			if(results){

@@ -144,7 +144,8 @@ module.exports = {
 		if(mode=="add"){
 			socket.emit('project:addAssign', {
 				uid:uid,
-				pid:pid
+				pid:pid,
+				uuid:localStorage.uid
 			}, (result) => {
 				if(!result) {
 					cb(false)
@@ -155,7 +156,8 @@ module.exports = {
 		}else{
 			socket.emit('project:removeAssign', {
 				uid:uid,
-				pid:pid
+				pid:pid,
+				uuid:localStorage.uid
 			}, (result) => {
 				if(!result) {
 					cb(false)

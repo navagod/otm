@@ -16,7 +16,7 @@ class Notification extends Component {
 			if(!rs){
 
 			}else{
-				this.setState({listNotify:rs,offset:4})
+				this.setState({listNotify:rs,offset:5})
 			}
 		})
 	}
@@ -38,7 +38,7 @@ class Notification extends Component {
 						listNotify.push(item)
 					})
 					var {offset} = this.state
-					offset = offset + 4
+					offset = offset + 5
 					this.setState({listNotify,offset})
 				}
 			})
@@ -50,6 +50,7 @@ class Notification extends Component {
 
 			}else{
 				this.context.router.transitionTo(link)
+				this.props.updateNotify()
 			}
 		})
 		
@@ -64,6 +65,7 @@ class Notification extends Component {
 					listNotify[i]['readed'] = "yes"
 				})
 				this.setState({listNotify})
+				this.props.updateNotify()
 			}
 		})
 	}
@@ -79,7 +81,7 @@ class Notification extends Component {
 				link = `/task/${item.tid}`
 			}
 			items.push(
-				<div className={"notify-item "+item.readed} key={"notify-"+i} onClick={this.clickNotify.bind(this,link,item.id)}>
+				<div className={"notify-item "+item.readed} data-type={item.type} key={"notify-"+i} onClick={this.clickNotify.bind(this,link,item.id)}>
 				<div className="notify-date">{timeConverterWithTime(item.date)}</div>
 				<div className="notify-title">{item.title}</div>
 				<div className="notify-detail">{item.detail}</div>
