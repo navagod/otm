@@ -24,10 +24,7 @@ class Profile extends Component {
 			if(!ds){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
-				if(ds.avatar == ""){
-					ds.avatar = "images/default-avatar.jpg";
-				}
-				return this.setState({error: false,U_email:ds.email, U_name :ds.name, U_avatar :ds.avatar, U_avatar_url : "uploads/" + ds.avatar});
+				return this.setState({error: false,U_email:ds.email, U_name :ds.name, U_avatar :ds.avatar, U_color :ds.color});
 			}
 		})
 	}
@@ -90,7 +87,12 @@ class Profile extends Component {
 			<div className="input-field col s12">
 			<div id="dropdown-upload">
 				<input id="avatar" ref="avatar" type="hidden" value={this.state.U_avatar} />
-				<img className="img-responsive" src={this.state.U_avatar_url} />
+				<div>
+				{this.state.U_avatar != ""?
+					<img className="img-responsive" src={this.state.U_avatar_url} />
+					: <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+this.state.U_name.charAt(0).toUpperCase()+"&w=100&h=100&txttrack=0&txtclr=000000&bg="+ this.state.U_color} className={"  tooltipped tooltip-user " + this.state.U_color} data-position="top" data-delay="50" data-tooltip={this.state.U_name} />
+				}
+				</div>
 				Drag & Drop image avatar
 				<Dropzone ref="dropzone" onDrop={this.onDrop} socket={this.socket}>
                     <div>Try dropping some files here, or click to select files to upload.</div>
