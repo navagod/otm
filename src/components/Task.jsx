@@ -66,9 +66,8 @@ class Task extends Component {
 	}
 	_updateAddTaskList(data){
 		if(data.pid == this.state.projectId && data.lists.cid == this.state.cardId){
-			var {listTasks} = this.state;
-			listTasks.push(data.lists);
-			this.setState({listTasks});
+			this.setState({listTasks:[]});
+			this.setState({listTasks:data.lists});
 		}
 	}
 	_updateList(data){
@@ -100,6 +99,9 @@ class Task extends Component {
 			}
 			if(after >= 0){
 				after = arr[after + 1]
+				if(after === undefined){
+					after = ""
+				}
 			}else{
 				after = ""
 			}
@@ -161,7 +163,11 @@ class Task extends Component {
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
 				this.setState({listTasks:[]})
+				$('#c-'+cid+' .sort-task').html('');
+				
 				this.setState({listTasks:rs,openAddTask: false,showAddButton:true});
+				$( ".sort-task" ).sortable({connectWith: ".sort-task",placeholder: "ui-state-highlight",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
+
 			}
 			this.setState({loading:false });
 		})
