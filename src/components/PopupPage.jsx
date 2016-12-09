@@ -95,10 +95,10 @@ class PopupPage extends Component {
 				this.setState({loading:false});
 			}
 		})
-		
+
 	}
 	componentWillUnmount() {
-		
+
 	}
 	_stopPropagation(e) {
 		e.stopPropagation();
@@ -214,6 +214,7 @@ class PopupPage extends Component {
 				var {taskData} = this.state
 				taskData['ua.Name'] = data.name
 				taskData['ua.Avatar'] = data.avatar
+				taskData['ua.Color'] = data.color
 				this.setState({taskData})
 			}
 		})
@@ -427,7 +428,7 @@ class PopupPage extends Component {
 
 			{c_item["u.Avatar"]
 			? <img  src={"/uploads/"+c_item["u.Avatar"]} className="avatar-mini circle responsive-img" width="40" height="40" />
-			: <img src={"https://placeholdit.imgix.net/~text?txtsize=15&txt="+c_item["u.Name"].charAt(0).toUpperCase()+"&w=40&h=40&txttrack=0"} className="circle  responsive-img" />
+			: <img src={"https://placeholdit.imgix.net/~text?txtsize=15&txt="+c_item["u.Name"].charAt(0).toUpperCase()+"&w=40&h=40&txttrack=0&txtclr=000000&bg="+ c_item["u.Color"]} className="circle  responsive-img" />
 		}
 
 		</div>
@@ -455,7 +456,7 @@ class PopupPage extends Component {
 				this.state.taskData['ua.Name'] && this.state.taskData['ua.Avatar'] ?
 				<img src={"/uploads/"+this.state.taskData['ua.Avatar']} width="50" height="50" className="avatar circle responsive-img" />
 				:
-				<img src="https://placeholdit.imgix.net/~text?txtsize=20&txt=%3F&w=50&h=50&txttrack=0" className="circle img-50responsive-img" />
+				<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+this.state.taskData['ua.Name']+"&w=50&h=50&txttrack=0&txtclr=000000&bg=" + this.state.taskData['ua.Color']} className="circle img-50responsive-img" />
 			}
 			<div>{this.state.taskData['ua.Name']}</div>
 			</div>

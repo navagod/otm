@@ -83,7 +83,8 @@ class Dashboard extends Component {
 			editUsers.push({
 				uid:data.id,
 				name:data.name,
-				avatar:data.avatar
+				avatar:data.avatar,
+				avatar:data.color
 			})
 			this.setState({editUsers})
 		}
@@ -108,7 +109,8 @@ class Dashboard extends Component {
 						users.push({
 							uid:u['ID(u)'],
 							name:u['u.Name'],
-							avatar:u['u.Avatar']
+							avatar:u['u.Avatar'],
+							color:u['u.Color']
 						})
 						)
 					return this.setState({
@@ -210,7 +212,8 @@ class Dashboard extends Component {
 					editUsers.push({
 						uid:rs.id,
 						name:rs.name,
-						avatar:rs.avatar
+						avatar:rs.avatar,
+						color:rs.color
 					})
 					this.setState({editUsers})
 
@@ -261,8 +264,8 @@ class Dashboard extends Component {
 					{u.user_name
 						? <div>
 						{u.user_avatar
-							? <img  src={"/uploads/"+u.user_avatar} className="avatar responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
-							: <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.user_name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="avatar  responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
+							? <img  src={"/uploads/"+u.user_avatar} className="avatar circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
+							: <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.user_name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0&txtclr=000000&bg=" + u.user_color} className="avatar circle tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
 						}
 						</div>
 						:null}
@@ -340,7 +343,7 @@ class Dashboard extends Component {
 					{u.avatar?
 						<img  src={"/uploads/"+u.avatar} className="avatar circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
 						:
-						<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
+						<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0&txtclr=000000&bg=" + u.color} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
 					}
 					</div>
 				}
@@ -374,7 +377,7 @@ class Dashboard extends Component {
 				{user.avatar?
 					<img src={"/uploads/"+user.avatar} className="avatar circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
 					:
-					<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+user.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
+					<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+user.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0&txtclr=000000&bg="+ user.color} className="circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
 				}
 				</div>
 				)}

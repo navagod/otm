@@ -12,18 +12,19 @@ class Register extends Component {
 		const email = this.refs.email.value
 		const pass = this.refs.pass.value
 		const name = this.refs.name.value
-		auth.register(this.props.socket,email, pass, name, (loggedIn) => {
+		const color = Math.floor(Math.random()*16777215).toString(16);
+		auth.register(this.props.socket,email, pass, name, color, (loggedIn) => {
 			if (!loggedIn){
 				return Materialize.toast("อีเมล์นี้ถูกใช้งานแล้ว", 4000)
 			}else{
 				this.context.router.transitionTo('/dashboard')
 			}
-			
+
 		})
 	}
 	render() {
 		return (
-			
+
 
 			<div className="row">
 			<div className="col s6 offset-s3">
