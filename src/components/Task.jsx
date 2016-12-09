@@ -39,7 +39,7 @@ class Task extends Component {
 				$( ".sort-task" ).sortable({connectWith: ".sort-task",placeholder: "ui-state-highlight",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
 			}
 		})
-		
+
 		this.props.socket.on('task:updateAddTaskList', this._updateAddTaskList.bind(this));
 		this.props.socket.on('task:reUpdateList', this._updateList.bind(this));
 		this.setState({totalCard:document.getElementsByClassName("sort-task").length})
@@ -134,7 +134,7 @@ class Task extends Component {
 			}else{
 				after = ""
 			}
-			
+
 			let store_state = this.state.cardList
 			tasks.sortTask(this.props.socket,cid,id,parent,after,"sorted",(rs)=>{
 				if(!rs){
@@ -183,7 +183,7 @@ class Task extends Component {
 		return (
 			<div>
 			<div className={this.styleforInputAddNew()} data-cid={this.state.cardId}>
-			
+
 			{ this.state.listTasks.map((task_item, i) =>
 				<div className={"task-box " + task_item.status} data-id={task_item.id} id={"task-"+task_item.id} key={i}>
 				<Link to={`/task/${task_item.id}`}>
@@ -191,7 +191,7 @@ class Task extends Component {
 				{task_item.user_name && task_item.user_avatar ?
 					<img src={"/uploads/"+task_item.user_avatar} width="50" height="50" className="avatar circle responsive-img" />
 					:
-					<img src="https://placeholdit.imgix.net/~text?txtsize=20&txt=%3F&w=50&h=50&txttrack=0" className="circle responsive-img" />
+					<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+task_item.user_name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0&txtclr=000000&bg="+ task_item.user_color} className="circle responsive-img" />
 				}
 				</div>
 

@@ -33,7 +33,6 @@ module.exports = {
 				cb(false)
 			}else{
 				cb(result)
-				
 			}
 		});
 	},
