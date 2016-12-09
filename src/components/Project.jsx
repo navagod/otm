@@ -91,6 +91,7 @@ class Project extends Component {
 	}
 	projectsListCard(){
 		if(this.state.projectId !==""){
+			this.setState({cardList:[]});
 			projects.listCard(this.props.socket,this.state.projectId,(rs)=>{
 				if(!rs){
 
@@ -254,9 +255,7 @@ class Project extends Component {
 		event.preventDefault()
 	}
 	RerenderProject(pid){
-		this.setState({projectId:pid})
 		this.projectsListCard.bind(this)()
-		this.taskCount.bind(this)()
 	}
 	render() {
 		var card_items = this.state.cardList
@@ -292,7 +291,7 @@ class Project extends Component {
 						<div className="card-title">{card_item.title}</div>
 						<div className="card-menu" onClick={this.editCard.bind(this,card_item.id)}><i className="material-icons tiny">mode_edit</i></div>
 					</div>
-					<div className="card-body"><Task projectId={this.state.projectId} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} cardId={card_item.id} /></div>
+					<div className="card-body"><Task projectId={this.state.projectId} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} RerenderProject={this.RerenderProject.bind(this)} cardId={card_item.id} /></div>
 				</div>
 				)}
 			</div>

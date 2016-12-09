@@ -369,6 +369,65 @@ socket.on('card:save', function (data,fn) {
 //card===============//
 
 //Task===============//
+function listUpdateTask(data,cb){
+	cb = arguments[arguments.length - 1]
+	db.cypher({
+		query:'MATCH x=(c:Cards)<-[*]-(t:Tasks)  ' +
+		'WHERE id(c)='+data.cid+' ' +
+		'AND t.status <> "archive" ' +
+		'AND t.status <> "trash" ' +
+		'OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) ' +
+		'OPTIONAL MATCH (cm:Comments)-[in1:IN]->(t) ' +
+		'WHERE cm.type <> "log"  ' +
+		'OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) ' +
+		'OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) ' +
+		'WHERE tdc.status="success" ' +
+		'OPTIONAL MATCH (l:Labels)-[:IN]->(t) ' +
+		'RETURN length(x) as pos,u.Name,u.Avatar,ID(t) ' +
+		'AS tid,' +
+		't.title,' +
+		't.position,' +
+		't.endDate,' +
+		't.detail,' +
+		't.status,' +
+		'count(distinct cm) AS total_comment,' +
+		data.cid+' AS cid,' +
+		'count(distinct td) AS total_todo,' +
+		'count(distinct tdc) AS todo_success,' +
+		'collect(distinct l) as tags ' +
+		'ORDER BY pos ASC',
+	},function(err,results){
+		if (err) console.log(err);
+		let res = [];
+		if(results){
+			for (let k in results) {
+				res.push({
+					"id": results[k]['tid'],
+					"title": results[k]['t.title'],
+					"detail": results[k]['t.detail'],
+					"position": results[k]['t.position'],
+					"duedate": results[k]['t.endDate'],
+					"pid": data.pid,
+					"cid": results[k]['cid'],
+					"total_comment": results[k]['total_comment'],
+					"total_task": results[k]['todo_success']+"/"+results[k]['total_todo'],
+					"user_avatar": results[k]['u.Avatar'],
+					"user_name": results[k]['u.Name'],
+					"status": results[k]['t.status'],
+					"tags": results[k]['tags']
+				})
+			};
+		}
+
+		cb(res);
+		socket.broadcast.emit('task:reUpdateList', {
+			cid:data.cid,
+			lists:res
+		})
+	});
+}
+
+
 socket.on('task:add',function(data,rs){
 	let sql_card = ''
 	if(data.totalTask == 0){
@@ -382,86 +441,100 @@ socket.on('task:add',function(data,rs){
 		}else{
 			if(data.parent){
 				db.cypher({
-					query:'MATCH (pt:Tasks) WHERE ID(pt) = '+data.parent+' MATCH (t:Tasks) WHERE ID(t) = '+results[0]['ID(t)']+' OPTIONAL MATCH (pt)<-[p]-(:Tasks) DELETE p CREATE (t)-[:Parent]->(pt) RETURN t'
+					query:'MATCH (pt:Tasks) WHERE ID(pt) = '+data.parent+' MATCH (t:Tasks) WHERE ID(t) = '+results[0]['ID(t)']+' CREATE (t)-[:Parent]->(pt) RETURN t'
 				},function(err,rs_relate){
 					if (err) {
 						console.log(err);
 					}else{
-						socket.broadcast.emit('task:updateAddTaskList', {
-							pid:data.pid,
-							lists:{
-								id:results[0]['ID(t)'],
-								title:data.title,
-								detail:"",
-								parent:data.parent,
-								duedate:(new Date().getTime() + 86400000),
-								pid:data.pid,
-								cid:data.cid,
-								total_comment:0,
-								total_task:"0/0",
-								user_avatar:"",
-								user_name:"",
-								status:"active",
-								tags:[]
+						listUpdateTask(data,function(cb){
+							if(!cb){
+								rs(false)
+							}else{
+								rs(cb)
 							}
-						});
-						rs({
-							pid:data.pid,
-							lists:{
-								id:results[0]['ID(t)'],
-								title:data.title,
-								detail:"",
-								parent:data.parent,
-								duedate:(new Date().getTime() + 86400000),
-								pid:data.pid,
-								cid:data.cid,
-								total_comment:0,
-								total_task:"0/0",
-								user_avatar:"",
-								status:"active",
-								user_name:"",
-								tags:[]
-							}
-						});
+						})
+						// socket.broadcast.emit('task:updateAddTaskList', {
+						// 	pid:data.pid,
+						// 	lists:{
+						// 		id:results[0]['ID(t)'],
+						// 		title:data.title,
+						// 		detail:"",
+						// 		parent:data.parent,
+						// 		duedate:(new Date().getTime() + 86400000),
+						// 		pid:data.pid,
+						// 		cid:data.cid,
+						// 		total_comment:0,
+						// 		total_task:"0/0",
+						// 		user_avatar:"",
+						// 		user_name:"",
+						// 		status:"active",
+						// 		tags:[]
+						// 	}
+						// });
+						// rs({
+						// 	pid:data.pid,
+						// 	lists:{
+						// 		id:results[0]['ID(t)'],
+						// 		title:data.title,
+						// 		detail:"",
+						// 		parent:data.parent,
+						// 		duedate:(new Date().getTime() + 86400000),
+						// 		pid:data.pid,
+						// 		cid:data.cid,
+						// 		total_comment:0,
+						// 		total_task:"0/0",
+						// 		user_avatar:"",
+						// 		status:"active",
+						// 		user_name:"",
+						// 		tags:[]
+						// 	}
+						// });
 					}
 				})
 			}else{
-				socket.broadcast.emit('task:updateAddTaskList', {
-					pid:data.pid,
-					lists:{
-						id:results[0]['ID(t)'],
-						title:data.title,
-						detail:"",
-						parent:data.parent,
-						duedate:(new Date().getTime() + 86400000),
-						pid:data.pid,
-						cid:data.cid,
-						total_comment:0,
-						total_task:"0/0",
-						user_avatar:"",
-						status:"active",
-						user_name:"",
-						tags:[]
+				listUpdateTask(data,function(cb){
+					if(!cb){
+						rs(false)
+					}else{
+						rs(cb)
 					}
-				});
-				rs({
-					pid:data.pid,
-					lists:{
-						id:results[0]['ID(t)'],
-						title:data.title,
-						detail:"",
-						parent:data.parent,
-						duedate:(new Date().getTime() + 86400000),
-						pid:data.pid,
-						cid:data.cid,
-						total_comment:0,
-						total_task:"0/0",
-						user_avatar:"",
-						status:"active",
-						user_name:"",
-						tags:[]
-					}
-				});
+				})
+				// socket.broadcast.emit('task:updateAddTaskList', {
+				// 	pid:data.pid,
+				// 	lists:{
+				// 		id:results[0]['ID(t)'],
+				// 		title:data.title,
+				// 		detail:"",
+				// 		parent:data.parent,
+				// 		duedate:(new Date().getTime() + 86400000),
+				// 		pid:data.pid,
+				// 		cid:data.cid,
+				// 		total_comment:0,
+				// 		total_task:"0/0",
+				// 		user_avatar:"",
+				// 		status:"active",
+				// 		user_name:"",
+				// 		tags:[]
+				// 	}
+				// });
+				// rs({
+				// 	pid:data.pid,
+				// 	lists:{
+				// 		id:results[0]['ID(t)'],
+				// 		title:data.title,
+				// 		detail:"",
+				// 		parent:data.parent,
+				// 		duedate:(new Date().getTime() + 86400000),
+				// 		pid:data.pid,
+				// 		cid:data.cid,
+				// 		total_comment:0,
+				// 		total_task:"0/0",
+				// 		user_avatar:"",
+				// 		status:"active",
+				// 		user_name:"",
+				// 		tags:[]
+				// 	}
+				// });
 			}
 		}
 	});
@@ -518,38 +591,15 @@ socket.on('task:list',function(data,rs){
 	});
 });
 
-socket.on('task:listUpdate',function(data,rs){
-	db.cypher({
-		query:'MATCH x=(c:Cards)<-[*]-(t:Tasks)  WHERE id(c)='+data.cid+' AND t.status <> "archive" AND t.status <> "trash" OPTIONAL MATCH (u:Users)-[cb:Assigned]->(t) OPTIONAL  MATCH (cm:Comments)-[in1:IN]->(t) WHERE cm.type <> "log"  OPTIONAL  MATCH (td:Todos)-[in2:IN]->(t) OPTIONAL  MATCH (tdc:Todos)-[in3:IN]->(t) WHERE tdc.status="success" OPTIONAL MATCH (l:Labels)-[:IN]->(t) RETURN length(x) as pos,u.Name,u.Avatar,ID(t) AS tid,t.title,t.position,t.endDate,t.detail,t.status,count(distinct cm) AS total_comment,'+data.cid+' AS cid,count(distinct td) AS total_todo,count(distinct tdc) AS todo_success,collect(distinct l) as tags ORDER BY pos ASC',
-	},function(err,results){
-		if (err) console.log(err);
-		let res = [];
-		if(results){
-			for (let k in results) {
-				res.push({
-					"id": results[k]['tid'],
-					"title": results[k]['t.title'],
-					"detail": results[k]['t.detail'],
-					"position": results[k]['t.position'],
-					"duedate": results[k]['t.endDate'],
-					"pid": data.pid,
-					"cid": results[k]['cid'],
-					"total_comment": results[k]['total_comment'],
-					"total_task": results[k]['todo_success']+"/"+results[k]['total_todo'],
-					"user_avatar": results[k]['u.Avatar'],
-					"user_name": results[k]['u.Name'],
-					"status": results[k]['t.status'],
-					"tags": results[k]['tags']
-				})
-			};
-		}
 
-		rs(res);
-		socket.broadcast.emit('task:reUpdateList', {
-			cid:data.cid,
-			lists:res
-		})
-	});
+socket.on('task:listUpdate',function(data,rs){
+	listUpdateTask(data,function(cb){
+		if(!cb){
+			rs(false)
+		}else{
+			rs(cb)
+		}
+	})
 });
 
 socket.on('task:listByProject',function(data,rs){
@@ -772,46 +822,100 @@ socket.on('task:changeSort',function(data,rs){
 					query:'MATCH (t:Tasks) WHERE ID(t)='+rs_relate[0]['ID(after)']+' MATCH (c:Cards) WHERE ID(c)='+rs_relate[0]['ID(c)']+' CREATE (t)-[:Parent]->(c)'
 				},function(err,rs1){ 
 					if (err) {console.log(err) }
+						listUpdateTask(data,function(cb){
+							if(!cb){
+								rs(false)
+							}else{
+								rs(cb)
+							}
+						})
 				})
 			}else if(rs_relate[0]['ID(before)'] && rs_relate[0]['ID(after)']){
 				db.cypher({
 					query:'MATCH (t:Tasks) WHERE ID(t)='+rs_relate[0]['ID(before)']+' MATCH (t2:Tasks) WHERE ID(t2)='+rs_relate[0]['ID(after)']+' CREATE (t2)-[:Parent]->(t)'
 				},function(err,rs2){
 					if (err){ console.log(err)} 
+						listUpdateTask(data,function(cb){
+							if(!cb){
+								rs(false)
+							}else{
+								rs(cb)
+							}
+						})
 				})
 			}else{
-
+				listUpdateTask(data,function(cb){
+					if(!cb){
+						rs(false)
+					}else{
+						rs(cb)
+					}
+				})
 			}
 
 
-			if((!data.parent || data.parent =="") && (!data.after || data.after =="")){
+			if((!data.parent || data.parent ==="") && (!data.after || data.after ==="")){
 				db.cypher({
 					query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (c:Cards) WHERE ID(c)='+data.cid+' SET t.cid = '+data.cid+' CREATE (t)-[:Parent]->(c)'
 				},function(err,nrs1){
 					if (err){ console.log(err)} 
+						listUpdateTask(data,function(cb){
+							if(!cb){
+								rs(false)
+							}else{
+								rs(cb)
+							}
+						})
 				});
-			}
-			if((data.parent && data.parent !="") && (!data.after || data.after =="")){
+			}else if((data.parent && data.parent !=="") && (!data.after || data.after ==="")){
 				db.cypher({
 					query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (t2:Tasks) WHERE ID(t2)='+data.parent+' SET t.cid = '+data.cid+' CREATE (t)-[:Parent]->(t2)'
 				},function(err,nrs2){
 					if (err){ console.log(err)} 
+						listUpdateTask(data,function(cb){
+							if(!cb){
+								rs(false)
+							}else{
+								rs(cb)
+							}
+						})
 				});
-			}
-			if((!data.parent || data.parent =="") && (data.after && data.after !="")){
+			}else if((!data.parent || data.parent ==="") && (data.after && data.after !=="")){
 				db.cypher({
 					query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (c:Cards) WHERE ID(c)='+data.cid+' MATCH (t2:Tasks) WHERE ID(t2)='+data.after+' MATCH (t2)-[r:Parent]->(c) SET t.cid = '+data.cid+' DELETE r CREATE (t2)-[:Parent]->(t)-[:Parent]->(c)'
 				},function(err,nrs3){
 					if (err){ console.log(err)} 
+						listUpdateTask(data,function(cb){
+							if(!cb){
+								rs(false)
+							}else{
+								rs(cb)
+							}
+						})
 				});
-			}
-			if((data.parent && data.parent !="") && (data.after && data.after !="")){
+			}else if((data.parent && data.parent !=="") && (data.after && data.after !=="")){
 				db.cypher({
 					query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (t2:Tasks) WHERE ID(t2)='+data.parent+' MATCH (t3:Tasks) WHERE ID(t3)='+data.after+' MATCH (t2)-[r:Parent]-(t3) DELETE r SET t.cid = '+data.cid+'  CREATE (t3)-[:Parent]->(t)-[:Parent]->(t2)'
 				},function(err,nrs4){
 					if (err){ console.log(err)} 
+						listUpdateTask(data,function(cb){
+							if(!cb){
+								rs(false)
+							}else{
+								rs(cb)
+							}
+						})
 				});
+			}else{
+				listUpdateTask(data,function(cb){
+					if(!cb){
+						rs(false)
+					}else{
+						rs(cb)
+					}
+				})
 			}
+			
 		}
 	})
 });
@@ -1293,7 +1397,7 @@ socket.on('attachment:delete',function(data,rs){
 	});
 	socket.on('notification:lists',function(data,rs){
 		db.cypher({
-			query:'MATCH (u:Users)<-[:TO]-(n:Notification) WHERE ID(u) = '+data.uid+' RETURN ID(n) AS id, n.Type AS type,n.date AS date,n.title AS title,n.detail AS detail,n.readed AS readed,n.pid AS pid,n.tid AS tid ORDER BY ID(n) DESC SKIP '+data.offset+' LIMIT 5',
+			query:'MATCH (u:Users)<-[:TO]-(n:Notification) WHERE ID(u) = '+data.uid+' RETURN ID(n) AS id, n.Type AS type,n.date AS date,n.title AS title,n.detail AS detail,n.readed AS readed,n.pid AS pid,n.tid AS tid ORDER BY ID(n) DESC SKIP '+data.offset+' LIMIT 8',
 		},function(err,results){
 			if (err) console.log(err);
 			if(results){

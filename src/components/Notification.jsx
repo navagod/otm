@@ -16,7 +16,7 @@ class Notification extends Component {
 			if(!rs){
 
 			}else{
-				this.setState({listNotify:rs,offset:5})
+				this.setState({listNotify:rs,offset:8})
 			}
 		})
 	}
@@ -38,7 +38,7 @@ class Notification extends Component {
 						listNotify.push(item)
 					})
 					var {offset} = this.state
-					offset = offset + 5
+					offset = offset + 8
 					this.setState({listNotify,offset})
 				}
 			})

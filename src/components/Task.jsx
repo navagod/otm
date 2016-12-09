@@ -7,12 +7,13 @@ import Link from 'react-router/Link'
 import Redirect from 'react-router/Redirect'
 import tasks from './Module/Task';
 import moment from 'moment';
+import Loading from './Loading';
 var _ = require('lodash')
 
 class Task extends Component {
-	 static propTypes = {
-      submitSuccess: React.PropTypes.bool
-    }
+	static propTypes = {
+		submitSuccess: React.PropTypes.bool
+	}
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -25,7 +26,8 @@ class Task extends Component {
 			looped:false,
 			totalCard:0,
 			currentLoop:-1,
-			showAddButton:true
+			showAddButton:true,
+			loading:true
 		}
 	}
 	componentDidMount(){
@@ -33,7 +35,7 @@ class Task extends Component {
 			if(!rs){
 
 			}else{
-				this.setState({listTasks:rs });
+				this.setState({listTasks:rs,loading:false });
 				$( ".sort-task" ).sortable({connectWith: ".sort-task",placeholder: "ui-state-highlight",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
 			}
 		})
@@ -85,7 +87,7 @@ class Task extends Component {
 	}
 	handleSortTaskUpdate(type,event, ui){
 		if(type=="receive"){
-			this.setState({looped:true})
+			this.setState({looped:true,loading:true})
 			let id = ui['item'].attr('data-id')
 			let cid = $(event['target']).attr('data-cid')
 			let arr = $(event['target']).sortable('toArray', { attribute: 'data-id' })
@@ -101,19 +103,20 @@ class Task extends Component {
 			}else{
 				after = ""
 			}
-
+			console.log('CID '+cid,'ID '+id,'P '+parent,'A '+after)
 			let store_state = this.state.cardList
 			tasks.sortTask(this.props.socket,cid,id,parent,after,"sorted",(rs)=>{
 				if(!rs){
-					$(div).sortable('cancel');
+					$(event['target']).sortable('cancel');
 					this.setState({ listTasks: store_state });
 				}else{
 					this.setState({looped:false})
-					console.log('success : ',rs)
 				}
+				this.setState({loading:false });
 			})
 
 		}else if(type=="sort" && !this.state.looped){
+			this.setState({loading:true });
 			let id = ui['item'].attr('data-id')
 			let cid = $(event['target']).attr('data-cid')
 			let arr = $(event['target']).sortable('toArray', { attribute: 'data-id' })
@@ -129,36 +132,38 @@ class Task extends Component {
 			}else{
 				after = ""
 			}
-
+			
 			let store_state = this.state.cardList
 			tasks.sortTask(this.props.socket,cid,id,parent,after,"sorted",(rs)=>{
 				if(!rs){
-					$(div).sortable('cancel');
+					$(event['target']).sortable('cancel');
 					this.setState({ listTasks: store_state });
 				}else{
 					this.setState({looped:false})
-					console.log('success : ',rs)
 				}
+				this.setState({loading:false });
 			})
 		}
 	}
 	submitAddTask(event){
 		event.preventDefault()
+		this.setState({loading:true });
 		const title = this.refs.addTaskTitle.value
 		let parent = ""
-		if(this.state.listTasks[this.state.listTasks.length - 1] !== undefined){
-			parent = this.state.listTasks[this.state.listTasks.length - 1]['id']
+		let cid = this.state.cardId
+		parent = $('#c-'+cid+' .task-box:last-child').attr('data-id');
+		if(parent === undefined || parent === null){
+			parent = ""
 		}
 		const totalTask = this.state.listTasks.length
 		tasks.add(this.props.socket,localStorage.uid,this.state.projectId,this.state.cardId,title,parent,totalTask,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
-				var {listTasks} = this.state;
-				listTasks.push(rs.lists);
-				this.setState({listTasks,openAddTask: false,showAddButton:true});
+				this.setState({listTasks:[]})
+				this.setState({listTasks:rs,openAddTask: false,showAddButton:true});
 			}
-
+			this.setState({loading:false });
 		})
 	}
 	styleforInputAddNew(){
@@ -210,7 +215,7 @@ class Task extends Component {
 				:
 				null
 			}
-
+			{this.state.loading?<Loading loading={this.state.loading}/>:null}
 			{this.state.showAddButton&&<div id="add-task" onClick={this.openAddTaskDialog.bind(this)}>+</div>}
 			</div>
 			)
