@@ -806,6 +806,30 @@ socket.on('task:changeStatus',function(data,rs){
 					}
 				});
 			}
+			if(data.status === "archive" || data.status === "trash"){
+				db.cypher({
+					query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (c:Cards) WHERE ID(c) = t.cid OPTIONAL MATCH (before:Tasks)<-[pp:Parent]-(t)  OPTIONAL MATCH (after:Tasks)-[bp:Parent]->(t) OPTIONAL MATCH (c)<-[bc:Parent]-(t) DELETE bp,pp,bc CREATE (t)-[:Hidden_Parent]->(c) RETURN ID(before),ID(after),ID(c)'
+				}, function (err, rs_r) {
+					if (err){
+						console.log(err); 
+					}else{
+						
+						if(rs_r[0]['ID(parent)'] && rs_r[0]['ID(after)']){
+							db.cypher({
+								query:'MATCH (t:Tasks) WHERE ID(t)='+rs_r[0]['ID(after)']+' MATCH (c:Cards) WHERE ID(c)='+rs_r[0]['ID(c)']+' CREATE (t)-[:Parent]->(c)'
+							},function(err,rs1){ 
+								if (err) {console.log('before and after',err) }
+							})
+						}else if(rs_r[0]['ID(before)'] && rs_r[0]['ID(after)']){
+							db.cypher({
+								query:'MATCH (t:Tasks) WHERE ID(t)='+rs_r[0]['ID(before)']+' MATCH (t2:Tasks) WHERE ID(t2)='+rs_r[0]['ID(after)']+' CREATE (t2)-[:Parent]->(t)'
+							},function(err,rs2){
+								if (err){ console.log('before',err)} 
+							})
+						}
+					}
+				});
+			}
 			rs(results)
 		}
 	})
