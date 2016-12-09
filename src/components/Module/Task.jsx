@@ -44,7 +44,7 @@ module.exports = {
 			if(!result){
 				cb(false)
 			}else{
-				cb(result.filter(cleanArray))
+				cb(result)
 			}
 		});
 	},
