@@ -56,24 +56,28 @@ class Profile extends Component {
 	    this.setState({ isReceiverOpen: false });
 	}
 	onDrop(acceptedFiles) {
-		this.setState({loading:true});
-		const uid = localStorage.uid
-		var _this = this;
-		var reader = new window.FileReader();
-		var first_file = acceptedFiles[0];
-		var socket_send = this.props.socket;
-		reader.readAsBinaryString(first_file);
-		reader.onload = function(event) {
-	        var binary_file = event.target.result;
-			auth.saveAvatar(socket_send,uid, binary_file, (file_name) => {
-				if (file_name == ""){
-					return Materialize.toast("เกิดข้อผิดพลาด", 4000)
-				}else{
-					_this.setState({loading:false});
-					_this.setState({U_avatar:file_name, U_avatar_url : "uploads/" + file_name});
-					return Materialize.toast("อัพโหลดรูปโปรไฟล์เรียบร้อยแล้ว", 4000)
-				}
-			})
+		if(acceptedFiles.length > 0){
+			this.setState({loading:true});
+			const uid = localStorage.uid
+			var _this = this;
+			var reader = new window.FileReader();
+			var first_file = acceptedFiles[0];
+			var socket_send = this.props.socket;
+			reader.readAsBinaryString(first_file);
+			reader.onload = function(event) {
+		        var binary_file = event.target.result;
+				auth.saveAvatar(socket_send,uid, binary_file, (file_name) => {
+					if (file_name == ""){
+						return Materialize.toast("เกิดข้อผิดพลาด", 4000)
+					}else{
+						_this.setState({loading:false});
+						_this.setState({U_avatar:file_name, U_avatar_url : "uploads/" + file_name});
+						return Materialize.toast("อัพโหลดรูปโปรไฟล์เรียบร้อยแล้ว", 4000)
+					}
+				})
+			}
+		}else{
+			alert("ไม่สามารถอัพโหลดไฟล์ได้");
 		}
     }
 	render() {
