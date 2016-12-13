@@ -307,36 +307,39 @@ class PopupPage extends Component {
 		this.refs.dropzone.open();
 	}
 	onDrop(acceptedFiles) {
+		if(acceptedFiles.length > 0){
 		this.setState({loading:true});
-		const uid = localStorage.uid
-		var _this = this;
-		var files = acceptedFiles;
-		var file_count = files.length;
-		var file_list_count = 0;
-		files.forEach((file)=> {
-			var reader = new window.FileReader();
-			var socket_send = this.props.socket;
-			reader.fileName = file.name;
-			reader.readAsBinaryString(file);
-			reader.onload = function(event) {
-				var binary_file = event.target.result;
-				var file_name = event.target.fileName;
-				var extension = file_name.split('.').pop().toLowerCase();
-
-				Tasks.addAttachment(socket_send,binary_file,extension,_this.state.taskId,(list_attachment)=>{
-					file_list_count++;
-					if (!list_attachment){
-						return Materialize.toast("เกิดข้อผิดพลาด", 4000)
-					}else{
-						_this.setState({attachments:list_attachment})
-						if(file_count == file_list_count){
-							_this.setState({loading:false});
+			const uid = localStorage.uid
+			var _this = this;
+			var files = acceptedFiles;
+			var file_count = files.length;
+			var file_list_count = 0;
+			files.forEach((file)=> {
+				var reader = new window.FileReader();
+				var socket_send = this.props.socket;
+				reader.fileName = file.name;
+				reader.readAsBinaryString(file);
+				reader.onload = function(event) {
+					var binary_file = event.target.result;
+					var file_name = event.target.fileName;
+					var extension = file_name.split('.').pop().toLowerCase();
+					Tasks.addAttachment(socket_send,binary_file,extension,_this.state.taskId,(list_attachment)=>{
+						file_list_count++;
+						if (!list_attachment){
+							return Materialize.toast("เกิดข้อผิดพลาด", 4000)
+						}else{
+							_this.setState({attachments:list_attachment})
+							if(file_count == file_list_count){
+								_this.setState({loading:false});
+							}
+							return Materialize.toast("อัพโหลดไฟล์เรียบร้อยแล้ว", 4000)
 						}
-						return Materialize.toast("อัพโหลดไฟล์เรียบร้อยแล้ว", 4000)
-					}
-				})
-			}
-		});
+					})
+				}
+			});
+		}else{
+			alert("ไม่สามารถอัพโหลดไฟล์ได้");
+		}
 	}
 
 	onAttachmentRemoveClick(attachment_id,file_name){
