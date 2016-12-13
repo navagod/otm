@@ -25,7 +25,7 @@ const MatchWhenAuthorized = ({ component: Component, ...rest }) => (
 		auth.loggedIn() ? (
 			<Component {...props} {...rest} socket={socket} />
 			) : (
-			<Redirect to='/login'/>
+			<Login socket={socket} />
 			)
 			)}/>
 	)
@@ -52,7 +52,7 @@ class Navbar extends Component {
 		socket.on('notify:updateCount', this.updateNotify.bind(this));
 	}
 	componentWillUnmount() {
-		
+
 	}
 	updateNotify(){
 		if(auth.loggedIn()){
