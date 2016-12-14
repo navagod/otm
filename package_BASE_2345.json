@@ -6,8 +6,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "forever_start": "forever start server.js",
-    "forever_stop": "forever stop server.js",
     "lint": "eslint --ext .js,.jsx src",
     "lintfix": "eslint --ext .js,.jsx src --fix",
     "postinstall": "webpack -p --config webpack.prod.config.js"
@@ -36,8 +34,6 @@
     "react": "^15.3.2",
     "react-calendar-timeline": "https://github.com/dev-orisma/react-calendar-timeline.git",
     "react-color": "^2.8.0",
-    "react-custom-scrollbars": "^4.0.0",
-    "react-columns": "^0.2.2",
     "react-datetime": "^2.7.5",
     "react-dnd": "^2.1.4",
     "react-dnd-html5-backend": "^2.1.2",

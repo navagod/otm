@@ -166,19 +166,20 @@
   width: 30px;
   height: 30px;
   cursor: pointer;
-  opacity: 0.5;
+  opacity: 0.3;
   -webkit-transition: all 0.3s ease-in-out;
   -moz-transition: all 0.3s ease-in-out;
   -ms-transition: all 0.3s ease-in-out;
   -o-transition: all 0.3s ease-in-out;
   transition: all 0.3s ease-in-out;
+  border-radius: 50%;
+  margin-right: 5px;
 }
 .color-select.active,
 .color-select:hover {
   opacity: 1;
-  width: 40px;
-  height: 40px;
-  margin-top: -6px;
+  width: 30px;
+  height: 30px;
 }
 .icon-select {
   float: left;
@@ -201,8 +202,7 @@
   opacity: 1;
   background: #aaa;
   width: 40px;
-  height: 40px;
-  margin-top: -6px;
+  height: 30px;
 }
 #add-task {
   background: #ccc;
@@ -442,7 +442,7 @@
 }
 .detail {
   font-size: 16px;
-  color: #bbb;
+  color: #717171;
 }
 hr {
   display: block;
@@ -1387,4 +1387,86 @@ nav .brand-logo {
 }
 .black_tag {
   background-color: #000;
+}
+#notify-wrap {
+  z-index: 9000;
+  width: 300px;
+  background: #fff;
+  border-radius: 10px;
+  position: absolute;
+  right: -50px;
+  overflow: hidden;
+  height: auto;
+  line-height: 10px;
+}
+#notify-head {
+  padding: 10px;
+  background: #eee;
+  color: #717171;
+}
+#readed {
+  padding: 5px;
+  background: #ccc;
+  color: #fff;
+  float: right;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+#readed span {
+  position: absolute;
+  padding: 5px;
+  color: #fff;
+  border-radius: 3px;
+  background: #000;
+  margin-left: -125px;
+  margin-top: -15px;
+  opacity: 0;
+  -webkit-transition: opacity 0.3s ease-in-out;
+  -moz-transition: opacity 0.3s ease-in-out;
+  -ms-transition: opacity 0.3s ease-in-out;
+  -o-transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.3s ease-in-out;
+}
+#readed:hover span {
+  opacity: 1;
+}
+#notify-body {
+  max-height: 700px;
+  overflow-y: auto;
+}
+#notify-body .notify-item {
+  cursor: pointer;
+  padding: 10px;
+  margin: 10px;
+  background: #eee;
+  border-radius: 5px;
+  line-height: 20px;
+}
+#notify-body .notify-item.no {
+  background: #ffe9e9;
+}
+#notify-body .notify-item .notify-date {
+  font-size: 12px;
+  color: #999;
+}
+#notify-body .notify-item .notify-title {
+  font-size: 16px;
+  color: #555;
+}
+#notify-body .notify-item .notify-detail {
+  font-size: 14px;
+  color: #777;
+}
+#overlayTransparent {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 8999;
+  background: rgba(0, 0, 0, 0.3);
+}
+.w100 {
+  width: 100%;
 }

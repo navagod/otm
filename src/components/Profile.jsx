@@ -24,10 +24,7 @@ class Profile extends Component {
 			if(!ds){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
-				if(ds.avatar == ""){
-					ds.avatar = "images/default-avatar.jpg";
-				}
-				return this.setState({error: false,U_email:ds.email, U_name :ds.name, U_avatar :ds.avatar, U_avatar_url : "uploads/" + ds.avatar});
+				return this.setState({error: false,U_email:ds.email, U_name :ds.name, U_avatar :ds.avatar, U_color :ds.color});
 			}
 		})
 	}
@@ -59,24 +56,28 @@ class Profile extends Component {
 	    this.setState({ isReceiverOpen: false });
 	}
 	onDrop(acceptedFiles) {
-		this.setState({loading:true});
-		const uid = localStorage.uid
-		var _this = this;
-		var reader = new window.FileReader();
-		var first_file = acceptedFiles[0];
-		var socket_send = this.props.socket;
-		reader.readAsBinaryString(first_file);
-		reader.onload = function(event) {
-	        var binary_file = event.target.result;
-			auth.saveAvatar(socket_send,uid, binary_file, (file_name) => {
-				if (file_name == ""){
-					return Materialize.toast("เกิดข้อผิดพลาด", 4000)
-				}else{
-					_this.setState({loading:false});
-					_this.setState({U_avatar:file_name, U_avatar_url : "uploads/" + file_name});
-					return Materialize.toast("อัพโหลดรูปโปรไฟล์เรียบร้อยแล้ว", 4000)
-				}
-			})
+		if(acceptedFiles.length > 0){
+			this.setState({loading:true});
+			const uid = localStorage.uid
+			var _this = this;
+			var reader = new window.FileReader();
+			var first_file = acceptedFiles[0];
+			var socket_send = this.props.socket;
+			reader.readAsBinaryString(first_file);
+			reader.onload = function(event) {
+		        var binary_file = event.target.result;
+				auth.saveAvatar(socket_send,uid, binary_file, (file_name) => {
+					if (file_name == ""){
+						return Materialize.toast("เกิดข้อผิดพลาด", 4000)
+					}else{
+						_this.setState({loading:false});
+						_this.setState({U_avatar:file_name, U_avatar_url : "uploads/" + file_name});
+						return Materialize.toast("อัพโหลดรูปโปรไฟล์เรียบร้อยแล้ว", 4000)
+					}
+				})
+			}
+		}else{
+			alert("ไม่สามารถอัพโหลดไฟล์ได้");
 		}
     }
 	render() {
@@ -90,7 +91,12 @@ class Profile extends Component {
 			<div className="input-field col s12">
 			<div id="dropdown-upload">
 				<input id="avatar" ref="avatar" type="hidden" value={this.state.U_avatar} />
-				<img className="img-responsive" src={this.state.U_avatar_url} />
+				<div>
+				{this.state.U_avatar != ""?
+					<img className="img-responsive" src={this.state.U_avatar_url} />
+					: <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+this.state.U_name.charAt(0).toUpperCase()+"&w=100&h=100&txttrack=0&txtclr=000000&bg="+ this.state.U_color} className={"  tooltipped tooltip-user " + this.state.U_color} data-position="top" data-delay="50" data-tooltip={this.state.U_name} />
+				}
+				</div>
 				Drag & Drop image avatar
 				<Dropzone ref="dropzone" onDrop={this.onDrop} socket={this.socket}>
                     <div>Try dropping some files here, or click to select files to upload.</div>

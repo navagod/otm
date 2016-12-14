@@ -36,8 +36,11 @@
     "react": "^15.3.2",
     "react-calendar-timeline": "https://github.com/dev-orisma/react-calendar-timeline.git",
     "react-color": "^2.8.0",
+<<<<<<< HEAD
     "react-custom-scrollbars": "^4.0.0",
+=======
     "react-columns": "^0.2.2",
+>>>>>>> 3f35c55d2650412d2e667e231affc9e5994e86cd
     "react-datetime": "^2.7.5",
     "react-dnd": "^2.1.4",
     "react-dnd-html5-backend": "^2.1.2",
