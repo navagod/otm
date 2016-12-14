@@ -9,6 +9,7 @@ import Miss from 'react-router/Miss'
 
 import Dashboard from './Dashboard'
 import Project from './Project'
+import Filter from './Filter'
 import Login from './Login'
 import Logout from './Logout'
 import Profile from './Profile'
@@ -45,8 +46,9 @@ class Navbar extends Component {
 				{ auth.loggedIn() ?
 					<ul className="right hide-on-med-and-down">
 					<li><Link to="/timeline"><i className="large material-icons">clear_all</i></Link></li>
+					<li><Link to="/filter"><i className="large material-icons">search</i></Link></li>
+                        <li className="relative"><a href="#"><i className="large material-icons">info</i> <span className="notify">4</span></a></li>
 					<li><Link to="/profile"><i className="large material-icons">perm_identity</i></Link></li>
-					<li className="relative"><a href="#"><i className="large material-icons">info</i> <span className="notify">4</span></a></li>
 					<li><Link to="/logout"><i className="large material-icons">power_settings_new</i></Link></li>
 					</ul>
 					:
@@ -66,6 +68,9 @@ class Navbar extends Component {
 				<MatchWhenAuthorized pattern="/timeline" exactly component={Timeline}/>
 				<MatchWhenAuthorized pattern="/project/:projectId" exactly component={Project} />
 				<MatchWhenAuthorized pattern="/task/:taskId" exactly component={Project} />
+				<MatchWhenAuthorized pattern="/filter" exactly component={Filter} />
+
+
 				<Miss  render={({ pathname }) => <Nopage socket={this.state.socket} /> }/>
 				</div>
 				</div>
