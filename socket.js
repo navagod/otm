@@ -1,6 +1,7 @@
 module.exports = function (socket) {
 	var request = require("request");
 	var neo4j = require('neo4j');
+	var filter = require("./server_script/filter");
 	var config = {
 		port: 5000,
 		neo4jURL: process.env.NEO4JURL ||'0.0.0.0:7474',
@@ -1411,7 +1412,6 @@ socket.on('attachment:delete',function(data,rs){
 	});
 	//users============//
 
-
 	//Notification
 	socket.on('notification:count',function(data,rs){
 		db.cypher({
@@ -1456,8 +1456,12 @@ socket.on('attachment:delete',function(data,rs){
 		});
 	});
 
+	socket = filter(socket);
+
 	//notification
 	socket.on('disconnect', function () {
 
 	});
+
 };
+
