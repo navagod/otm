@@ -3,6 +3,7 @@ import {Link} from 'react-router'
 import projects from './Module/Project'
 import Tags from './Tags'
 var _ = require('lodash')
+var Columns = require('react-columns');
 class Dashboard extends Component {
 	constructor(props) {
 		super(props)
@@ -18,7 +19,17 @@ class Dashboard extends Component {
 			selectUser:false,
 			listProject:[],
 			listUsers:[],
-			showTag:false
+			showTag:false,
+			queries: [{
+			    columns: 2,
+			    query: 'min-width: 500px'
+			  }, {
+			    columns: 3,
+			    query: 'min-width: 1000px'
+			  }, {
+			    columns: 4,
+			    query: 'min-width: 1200px'
+			  }]
 		}
 	}
 	componentDidMount(){
@@ -245,8 +256,9 @@ class Dashboard extends Component {
 			</div>
 			<div id="list-board">
 			<div className="row">
+				<Columns queries={this.state.queries}>
 			{ arrs.map((item, i) =>
-				<div className="col s4 m3" key={i}>
+				<div className="col w100" key={i}>
 				<div className="card blue-grey">
 				<div className="editProjectBtn waves-effect waves-blue blue btn-flat" onClick={this.openEditProject.bind(this,item[0].id)}><i className="material-icons">mode_edit</i></div>
 				<Link to={`/project/${item[0].id}`}>
@@ -278,6 +290,7 @@ class Dashboard extends Component {
 				</div>
 				)
 		}
+		</Columns>
 		</div>
 		</div>
 
