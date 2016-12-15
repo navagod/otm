@@ -26,8 +26,7 @@ class Task extends Component {
 			looped:false,
 			totalCard:0,
 			currentLoop:-1,
-			showAddButton:true,
-			loading:true
+			showAddButton:true
 		}
 	}
 	componentDidMount(){
@@ -164,7 +163,7 @@ class Task extends Component {
 			}else{
 				this.setState({listTasks:[]})
 				$('#c-'+cid+' .sort-task').html('');
-				
+
 				this.setState({listTasks:rs,openAddTask: false,showAddButton:true});
 				$( ".sort-task" ).sortable({connectWith: ".sort-task",placeholder: "ui-state-highlight",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
 
