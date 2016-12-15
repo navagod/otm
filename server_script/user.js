@@ -57,8 +57,13 @@ module.exports = function (socket,db) {
 		});
 	});
 	socket.on('user:saveProfile',function(data,rs){
+		var new_pass = "";
+		if(data.pass != ""){
+			new_pass = ', u.Pass = "'+md5(data.pass)+'"';
+		}
+
 		db.cypher({
-			query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' SET u.Name = "'+data.name+'", u.Pass = "'+md5(data.pass)+'" , u.Avatar = "'+data.avatar+'" RETURN u',
+			query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' SET u.Name = "'+data.name+'" '+new_pass+' , u.Avatar = "'+data.avatar+'" RETURN u',
 		},function(err,results){
 			if (err) console.log('Save Profile Error : ',err);
 			if(results){
