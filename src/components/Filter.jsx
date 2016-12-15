@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import { Scrollbars } from 'react-custom-scrollbars';
 import FilterLoad from "./Module/Filter";
-import Link from 'react-router/Link'
+import TaskDetail from './TaskDetail';
+import Tasks from './Module/Task'
 
 var _ = require('lodash')
 
@@ -15,12 +16,13 @@ class Filter extends Component {
             users: [],
             tags: [],
             task_status: [],
-            taskList: []
+            taskList: [],
+            view_task: null,
+            taskDetail: []
         }
-
     }
     componentDidMount() {
-        FilterLoad.loadProjectFilter(this.props.socket,5,(rs)=>{
+        FilterLoad.loadProjectFilter(this.props.socket,localStorage.uid,(rs)=>{
             if(!rs){
                 return Materialize.toast("Error Not Found Project Data.", 4000)
             }else{
@@ -35,7 +37,7 @@ class Filter extends Component {
                 this.setState({project:project_data});
             }
         })
-        FilterLoad.loadUserFilter(this.props.socket,5,(rs)=>{
+        FilterLoad.loadUserFilter(this.props.socket,localStorage.uid,(rs)=>{
             if(!rs){
                 return Materialize.toast("", 4000)
             }else{
@@ -48,7 +50,7 @@ class Filter extends Component {
                 this.setState({users:user_data});
             }
         })
-        FilterLoad.loadTagFilter(this.props.socket,5,(rs)=>{
+        FilterLoad.loadTagFilter(this.props.socket,localStorage.uid,(rs)=>{
             if(!rs){
                 return Materialize.toast("", 4000)
             }else{
@@ -182,11 +184,23 @@ class Filter extends Component {
         this.updateFilter();
         this.setState({keyword:this.state.keyword});
     }
+    closeTaskDetail() {
+        var taskDetail = [];
+        this.setState({taskDetail: taskDetail});
+        window.history.pushState("", 'Filter', '/filter');
+    }
+    viewTaskDetail(task_id) {
+        var taskDetail = [];
+        taskDetail.push(task_id);
+        this.setState({taskDetail: taskDetail});
+        console.log(this.props.location.state);
+        window.history.pushState("", 'Filter', '/task/'+task_id);
+    }
 	render() {
 		return (
 			<div className="" id='filter_panel'>
                 <div className='filter_row'>
-                    <ListPanel taskList={this.state.taskList}/>
+                    <ListPanel taskList={this.state.taskList} viewTaskDetail={this.viewTaskDetail.bind(this)}/>
                     <FilterPanel project={this.state.project}
                                  users={this.state.users}
                                  tags={this.state.tags}
@@ -199,6 +213,9 @@ class Filter extends Component {
                                  addKeyword={this.addKeyword.bind(this)}
                                  removeKeyword={this.removeKeyword.bind(this)}/>
                 </div>
+                {this.state.taskDetail.map((task_id,index) =>
+                    <TaskDetail key={index} taskId={task_id} socket={this.props.socket} closeTask={this.closeTaskDetail.bind(this)}/>
+                )}
 			</div>
 		)
 	}
@@ -370,7 +387,7 @@ class UserList extends Component {
         if (avatar.length > 0) {
             return <div className="avatar" style={{backgroundImage:"url('/upload/"+avatar+"')"}}>&nbsp;</div>
         } else {
-            return <div className="no_avatar">&nbsp;<div className="text" style={{backgroundColor:"#"+this.props.data.color}}>{first_two_char}</div></div>
+            return <div className="no_avatar"><div className="text" style={{backgroundColor:"#"+this.props.data.color}}>{first_two_char}</div></div>
         }
     }
     checkSelected() {
@@ -399,7 +416,7 @@ class DatePanel extends Component {
                 </div>
                 <div className="task_in_date">
                     {this.props.data.data.map((task_list,index) =>
-                        <TaskListInDate key={index} data={task_list}/>
+                        <TaskListInDate key={index} data={task_list} viewTaskDetail={this.props.viewTaskDetail}/>
                     )}
                 </div>
             </div>
@@ -421,8 +438,7 @@ class TaskListInDate extends Component {
     render() {
         return (
             <div className="task_in_date_list">
-                <Link to={`/task/${this.props.data.id}`}>
-                <div className='task_detail'>
+                <div className='task_detail' onClick={this.props.viewTaskDetail.bind(this,this.props.data.id)}>
                     <div className='task_name'>
                         {this.props.data.title}
                     </div>
@@ -432,7 +448,6 @@ class TaskListInDate extends Component {
                         )}
                     </div>
                 </div>
-                </Link>
             </div>
         )
     }
@@ -455,7 +470,7 @@ class ListPanel extends Component {
             <div className="task_list_panel">
                 <Scrollbars className='scroll_list'>
                     {this.props.taskList.map((date_list,index) =>
-                        <DatePanel key={date_list.id} data={date_list}/>
+                        <DatePanel key={date_list.id} data={date_list} viewTaskDetail={this.props.viewTaskDetail}/>
                     )}
                 </Scrollbars>
             </div>
