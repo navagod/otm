@@ -121,7 +121,7 @@ class Profile extends Component {
 
 			<div className="row">
 			<div className="input-field col s12">
-			<input id="password" ref="pass" type="password" className="validate" required />
+			<input id="password" ref="pass" type="password" className="validate" />
 			<label htmlFor="password">New Password</label>
 			</div>
 			</div>

@@ -816,20 +816,20 @@ socket.on('task:changeStatus',function(data,rs){
 					query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (c:Cards) WHERE ID(c) = t.cid OPTIONAL MATCH (before:Tasks)<-[pp:Parent]-(t)  OPTIONAL MATCH (after:Tasks)-[bp:Parent]->(t) OPTIONAL MATCH (c)<-[bc:Parent]-(t) DELETE bp,pp,bc CREATE (t)-[:Hidden_Parent]->(c) RETURN ID(before),ID(after),ID(c)'
 				}, function (err, rs_r) {
 					if (err){
-						console.log(err); 
+						console.log(err);
 					}else{
-						
+
 						if(rs_r[0]['ID(parent)'] && rs_r[0]['ID(after)']){
 							db.cypher({
 								query:'MATCH (t:Tasks) WHERE ID(t)='+rs_r[0]['ID(after)']+' MATCH (c:Cards) WHERE ID(c)='+rs_r[0]['ID(c)']+' CREATE (t)-[:Parent]->(c)'
-							},function(err,rs1){ 
+							},function(err,rs1){
 								if (err) {console.log('before and after',err) }
 							})
 						}else if(rs_r[0]['ID(before)'] && rs_r[0]['ID(after)']){
 							db.cypher({
 								query:'MATCH (t:Tasks) WHERE ID(t)='+rs_r[0]['ID(before)']+' MATCH (t2:Tasks) WHERE ID(t2)='+rs_r[0]['ID(after)']+' CREATE (t2)-[:Parent]->(t)'
 							},function(err,rs2){
-								if (err){ console.log('before',err)} 
+								if (err){ console.log('before',err)}
 							})
 						}
 					}
@@ -1352,8 +1352,12 @@ socket.on('attachment:delete',function(data,rs){
 		});
 	});
 	socket.on('user:saveProfile',function(data,rs){
+		var new_password = "";
+		if(data.pass != ""){
+			new_password = ', u.Pass = "'+md5(data.pass)+'"';
+		}
 		db.cypher({
-			query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' SET u.Name = "'+data.name+'", u.Pass = "'+md5(data.pass)+'" , u.Avatar = "'+data.avatar+'" RETURN u',
+			query:'MATCH (u:Users) WHERE ID(u) = '+data.uid+' SET u.Name = "'+data.name+'" ' + new_password + ' , u.Avatar = "'+data.avatar+'" RETURN u',
 		},function(err,results){
 			if (err) console.log('Save Profile Error : ',err);
 			if(results){
