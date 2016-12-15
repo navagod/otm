@@ -24,7 +24,7 @@ class Profile extends Component {
 			if(!ds){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
-				return this.setState({error: false,U_email:ds.email, U_name :ds.name, U_avatar :ds.avatar, U_color :ds.color});
+				return this.setState({error: false,U_email:ds.email, U_name :ds.name, U_avatar :ds.avatar, U_color :ds.color, U_avatar_url : "/uploads/" + ds.avatar});
 			}
 		})
 	}
@@ -71,7 +71,7 @@ class Profile extends Component {
 						return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 					}else{
 						_this.setState({loading:false});
-						_this.setState({U_avatar:file_name, U_avatar_url : "uploads/" + file_name});
+						_this.setState({U_avatar:file_name, U_avatar_url : "/uploads/" + file_name});
 						return Materialize.toast("อัพโหลดรูปโปรไฟล์เรียบร้อยแล้ว", 4000)
 					}
 				})
@@ -121,7 +121,7 @@ class Profile extends Component {
 
 			<div className="row">
 			<div className="input-field col s12">
-			<input id="password" ref="pass" type="password" className="validate" required />
+			<input id="password" ref="pass" type="password" className="validate" />
 			<label htmlFor="password">New Password</label>
 			</div>
 			</div>
