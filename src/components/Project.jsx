@@ -255,6 +255,7 @@ class Project extends Component {
 		event.preventDefault()
 	}
 	RerenderProject(pid){
+		this.setState({projectId:pid});
 		this.projectsListCard.bind(this)()
 	}
 	render() {
