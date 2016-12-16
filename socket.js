@@ -456,42 +456,6 @@ socket.on('task:add',function(data,rs){
 								rs(cb)
 							}
 						})
-						// socket.broadcast.emit('task:updateAddTaskList', {
-						// 	pid:data.pid,
-						// 	lists:{
-						// 		id:results[0]['ID(t)'],
-						// 		title:data.title,
-						// 		detail:"",
-						// 		parent:data.parent,
-						// 		duedate:(new Date().getTime() + 86400000),
-						// 		pid:data.pid,
-						// 		cid:data.cid,
-						// 		total_comment:0,
-						// 		total_task:"0/0",
-						// 		user_avatar:"",
-						// 		user_name:"",
-						// 		status:"active",
-						// 		tags:[]
-						// 	}
-						// });
-						// rs({
-						// 	pid:data.pid,
-						// 	lists:{
-						// 		id:results[0]['ID(t)'],
-						// 		title:data.title,
-						// 		detail:"",
-						// 		parent:data.parent,
-						// 		duedate:(new Date().getTime() + 86400000),
-						// 		pid:data.pid,
-						// 		cid:data.cid,
-						// 		total_comment:0,
-						// 		total_task:"0/0",
-						// 		user_avatar:"",
-						// 		status:"active",
-						// 		user_name:"",
-						// 		tags:[]
-						// 	}
-						// });
 					}
 				})
 			}else{
@@ -502,42 +466,6 @@ socket.on('task:add',function(data,rs){
 						rs(cb)
 					}
 				})
-				// socket.broadcast.emit('task:updateAddTaskList', {
-				// 	pid:data.pid,
-				// 	lists:{
-				// 		id:results[0]['ID(t)'],
-				// 		title:data.title,
-				// 		detail:"",
-				// 		parent:data.parent,
-				// 		duedate:(new Date().getTime() + 86400000),
-				// 		pid:data.pid,
-				// 		cid:data.cid,
-				// 		total_comment:0,
-				// 		total_task:"0/0",
-				// 		user_avatar:"",
-				// 		status:"active",
-				// 		user_name:"",
-				// 		tags:[]
-				// 	}
-				// });
-				// rs({
-				// 	pid:data.pid,
-				// 	lists:{
-				// 		id:results[0]['ID(t)'],
-				// 		title:data.title,
-				// 		detail:"",
-				// 		parent:data.parent,
-				// 		duedate:(new Date().getTime() + 86400000),
-				// 		pid:data.pid,
-				// 		cid:data.cid,
-				// 		total_comment:0,
-				// 		total_task:"0/0",
-				// 		user_avatar:"",
-				// 		status:"active",
-				// 		user_name:"",
-				// 		tags:[]
-				// 	}
-				// });
 			}
 		}
 	});
@@ -818,7 +746,8 @@ socket.on('task:changeStatus',function(data,rs){
 						console.log(err); 
 					}else{
 						
-						if(rs_r[0]['ID(parent)'] && rs_r[0]['ID(after)']){
+						if(!rs_r[0]['ID(before)'] && rs_r[0]['ID(after)']){
+							console.log('not have top');
 							db.cypher({
 								query:'MATCH (t:Tasks) WHERE ID(t)='+rs_r[0]['ID(after)']+' MATCH (c:Cards) WHERE ID(c)='+rs_r[0]['ID(c)']+' CREATE (t)-[:Parent]->(c)'
 							},function(err,rs1){ 
@@ -839,6 +768,7 @@ socket.on('task:changeStatus',function(data,rs){
 	})
 });
 socket.on('task:changeSort',function(data,rs){
+
 	db.cypher({
 		query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) OPTIONAL MATCH (t)-[l3:Parent]->(c:Cards) DELETE l1,l2,l3 RETURN ID(before),ID(after),ID(c)'
 	},function(err,rs_relate){
