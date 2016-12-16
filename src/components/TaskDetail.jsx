@@ -11,10 +11,16 @@ var Dropzone = require('react-dynamic-dropzone');
 class TaskDetail extends Component {
     constructor(props) {
         super(props)
+        var taskId = null;
+        if (typeof(this.props.params) != "undefined") {
+            taskId = this.props.params.taskId;
+        } else {
+            taskId = this.props.taskId;
+        }
         this.state = {
             error: false,
             projectId:"",
-            taskId:this.props.taskId,
+            taskId:taskId,
             taskData:[],
             socket:this.props.socket,
             comments:[],
@@ -36,8 +42,8 @@ class TaskDetail extends Component {
         this.onAttachmentRemoveClick = this.onAttachmentRemoveClick.bind(this);
     }
     componentDidMount() {
-        if (this.props.taskId != null) {
-            if (this.state.taskId != this.props.taskId) {
+        if (this.state.taskId != null) {
+            if (this.state.taskId != this.props.taskId && typeof(this.props.params) == "undefined") {
                 this.setState({taskId:this.props.taskId});
             }
             Tasks.get(this.state.socket,this.state.projectId,this.state.taskId,(rs)=>{
@@ -48,10 +54,11 @@ class TaskDetail extends Component {
                     taskData = rs[0]
                     this.setState({task_status:rs[0]["t.status"]});
                     this.setState({taskData,projectId:rs[0]["ID(p)"]})
+                    var projectId = rs[0]["ID(p)"];
                     if(rs[0]['todo']>0){
                         this.setState({showTodo:true})
                     }
-                    Tasks.listComment(this.state.socket,this.state.projectId,this.state.taskId,(rsc)=>{
+                    Tasks.listComment(this.state.socket,projectId,this.state.taskId,(rsc)=>{
                         if(!rsc){
 
                         }else{
@@ -60,7 +67,7 @@ class TaskDetail extends Component {
                             this.setState({comments})
                         }
                     })
-                    Tasks.listUsers(this.state.socket,this.state.projectId,(rs)=>{
+                    Tasks.listUsers(this.state.socket,projectId,(rs)=>{
                         if(!rs){
                             return Materialize.toast("ไม่พบสมาชิกที่เข้าร่วมโปรเจคนี้", 4000)
                         }else{
@@ -78,7 +85,7 @@ class TaskDetail extends Component {
                             this.setState({currentTags})
                         }
                     })
-                    Tasks.allTag(this.state.socket,this.state.projectId,(rs)=>{
+                    Tasks.allTag(this.state.socket,projectId,(rs)=>{
                         if(!rs){
 
                         }else{
@@ -87,7 +94,7 @@ class TaskDetail extends Component {
                             this.setState({allTags})
                         }
                     })
-                    Tasks.listAttachment(this.state.socket,this.state.projectId,this.state.taskId,(list_attachment)=>{
+                    Tasks.listAttachment(this.state.socket,projectId,this.state.taskId,(list_attachment)=>{
                         if(!list_attachment){
 
                         }else{
@@ -358,17 +365,28 @@ class TaskDetail extends Component {
         }
     }
     checkTaskId() {
-        if (this.state.taskId != null) {
-            return "block";
-        } else {
+        if (typeof(this.props.params) == "undefined" && typeof(this.props.taskId) == "undefined") {
             return "none";
+        } else {
+            if (this.state.taskId != null) {
+                return "block";
+            } else {
+                return "none";
+            }
+        }
+    }
+    closeTaskDetail() {
+        if (typeof(this.props.closeTask) != "undefined") {
+            return <div id="closePopup" onClick={this.props.closeTask.bind(this)}>×</div>
+        } else {
+            return <div id="closePopup"><Link to={`/project/${this.state.projectId}`}>×</Link></div>
         }
     }
     render() {
         return (
             <div style={{display:this.checkTaskId()}}>
                 <div id="inner" className="element-animation">
-                    <div id="closePopup" onClick={this.props.closeTask.bind(this)}>×</div>
+                    {this.closeTaskDetail()}
                     <div id="menuPopup">
                         <StatusAction status={this.state.task_status} changeStatus={this.statusTask.bind(this)}/>
                     </div>

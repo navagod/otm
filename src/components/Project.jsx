@@ -4,6 +4,7 @@ import {Link} from 'react-router';
 import projects from './Module/Project'
 import Task from './Task'
 import PopupPage from './PopupPage'
+import TaskDetail from './TaskDetail'
 import Router from 'react-router/BrowserRouter'
 import Match from 'react-router/Match'
 import Redirect from 'react-router/Redirect'
@@ -363,7 +364,7 @@ class Project extends Component {
 					</div>
 					:null
 				}
-				<MatchWhenAuthorized pattern="/task/:taskId" onRender={this.RerenderProject.bind(this)} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} component={PopupPage} />
+				<MatchWhenAuthorized pattern="/task/:taskId" onRender={this.RerenderProject.bind(this)} socket={this.props.socket} updateTaskCount={this.taskCount.bind(this)} component={TaskDetail} />
 				</div>
 				</Router>
 				);

@@ -2,7 +2,7 @@ module.exports = function (socket,db) {
 	//Filter
 	socket.on('filter:loadProject',function(data,rs){
 		db.cypher({
-			query:"MATCH (p:Projects)-[:CREATE_BY|:Assigned]-(u:Users) WHERE ID(u) = "+data.uid+" RETURN ID(p) as id,p.title as name",
+			query:"MATCH (p:Projects)-[:CREATE_BY|:Assigned]-(u:Users) WHERE ID(u) = "+data.uid+" AND p.status = 'active' RETURN ID(p) as id,p.title as name",
 		},function(err,results){
 			if (err) console.log(err);
 			if(!results || err){
@@ -45,10 +45,12 @@ module.exports = function (socket,db) {
 	});
 
 	socket.on('filter:loadFilter',function(data,rs){
-		var project_query = "";
 		var where_all = [];
+		var only_active_project = "(p.status = 'active')";
+		where_all.push(only_active_project);
+		//console.log(data);
+		var project_query = "-[:LIVE_IN]-(p:Projects)";
 		if (data.filter.project.length > 0) {
-			project_query = "-[:LIVE_IN]-(p:Projects)"
 			var project_where = [];
 			for (var i in data.filter.project) {
 				project_where.push("ID(p) = "+data.filter.project[i]);
@@ -85,6 +87,12 @@ module.exports = function (socket,db) {
 			var status_where_str = "("+status_where.join(" OR ")+")";
 			where_all.push(status_where_str);
 		}
+		var keyword_operator = "";
+		if (data.filter.operator.keyword == "&") {
+			keyword_operator = " AND ";
+		} else {
+			keyword_operator = " OR ";
+		}
 		if (data.filter.keyword.length > 0) {
 			var keyword_title_where = [];
 			var keyword_detail_where = [];
@@ -92,7 +100,7 @@ module.exports = function (socket,db) {
 				keyword_title_where.push("t.title CONTAINS '"+data.filter.keyword[i]+"'");
 				keyword_detail_where.push("t.detail CONTAINS '"+data.filter.keyword[i]+"'");
 			}
-			var keyword_where_str = "("+keyword_title_where.join(" OR ")+" OR "+keyword_detail_where.join(" OR ")+")";
+			var keyword_where_str = "(("+keyword_title_where.join(keyword_operator)+") OR ("+keyword_detail_where.join(keyword_operator)+"))";
 			where_all.push(keyword_where_str);
 		}
 		var where_all_str = "";
@@ -103,6 +111,7 @@ module.exports = function (socket,db) {
 			" OPTIONAL MATCH (lb:Labels)-[:IN]->(t) " +
 			"WITH t,COUNT(lb) as tags_count,lb as tags " +
 			"RETURN ID(t) as id,t.title as title,t.startDate as start_date,t.endDate as end_date,COLLECT(tags) as tags,count(ID(t)) AS count SKIP 0 LIMIT 30";
+		//console.log(query);
 		db.cypher({
 			query:query,
 		},function(err,results){
