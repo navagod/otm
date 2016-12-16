@@ -85,42 +85,6 @@ module.exports = function (socket,db) {
 									rs(cb)
 								}
 							})
-							// socket.broadcast.emit('task:updateAddTaskList', {
-							// 	pid:data.pid,
-							// 	lists:{
-							// 		id:results[0]['ID(t)'],
-							// 		title:data.title,
-							// 		detail:"",
-							// 		parent:data.parent,
-							// 		duedate:(new Date().getTime() + 86400000),
-							// 		pid:data.pid,
-							// 		cid:data.cid,
-							// 		total_comment:0,
-							// 		total_task:"0/0",
-							// 		user_avatar:"",
-							// 		user_name:"",
-							// 		status:"active",
-							// 		tags:[]
-							// 	}
-							// });
-							// rs({
-							// 	pid:data.pid,
-							// 	lists:{
-							// 		id:results[0]['ID(t)'],
-							// 		title:data.title,
-							// 		detail:"",
-							// 		parent:data.parent,
-							// 		duedate:(new Date().getTime() + 86400000),
-							// 		pid:data.pid,
-							// 		cid:data.cid,
-							// 		total_comment:0,
-							// 		total_task:"0/0",
-							// 		user_avatar:"",
-							// 		status:"active",
-							// 		user_name:"",
-							// 		tags:[]
-							// 	}
-							// });
 						}
 					})
 				}else{
@@ -131,42 +95,6 @@ module.exports = function (socket,db) {
 							rs(cb)
 						}
 					})
-					// socket.broadcast.emit('task:updateAddTaskList', {
-					// 	pid:data.pid,
-					// 	lists:{
-					// 		id:results[0]['ID(t)'],
-					// 		title:data.title,
-					// 		detail:"",
-					// 		parent:data.parent,
-					// 		duedate:(new Date().getTime() + 86400000),
-					// 		pid:data.pid,
-					// 		cid:data.cid,
-					// 		total_comment:0,
-					// 		total_task:"0/0",
-					// 		user_avatar:"",
-					// 		status:"active",
-					// 		user_name:"",
-					// 		tags:[]
-					// 	}
-					// });
-					// rs({
-					// 	pid:data.pid,
-					// 	lists:{
-					// 		id:results[0]['ID(t)'],
-					// 		title:data.title,
-					// 		detail:"",
-					// 		parent:data.parent,
-					// 		duedate:(new Date().getTime() + 86400000),
-					// 		pid:data.pid,
-					// 		cid:data.cid,
-					// 		total_comment:0,
-					// 		total_task:"0/0",
-					// 		user_avatar:"",
-					// 		status:"active",
-					// 		user_name:"",
-					// 		tags:[]
-					// 	}
-					// });
 				}
 			}
 		});
@@ -468,6 +396,7 @@ module.exports = function (socket,db) {
 		})
 	});
 	socket.on('task:changeSort',function(data,rs){
+
 		db.cypher({
 			query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) OPTIONAL MATCH (t)-[l3:Parent]->(c:Cards) DELETE l1,l2,l3 RETURN ID(before),ID(after),ID(c)'
 		},function(err,rs_relate){

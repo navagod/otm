@@ -9,7 +9,7 @@ import tasks from './Module/Task';
 import moment from 'moment';
 import Loading from './Loading';
 var _ = require('lodash')
-
+var socket = io.connect()
 class Task extends Component {
 	static propTypes = {
 		submitSuccess: React.PropTypes.bool
@@ -30,7 +30,7 @@ class Task extends Component {
 		}
 	}
 	componentDidMount(){
-		tasks.list(this.props.socket,this.state.cardId,this.state.projectId,(rs)=>{
+		tasks.list(socket,this.state.cardId,this.state.projectId,(rs)=>{
 			if(!rs){
 
 			}else{
@@ -39,8 +39,8 @@ class Task extends Component {
 			}
 		})
 
-		this.props.socket.on('task:updateAddTaskList', this._updateAddTaskList.bind(this));
-		this.props.socket.on('task:reUpdateList', this._updateList.bind(this));
+		socket.on('task:updateAddTaskList', this._updateAddTaskList.bind(this));
+		socket.on('task:reUpdateList', this._updateList.bind(this));
 		this.setState({totalCard:document.getElementsByClassName("sort-task").length})
 	}
 	componentDidUpdate(prevProps, prevState){
@@ -55,13 +55,17 @@ class Task extends Component {
 	componentWillReceiveProps(nextProps){
 		this.setState({cardId:nextProps.cardId})
 		$( ".sort-task" ).sortable({connectWith: ".sort-task",placeholder: "ui-state-highlight",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
-		tasks.list(this.props.socket,nextProps.cardId,(rs)=>{
+		tasks.list(socket,nextProps.cardId,(rs)=>{
 			if(!rs){
 
 			}else{
 				this.setState({listTasks:rs });
 			}
 		})
+	}
+	
+	componentWillUnmount(){
+		console.log('componentWillUnmount');
 	}
 	_updateAddTaskList(data){
 		if(data.pid == this.state.projectId && data.lists.cid == this.state.cardId){
@@ -106,7 +110,7 @@ class Task extends Component {
 			}
 			console.log('CID '+cid,'ID '+id,'P '+parent,'A '+after)
 			let store_state = this.state.cardList
-			tasks.sortTask(this.props.socket,cid,id,parent,after,"sorted",(rs)=>{
+			tasks.sortTask(socket,cid,id,parent,after,"sorted",(rs)=>{
 				if(!rs){
 					$(event['target']).sortable('cancel');
 					this.setState({ listTasks: store_state });
@@ -135,7 +139,7 @@ class Task extends Component {
 			}
 
 			let store_state = this.state.cardList
-			tasks.sortTask(this.props.socket,cid,id,parent,after,"sorted",(rs)=>{
+			tasks.sortTask(socket,cid,id,parent,after,"sorted",(rs)=>{
 				if(!rs){
 					$(event['target']).sortable('cancel');
 					this.setState({ listTasks: store_state });
@@ -156,8 +160,8 @@ class Task extends Component {
 		if(parent === undefined || parent === null){
 			parent = ""
 		}
-		const totalTask = this.state.listTasks.length
-		tasks.add(this.props.socket,localStorage.uid,this.state.projectId,this.state.cardId,title,parent,totalTask,(rs)=>{
+		const totalTask = $('#c-'+cid+' .task-box').length
+		tasks.add(socket,localStorage.uid,this.state.projectId,this.state.cardId,title,parent,totalTask,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
