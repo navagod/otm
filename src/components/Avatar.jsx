@@ -1,11 +1,17 @@
 import React, { Component } from 'react';
 
 class Avatar extends Component {
-    componentDidUpdate(){
-        $('.tooltip-user').tooltip()
+    state = {
+        userTooltipDisplay:"none"
+    }
+    showTooltips() {
+        this.setState({userTooltipDisplay:"block"});
+    }
+    hideTooltips() {
+        this.setState({userTooltipDisplay:"none"});
     }
     render() {
-        var name = "Unassign";
+        var name = "Unassigned";
         var first_two_char = "";
         var color = "";
         var avatar = "";
@@ -17,11 +23,25 @@ class Avatar extends Component {
         }
         if (typeof(this.props.avatar) != "undefined" && avatar.length > 0) {
             return (
-                <div className="avatar tooltip-user" style={{backgroundImage:"url('/uploads/"+avatar+"')"}} data-position="top" data-delay="50" data-tooltip={name}>&nbsp;</div>
+                <div className='user_display'>
+                    <div className="user_tooltips" style={{display:this.state.userTooltipDisplay}}>
+                        {name}
+                    </div>
+                    <div className="avatar" style={{backgroundImage:"url('/uploads/"+avatar+"')"}} data-position="top" data-delay="50" data-tooltip={name} onMouseOver={this.showTooltips.bind(this)} onMouseOut={this.hideTooltips.bind(this)}>
+
+                    </div>
+                </div>
             )
         } else {
             return (
-                <div className="no_avatar tooltip-user" data-position="top" data-delay="50" data-tooltip={name}><div className="text" style={{backgroundColor:"#"+color}}>{first_two_char}</div></div>
+                <div className='user_display'>
+                    <div className="user_tooltips" style={{display:this.state.userTooltipDisplay}}>
+                        {name}
+                    </div>
+                    <div className="no_avatar" data-position="top" data-delay="50" data-tooltip={name} onMouseOver={this.showTooltips.bind(this)} onMouseOut={this.hideTooltips.bind(this)}>
+                        <div className="text" style={{backgroundColor:"#"+color}}>{first_two_char}</div>
+                    </div>
+                </div>
             )
         }
     }
