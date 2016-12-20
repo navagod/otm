@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
 import { Scrollbars } from 'react-custom-scrollbars';
 import FilterLoad from "./Module/Filter";
-import Link from 'react-router/Link'
+import TaskDetail from './TaskDetail';
+import Avatar from './Avatar';
+import Tasks from './Module/Task'
 
 var _ = require('lodash')
 
@@ -15,12 +17,15 @@ class Filter extends Component {
             users: [],
             tags: [],
             task_status: [],
-            taskList: []
+            taskList: [],
+            view_task: null,
+            taskDetail: [],
+            operation:{keyword: "&"},
+            filter_display:{project:true,assign:true,tags:true}
         }
-
     }
     componentDidMount() {
-        FilterLoad.loadProjectFilter(this.props.socket,5,(rs)=>{
+        FilterLoad.loadProjectFilter(this.props.socket,localStorage.uid,(rs)=>{
             if(!rs){
                 return Materialize.toast("Error Not Found Project Data.", 4000)
             }else{
@@ -35,7 +40,7 @@ class Filter extends Component {
                 this.setState({project:project_data});
             }
         })
-        FilterLoad.loadUserFilter(this.props.socket,5,(rs)=>{
+        FilterLoad.loadUserFilter(this.props.socket,localStorage.uid,(rs)=>{
             if(!rs){
                 return Materialize.toast("", 4000)
             }else{
@@ -48,7 +53,7 @@ class Filter extends Component {
                 this.setState({users:user_data});
             }
         })
-        FilterLoad.loadTagFilter(this.props.socket,5,(rs)=>{
+        FilterLoad.loadTagFilter(this.props.socket,localStorage.uid,(rs)=>{
             if(!rs){
                 return Materialize.toast("", 4000)
             }else{
@@ -71,6 +76,7 @@ class Filter extends Component {
     }
     updateFilter() {
         var project_refined = [],keyword_refined = [],user_refined = [],tag_refined = [],status_refined = [];
+        var needFilter = false;
         if (this.state.project[0].selected == false) {
             for (var i in this.state.project) {
                 var data = this.state.project[i];
@@ -83,63 +89,117 @@ class Filter extends Component {
             var data = this.state.keyword[i];
             if (data != null) {
                 keyword_refined.push(data);
+                needFilter = true;
             }
         }
         for (var i in this.state.users) {
             var data = this.state.users[i];
             if (data.selected == true) {
                 user_refined.push(data.id);
+                needFilter = true;
             }
         }
         for (var i in this.state.tags) {
             var data = this.state.tags[i];
             if (data.selected == true) {
                 tag_refined.push(data.id);
+                needFilter = true;
             }
         }
         for (var i in this.state.task_status) {
             var data = this.state.task_status[i];
             if (data.selected == true) {
                 status_refined.push(data.id);
+                needFilter = true;
             }
         }
-        var filter = {project:project_refined,keyword:keyword_refined,user:user_refined,tags:tag_refined,status:status_refined}
-        FilterLoad.loadFilter(this.props.socket,filter,(rs)=>{
-            if(!rs){
-                return Materialize.toast("Error Not Found Project Data.", 4000)
-            }else{
-                var date_data_list = [];
-                for (var i in rs) {
-                    var data = rs[i];
-                    var tempList = [];
-                    var tempDate = [];
-                    var date_data = new Date(parseInt(data.start_date));
-                    var dateIndex = date_data.getMonth()+"-"+date_data.getFullYear();
-                    var dateString= date_data.getMonth()+" "+date_data.getFullYear();
-                    if (typeof(date_data_list[dateIndex]) != "undefined") {
-                        tempList = date_data_list[dateIndex].data;
-                        tempDate = date_data_list[dateIndex].date_str;
-                    } else {
-                        tempDate = dateString;
+        if (needFilter == true) {
+            var filter = {project:project_refined,keyword:keyword_refined,user:user_refined,tags:tag_refined,status:status_refined,operator:this.state.operation}
+            FilterLoad.loadFilter(this.props.socket,filter,(rs)=>{
+                if(!rs){
+                    return Materialize.toast("Error Not Found Project Data.", 4000)
+                }else{
+                    var date_data_list = [];
+                    for (var i in rs) {
+                        var data = rs[i];
+                        var tempList = [];
+                        var tempDate = [];
+                        var date_data = new Date(parseInt(data.start_date));
+                        var dateIndex = date_data.getMonth()+"-"+date_data.getFullYear();
+                        var dateString= date_data.getMonth()+" "+date_data.getFullYear();
+                        if (typeof(date_data_list[dateIndex]) != "undefined") {
+                            tempList = date_data_list[dateIndex].data;
+                            tempDate = date_data_list[dateIndex].date_str;
+                        } else {
+                            tempDate = dateString;
+                        }
+                        tempList.push(data);
+                        var data_obj_list = {id:dateIndex,data:tempList,date_str:tempDate};
+                        date_data_list[dateIndex] = data_obj_list;
                     }
-                    tempList.push(data);
-                    var data_obj_list = {id:dateIndex,data:tempList,date_str:tempDate};
-                    date_data_list[dateIndex] = data_obj_list;
+                    var task_list = [];
+                    for (var i in date_data_list) {
+                        task_list.push(date_data_list[i]);
+                    }
+                    this.setState({taskList:task_list});
                 }
-                var task_list = [];
-                for (var i in date_data_list) {
-                    task_list.push(date_data_list[i]);
-                }
-                this.setState({taskList:task_list});
-            }
-        })
+            })
+        } else {
+            var task_list = [];
+            this.setState({taskList:task_list});
+        }
 
+    }
+    toggleShowFilter(type) {
+        if (type == "project") {
+            if (this.state.filter_display.project == true) {
+                this.state.filter_display.project = false;
+            } else {
+                this.state.filter_display.project = true;
+            }
+        } else if (type == "assign") {
+            if (this.state.filter_display.assign == true) {
+                this.state.filter_display.assign = false;
+            } else {
+                this.state.filter_display.assign = true;
+            }
+        } else if (type == "tag") {
+            if (this.state.filter_display.tags == true) {
+                this.state.filter_display.tags = false;
+            } else {
+                this.state.filter_display.tags = true;
+            }
+        }
+        this.setState({filter_display:this.state.filter_display});
+    }
+    toggleOperation(type) {
+        if (type == "keyword") {
+            if (this.state.operation.keyword == "&") {
+                this.state.operation.keyword = "|";
+            } else {
+                this.state.operation.keyword = "&";
+            }
+        }
+        this.updateFilter();
+        this.setState({operation:this.state.operation});
     }
     toggleProjectSelect(pid) {
         if (this.state.project[pid].selected == false) {
             this.state.project[pid].selected = true;
+            if (pid == 0) {
+                for (var i in this.state.project) {
+                    this.state.project[i].selected = true;
+                }
+            }
         } else {
             this.state.project[pid].selected = false;
+            if (pid == 0) {
+                for (var i in this.state.project) {
+                    this.state.project[i].selected = false;
+                }
+            } else {
+                this.state.project[0].selected = false;
+            }
         }
         this.updateFilter();
         this.setState({project:this.state.project})
@@ -182,23 +242,42 @@ class Filter extends Component {
         this.updateFilter();
         this.setState({keyword:this.state.keyword});
     }
+    closeTaskDetail() {
+        var taskDetail = [];
+        this.setState({taskDetail: taskDetail});
+        window.history.pushState("", 'Filter', '/filter');
+    }
+    viewTaskDetail(task_id) {
+        var taskDetail = [];
+        taskDetail.push(task_id);
+        this.setState({taskDetail: taskDetail});
+        window.history.pushState("", 'Filter', '/task/'+task_id);
+    }
 	render() {
 		return (
 			<div className="" id='filter_panel'>
                 <div className='filter_row'>
-                    <ListPanel taskList={this.state.taskList}/>
+                    <ListPanel taskList={this.state.taskList} viewTaskDetail={this.viewTaskDetail.bind(this)}/>
                     <FilterPanel project={this.state.project}
                                  users={this.state.users}
                                  tags={this.state.tags}
                                  task_status={this.state.task_status}
                                  keyword={this.state.keyword}
+                                 operation={this.state.operation}
+                                 filter_display={this.state.filter_display}
                                  projectToggle={this.toggleProjectSelect.bind(this)}
                                  userToggle={this.toggleUserSelect.bind(this)}
                                  tagToggle={this.toggleTagSelect.bind(this)}
                                  taskStatusToggle={this.toggleTaskStatus.bind(this)}
                                  addKeyword={this.addKeyword.bind(this)}
-                                 removeKeyword={this.removeKeyword.bind(this)}/>
+                                 removeKeyword={this.removeKeyword.bind(this)}
+                                 toggleOperation={this.toggleOperation.bind(this)}
+                                 toggleShowFilter={this.toggleShowFilter.bind(this)}
+                                 />
                 </div>
+                {this.state.taskDetail.map((task_id,index) =>
+                    <TaskDetail key={index} taskId={task_id} socket={this.props.socket} closeTask={this.closeTaskDetail.bind(this)}/>
+                )}
 			</div>
 		)
 	}
@@ -229,9 +308,16 @@ class ProjectDisplay extends Component {
             )
         }
     }
+    checkActive() {
+        if (this.props.data.selected) {
+            return "active"
+        } else {
+            return "";
+        }
+    }
     render() {
         return (
-            <div className="filter_project" onClick={this.props.projectToggle.bind(this,this.props.data.id)}>
+            <div className={"project_list "+this.checkActive()} onClick={this.props.projectToggle.bind(this,this.props.data.id)}>
                 {this.selectedData()}{this.props.data.name}
             </div>
         )
@@ -259,6 +345,20 @@ class FilterPanel extends Component {
     getKeyword(event) {
         this.setState({keyword: event.target.value});
     }
+    convertShowStatus(data) {
+        if (data == true) {
+            return "hide_none_select";
+        } else {
+            return "";
+        }
+    }
+    arrowDisplay(data) {
+        if (data == true) {
+            return "arrow_ex";
+        } else {
+            return "";
+        }
+    }
     render() {
         return (
             <div className="filter_panel">
@@ -267,14 +367,18 @@ class FilterPanel extends Component {
                     <div className='task_detail'>
                         <div className='filter_header'>
                             Project
+                            <div className={'sign right1 arrow '+this.arrowDisplay(this.props.filter_display.project)} onClick={this.props.toggleShowFilter.bind(this,"project")}></div>
                         </div>
                         <div className='filter'>
-                            {this.props.project.map((project) =>
-                                <ProjectDisplay key={project.id} data={project} projectToggle={this.props.projectToggle}/>
-                            )}
+                            <div className={"filter_project "+this.convertShowStatus(this.props.filter_display.project)}>
+                                {this.props.project.map((project) =>
+                                    <ProjectDisplay key={project.id} data={project} projectToggle={this.props.projectToggle}/>
+                                )}
+                            </div>
                         </div>
                         <div className='filter_header'>
                             Keyword
+                            <div className='sign right1' onClick={this.props.toggleOperation.bind(this,"keyword")}>{this.props.operation.keyword}</div>
                         </div>
                         <div className='filter'>
                             <div className='filter_keyword'>
@@ -289,9 +393,10 @@ class FilterPanel extends Component {
                         </div>
                         <div className='filter_header'>
                             Assigned To
+                            <div className={'sign right1 arrow '+this.arrowDisplay(this.props.filter_display.assign)} onClick={this.props.toggleShowFilter.bind(this,"assign")}></div>
                         </div>
                         <div className='filter'>
-                            <div className='filter_assign'>
+                            <div className={"filter_assign "+this.convertShowStatus(this.props.filter_display.assign)}>
                                 {this.props.users.map((users) =>
                                     <UserList key={users.id} data={users} userToggle={this.props.userToggle}/>
                                 )}
@@ -299,9 +404,10 @@ class FilterPanel extends Component {
                         </div>
                         <div className='filter_header'>
                             Tags
+                            <div className={'sign right1 arrow '+this.arrowDisplay(this.props.filter_display.tags)} onClick={this.props.toggleShowFilter.bind(this,"tag")}></div>
                         </div>
                         <div className='filter'>
-                            <div className='filter_tag'>
+                            <div className={"filter_tag "+this.convertShowStatus(this.props.filter_display.tags)}>
                                 {this.props.tags.map((tag) =>
                                     <TagsList key={tag.id} data={tag} tagToggle={this.props.tagToggle} />
                                 )}
@@ -346,50 +452,41 @@ class StatusList extends Component {
 class TagsList extends Component {
     checkSelected() {
         if (this.props.data.selected == true) {
-            return "selected active";
+            return "active";
         } else {
-            return "selected";
+            return "";
         }
     }
     render() {
         return (
-            <div className="tagsList" onClick={this.props.tagToggle.bind(this,this.props.data.id)}>
+            <div className={"tagsList "+this.checkSelected()} onClick={this.props.tagToggle.bind(this,this.props.data.id)}>
                 <div className={"tagColor "+this.props.data.color} style={{background:this.props.data.bg,color:this.props.data.f}}>
                     {this.props.data.text}
                 </div>
-                <i className={"material-icons "+this.checkSelected()}>check_circle</i>
+                <i className={"material-icons selected"}>check_circle</i>
             </div>
         )
     }
 }
 class UserList extends Component {
-    checkAvatar() {
-        var avatar = this.props.data.avatar;
-        var name = this.props.data.name;
-        var first_two_char = name.substring(0,2).toUpperCase();
-        if (avatar.length > 0) {
-            return <div className="avatar" style={{backgroundImage:"url('/upload/"+avatar+"')"}}>&nbsp;</div>
-        } else {
-            return <div className="no_avatar">&nbsp;<div className="text" style={{backgroundColor:"#"+this.props.data.color}}>{first_two_char}</div></div>
-        }
-    }
     checkSelected() {
         if (this.props.data.selected == true) {
-            return "selected active";
+            return "active";
         } else {
-            return "selected";
+            return "";
         }
     }
     render() {
         return (
-            <div className="userList" onClick={this.props.userToggle.bind(this,this.props.data.id)}>
-                {this.checkAvatar()}
+            <div className={"userList "+this.checkSelected()} onClick={this.props.userToggle.bind(this,this.props.data.id)}>
+                <Avatar name={this.props.data.name} avatar={this.props.data.avatar} color={this.props.data.color}/>
                 <div className="userName">{this.props.data.name}</div>
-                <i className={"material-icons "+this.checkSelected()}>check_circle</i>
+                <i className="material-icons selected">check_circle</i>
             </div>
         )
     }
 }
+
 class DatePanel extends Component {
     render() {
         return (
@@ -399,7 +496,7 @@ class DatePanel extends Component {
                 </div>
                 <div className="task_in_date">
                     {this.props.data.data.map((task_list,index) =>
-                        <TaskListInDate key={index} data={task_list}/>
+                        <TaskListInDate key={index} data={task_list} viewTaskDetail={this.props.viewTaskDetail}/>
                     )}
                 </div>
             </div>
@@ -421,8 +518,7 @@ class TaskListInDate extends Component {
     render() {
         return (
             <div className="task_in_date_list">
-                <Link to={`/task/${this.props.data.id}`}>
-                <div className='task_detail'>
+                <div className='task_detail' onClick={this.props.viewTaskDetail.bind(this,this.props.data.id)}>
                     <div className='task_name'>
                         {this.props.data.title}
                     </div>
@@ -432,7 +528,6 @@ class TaskListInDate extends Component {
                         )}
                     </div>
                 </div>
-                </Link>
             </div>
         )
     }
@@ -455,7 +550,7 @@ class ListPanel extends Component {
             <div className="task_list_panel">
                 <Scrollbars className='scroll_list'>
                     {this.props.taskList.map((date_list,index) =>
-                        <DatePanel key={date_list.id} data={date_list}/>
+                        <DatePanel key={date_list.id} data={date_list} viewTaskDetail={this.props.viewTaskDetail}/>
                     )}
                 </Scrollbars>
             </div>

@@ -8,6 +8,8 @@ import Redirect from 'react-router/Redirect'
 import tasks from './Module/Task';
 import moment from 'moment';
 import Loading from './Loading';
+import Avatar from './Avatar';
+
 var _ = require('lodash')
 
 class Task extends Component {
@@ -187,11 +189,7 @@ class Task extends Component {
 				<div className={"task-box " + task_item.status} data-id={task_item.id} id={"task-"+task_item.id} key={i}>
 				<Link to={`/task/${task_item.id}`}>
 				<div className="task-assign">
-				{task_item.user_name && task_item.user_avatar ?
-					<img src={"/uploads/"+task_item.user_avatar} width="50" height="50" className="avatar circle responsive-img" />
-					:
-					<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+task_item.user_name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0&txtclr=000000&bg="+ task_item.user_color} className="circle responsive-img" />
-				}
+					<Avatar name={task_item.user_name} avatar={task_item.user_avatar} color={task_item.user_color}/>
 				</div>
 
 				<div className="task-title">{task_item.title}</div>
