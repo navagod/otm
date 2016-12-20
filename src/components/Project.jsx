@@ -91,6 +91,7 @@ class Project extends Component {
 		});
 	}
 	projectsListCard(){
+		console.log(this.state.projectId);
 		if(this.state.projectId !==""){
 			this.setState({cardList:[]});
 			projects.listCard(this.props.socket,this.state.projectId,(rs)=>{

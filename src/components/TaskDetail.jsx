@@ -5,6 +5,7 @@ import Tasks from './Module/Task'
 import Todo from './Todo'
 import Tags from './Tags'
 import Loading from './Loading';
+import Move from './Move';
 import Avatar from './Avatar';
 var Datetime = require('react-datetime');
 var Dropzone = require('react-dynamic-dropzone');
@@ -460,6 +461,7 @@ class TaskDetail extends Component {
                             </div>
                         </div>
                         <div className="col s4 bg-gray">
+                        	<Move socket={this.props.socket} taskId={this.state.taskId}/>
 
 
 
