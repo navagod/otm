@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 
 class Avatar extends Component {
+    componentDidUpdate(){
+        $('.tooltip-user').tooltip()
+    }
     render() {
         var name = "Unassign";
         var first_two_char = "";
@@ -14,11 +17,11 @@ class Avatar extends Component {
         }
         if (typeof(this.props.avatar) != "undefined" && avatar.length > 0) {
             return (
-                <div className="avatar" style={{backgroundImage:"url('/uploads/"+avatar+"')"}}>&nbsp;</div>
+                <div className="avatar tooltip-user" style={{backgroundImage:"url('/uploads/"+avatar+"')"}} data-position="top" data-delay="50" data-tooltip={name}>&nbsp;</div>
             )
         } else {
             return (
-                <div className="no_avatar"><div className="text" style={{backgroundColor:"#"+color}}>{first_two_char}</div></div>
+                <div className="no_avatar tooltip-user" data-position="top" data-delay="50" data-tooltip={name}><div className="text" style={{backgroundColor:"#"+color}}>{first_two_char}</div></div>
             )
         }
     }
