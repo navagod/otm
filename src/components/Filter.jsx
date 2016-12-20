@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Scrollbars } from 'react-custom-scrollbars';
 import FilterLoad from "./Module/Filter";
 import TaskDetail from './TaskDetail';
+import Avatar from './Avatar';
 import Tasks from './Module/Task'
 
 var _ = require('lodash')
@@ -468,16 +469,6 @@ class TagsList extends Component {
     }
 }
 class UserList extends Component {
-    checkAvatar() {
-        var avatar = this.props.data.avatar;
-        var name = this.props.data.name;
-        var first_two_char = name.substring(0,2).toUpperCase();
-        if (avatar.length > 0) {
-            return <div className="avatar" style={{backgroundImage:"url('/upload/"+avatar+"')"}}>&nbsp;</div>
-        } else {
-            return <div className="no_avatar"><div className="text" style={{backgroundColor:"#"+this.props.data.color}}>{first_two_char}</div></div>
-        }
-    }
     checkSelected() {
         if (this.props.data.selected == true) {
             return "active";
@@ -488,13 +479,14 @@ class UserList extends Component {
     render() {
         return (
             <div className={"userList "+this.checkSelected()} onClick={this.props.userToggle.bind(this,this.props.data.id)}>
-                {this.checkAvatar()}
+                <Avatar name={this.props.data.name} avatar={this.props.data.avatar} color={this.props.data.color}/>
                 <div className="userName">{this.props.data.name}</div>
                 <i className="material-icons selected">check_circle</i>
             </div>
         )
     }
 }
+
 class DatePanel extends Component {
     render() {
         return (
