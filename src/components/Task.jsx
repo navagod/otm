@@ -63,9 +63,9 @@ class Task extends Component {
 			}
 		})
 	}
-	
+
 	componentWillUnmount(){
-		console.log('componentWillUnmount');
+
 	}
 	_updateAddTaskList(data){
 		if(data.pid == this.state.projectId && data.lists.cid == this.state.cardId){

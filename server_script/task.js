@@ -273,7 +273,7 @@ module.exports = function (socket,db) {
 	});
 	socket.on('task:get',function(data,rs){
 		db.cypher({
-			query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (uc:Users)-[:CREATE_BY]->(t) MATCH (p:Projects)<-[:LIVE_IN]-(t) OPTIONAL MATCH (ua:Users)-[:Assigned]->(t) WHERE ID(ua) <> 0 AND ID(t) = '+data.tid+' OPTIONAL MATCH (td:Todos)-[:IN]->(t) RETURN t.title,t.detail,t.startDate,t.endDate,t.status,uc.Name,uc.Avatar,uc.Color,ua.Name,ua.Avatar,ua.Color,ID(ua),ID(p),p.title,COUNT(distinct td) AS todo',
+			query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (uc:Users)-[:CREATE_BY]->(t) MATCH (c:Cards)<-[r]-(t) MATCH (c)-[:LIVE_IN]->(p:Projects) OPTIONAL MATCH (ua:Users)-[:Assigned]->(t) WHERE ID(ua) <> 0 AND ID(t) = '+data.tid+'  OPTIONAL MATCH (td:Todos)-[:IN]->(t) RETURN t.title,t.detail,t.startDate,t.endDate,t.status,uc.Name,uc.Avatar,uc.Color,ua.Name,ua.Avatar,ua.Color,ID(ua),COUNT(distinct td) AS todo, t.cid,ID(p),p.title',
 		},function(err,results){
 			if (err) console.log(err);
 			if(!results || err){
@@ -505,26 +505,68 @@ module.exports = function (socket,db) {
 			}
 		})
 	});
-	socket.on('task:move',function(data,rs){
-		db.cypher({
-			query:'MATCH (t:Tasks) WHERE ID(t) = '+data.task_id+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) OPTIONAL MATCH (t)-[l3:Parent]->(c:Cards) DELETE l1,l2,l3 RETURN ID(before),ID(after),ID(c)'
-		},function(err,rs_relate){
-			if(rs_relate){
-				db.cypher({
-					query:'MATCH (t:Tasks) WHERE ID(t)='+data.task_id+' MATCH (c:Cards) WHERE ID(c)='+data.card_id+' SET t.cid = '+data.card_id+' CREATE (t)-[:Parent]->(c)'
-				},function(err,nrs1){
-					if (err){ console.log(err)}
-						listUpdateTask(data,function(cb){
-						if(!cb){
-							rs(false)
-						}else{
-							rs(cb)
-						}
-					})
-				});
-			}
-		});
-	});
+	// socket.on('task:move',function(data,rs){
+	// 	db.cypher({
+	// 		// query:'MATCH (t:Tasks) WHERE ID(t) = '+data.task_id+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) OPTIONAL MATCH (t)-[l3:Parent]->(c:Cards) DELETE l1,l2,l3 RETURN ID(before),ID(after),ID(c)'
+	// 		query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) OPTIONAL MATCH (t)-[l3:Parent]->(c:Cards) RETURN ID(before),ID(after),ID(c)'
+	// 	},function(err,rs_relate){
+	// 		console.log(1);
+	// 		if(rs_relate[0]['ID(c)'] && rs_relate[0]['ID(after)']){
+	// 			console.log(2);
+	// 				db.cypher({
+	// 					query:'MATCH (t:Tasks) WHERE ID(t)='+rs_relate[0]['ID(after)']+' MATCH (c:Cards) WHERE ID(c)='+rs_relate[0]['ID(c)']+' CREATE (t)-[:Parent]->(c)'
+	// 				},function(err,rs1){
+	// 					if (err) {console.log(err) }
+	// 						listUpdateTask(data,function(cb){
+	// 							if(!cb){
+	// 								rs(false)
+	// 							}else{
+	// 								rs(cb)
+	// 							}
+	// 						})
+	// 				})
+	// 			}else if(rs_relate[0]['ID(before)'] && rs_relate[0]['ID(after)']){
+	// 				console.log(3);
+	// 				db.cypher({
+	// 					query:'MATCH (t:Tasks) WHERE ID(t)='+rs_relate[0]['ID(before)']+' MATCH (t2:Tasks) WHERE ID(t2)='+rs_relate[0]['ID(after)']+' CREATE (t2)-[:Parent]->(t)'
+	// 				},function(err,rs2){
+	// 					if (err){ console.log(err)}
+	// 						listUpdateTask(data,function(cb){
+	// 							if(!cb){
+	// 								rs(false)
+	// 							}else{
+	// 								rs(cb)
+	// 							}
+	// 						})
+	// 				})
+	// 			}else{
+	// 				console.log(4);
+	// 				listUpdateTask(data,function(cb){
+	// 					if(!cb){
+	// 						rs(false)
+	// 					}else{
+	// 						rs(cb)
+	// 					}
+	// 				})
+	// 			}
+
+	// 			db.cypher({
+	// 					query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (c:Cards) WHERE ID(c)='+data.cid+' SET t.cid = '+data.cid+' CREATE (t)-[:Parent]->(c)'
+	// 				},function(err,nrs1){
+	// 					console.log(6);
+	// 					if (err){ console.log(err)}
+	// 						listUpdateTask(data,function(cb){
+	// 							if(!cb){
+	// 								rs(false)
+	// 							}else{
+	// 								rs(cb)
+	// 							}
+	// 						})
+	// 				});
+
+
+	// 	});
+	// });
 	//Task===============//
 };
 
