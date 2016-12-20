@@ -5,6 +5,7 @@ import Tasks from './Module/Task'
 import Todo from './Todo'
 import Tags from './Tags'
 import Loading from './Loading';
+import Avatar from './Avatar';
 var Datetime = require('react-datetime');
 var Dropzone = require('react-dynamic-dropzone');
 
@@ -465,13 +466,8 @@ class TaskDetail extends Component {
 
                             <Dropdown trigger={
                                 <div className="userAssigned">
-                                    <span>Assigned to </span>
-                                    {
-                                        this.state.taskData['ua.Name'] && this.state.taskData['ua.Avatar'] ?
-                                            <img src={"/uploads/"+this.state.taskData['ua.Avatar']} width="50" height="50" className="avatar circle responsive-img" />
-                                            :
-                                            <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+this.state.taskData['ua.Name']+"&w=50&h=50&txttrack=0&txtclr=000000&bg=" + this.state.taskData['ua.Color']} className="circle img-50responsive-img" />
-                                    }
+                                    <div>Assigned to </div>
+                                    <Avatar name={this.state.taskData['ua.Name']} avatar={this.state.taskData['ua.Avatar']} color={this.state.taskData['ua.Color']} />
                                     <div>{this.state.taskData['ua.Name']}</div>
                                 </div>
                             }>
