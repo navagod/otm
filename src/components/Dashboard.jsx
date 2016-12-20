@@ -47,9 +47,6 @@ class Dashboard extends Component {
 		this.props.socket.on('project:updateAddAssign', this._updateAddAssign.bind(this))
 		this.props.socket.on('project:updateRemoveAssign', this._updateRemoveAssign.bind(this))
 	}
-	componentDidUpdate(){
-		$('.tooltip-user').tooltip()
-	}
 	openAddProject(e){
 		if(!this.state.dialogAdd){
 			this.setState({dialogAdd:true})
