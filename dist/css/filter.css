@@ -196,42 +196,6 @@
   -webkit-animation: fadeIn 1s;
   animation: fadeIn 1s;
 }
-#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_assign .userList .avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  display: inline-block;
-  line-height: 40px;
-  text-align: center;
-  vertical-align: bottom;
-  box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.7), 0px 0px 3px #000000;
-}
-#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_assign .userList .no_avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  display: inline-block;
-  text-align: center;
-  overflow: hidden;
-  position: relative;
-  vertical-align: bottom;
-  box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.7), 0px 0px 3px #000000;
-}
-#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_assign .userList .no_avatar .text {
-  width: 70px;
-  height: 70px;
-  transform: rotate(-28deg);
-  font-size: 46px;
-  background: #004976;
-  color: rgba(255, 255, 255, 0.3);
-  line-height: 70px;
-  text-align: center;
-  position: absolute;
-  left: -21px;
-  top: -12px;
-  letter-spacing: -15px;
-  display: block;
-}
 #filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_assign .userList .userName {
   display: inline-block;
   margin-left: 5px;
