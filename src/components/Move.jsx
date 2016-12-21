@@ -35,7 +35,6 @@ class Move extends Component {
 				return Materialize.toast("เกิดข้อผิดพลาด ไม่พบ Task นี้", 4000)
 			}else{
 				this.setState({projectId:rs[0]["ID(p)"],cardID: rs[0]["t.cid"]})
-				console.log(rs);
 			}
 		})
 		Project.list(socket,(rs)=>{

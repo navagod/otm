@@ -33,6 +33,7 @@ class Task extends Component {
 	}
 	componentDidMount(){
 		tasks.list(socket,this.state.cardId,this.state.projectId,(rs)=>{
+			console.log(rs);
 			if(!rs){
 
 			}else{
@@ -110,7 +111,6 @@ class Task extends Component {
 			}else{
 				after = ""
 			}
-			console.log('CID '+cid,'ID '+id,'P '+parent,'A '+after)
 			let store_state = this.state.cardList
 			tasks.sortTask(socket,cid,id,parent,after,"sorted",(rs)=>{
 				if(!rs){
