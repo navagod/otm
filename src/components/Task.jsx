@@ -162,7 +162,7 @@ class Task extends Component {
 		if(parent === undefined || parent === null){
 			parent = ""
 		}
-		const totalTask = $('#c-'+cid+' .task-box').length
+		const totalTask = $('#c-'+cid+' .sort-task .task-box').length
 		tasks.add(socket,localStorage.uid,this.state.projectId,this.state.cardId,title,parent,totalTask,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)

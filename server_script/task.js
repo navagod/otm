@@ -3,7 +3,7 @@ module.exports = function (socket,db) {
 	function listUpdateTask(data,cb){
 		cb = arguments[arguments.length - 1]
 		db.cypher({
-			query:'MATCH x=(c:Cards)<-[*]-(t:Tasks)  ' +
+			query:'MATCH x=(c:Cards)<-[:Parent*]-(t:Tasks)  ' +
 			'WHERE id(c)='+data.cid+' ' +
 			'AND t.status <> "archive" ' +
 			'AND t.status <> "trash" ' +
@@ -101,7 +101,7 @@ module.exports = function (socket,db) {
 	});
 	socket.on('task:list',function(data,rs){
 		db.cypher({
-			query:'MATCH x=(c:Cards)<-[:IN]-(t:Tasks)  ' +
+			query:'MATCH x=(c:Cards)<-[:Parent*]-(t:Tasks)  ' +
 			'WHERE id(c)='+data.cid+' ' +
 			'AND t.status <> "archive" ' +
 			'AND t.status <> "trash" ' +
