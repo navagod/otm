@@ -398,11 +398,24 @@ module.exports = function (socket,db) {
 	socket.on('task:changeSort',function(data,rs){
 
 		db.cypher({
-			query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) OPTIONAL MATCH (t)-[l3:Parent]->(c:Cards) OPTIONAL MATCH (t)-[l4:IN]->(c:Cards) DELETE l1,l2,l3,l4 RETURN ID(before),ID(after),ID(c)'
+			query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l1:Parent]->(before:Tasks) OPTIONAL MATCH (t)<-[l2:Parent]-(after:Tasks) OPTIONAL MATCH (t)-[l3:Parent]->(c:Cards) DELETE l1,l2,l3 RETURN ID(before),ID(after),ID(c)'
 		},function(err,rs_relate){
 			if (err) {
 				console.log(err);
 			}else{
+
+				db.cypher({
+					query:'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' OPTIONAL MATCH (t)-[l4:IN]->(c:Cards) DELETE l4 RETURN t,c'
+				},function(err,nrs1){
+					if (err){ console.log(err)}
+						listUpdateTask(data,function(cb){
+							if(!cb){
+								rs(false)
+							}else{
+								rs(cb)
+							}
+						})
+				});
 
 				db.cypher({
 					query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (c:Cards) WHERE ID(c)='+data.cid+' SET t.cid = '+data.cid+' CREATE (t)-[:IN]->(c)'
