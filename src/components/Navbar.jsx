@@ -58,6 +58,7 @@ class Navbar extends Component {
 	updateNotify(){
 		if(auth.loggedIn()){
 			Common.countNotification(socket,(rs)=>{
+				console.log(rs);
 				if(!rs){
 
 				}else{
