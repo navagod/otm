@@ -33,7 +33,6 @@ class Task extends Component {
 	}
 	componentDidMount(){
 		tasks.list(socket,this.state.cardId,this.state.projectId,(rs)=>{
-			console.log(rs);
 			if(!rs){
 
 			}else{
