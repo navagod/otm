@@ -2,7 +2,7 @@ module.exports = {
 	countNotification(socket,cb){
 		cb = arguments[arguments.length - 1]
 		socket.emit('notification:count', {uid:localStorage.uid}, (result) => {
-			if(!result){
+			if(!result && result !==0){
 				cb(false)
 			}else{
 				cb(result)

@@ -186,7 +186,6 @@ module.exports = function (socket,db) {
 			}
 		});
 	});
-
 	socket.on('task:changeEndTime', function (data,fn) {
 		db.cypher({
 			query: 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' SET t.endDate = "'+data.time+'" RETURN t'
@@ -230,7 +229,6 @@ module.exports = function (socket,db) {
 	});
 
 	socket.on('task:changePosition', function (data,fn) {
-
 		var sql = 'MATCH (t:Tasks) WHERE ID(t) = '+data.tid+' MATCH (u:Users)-[a:Assigned]->(t) MATCH (u2:Users) WHERE ID(u2) = '+data.new_uid+' DELETE a CREATE (u2)-[:Assigned]->(t) SET t.startDate = "'+data.time_start+'", t.endDate = "'+data.time_end+'" RETURN t'
 		db.cypher({
 			query: sql
@@ -467,6 +465,7 @@ module.exports = function (socket,db) {
 				}
 
 
+
 				if((!data.parent || data.parent ==="") && (!data.after || data.after ==="")){
 					db.cypher({
 						query:'MATCH (t:Tasks) WHERE ID(t)='+data.tid+' MATCH (c:Cards) WHERE ID(c)='+data.cid+' SET t.cid = '+data.cid+' CREATE (t)-[:Parent]->(c)'
@@ -532,6 +531,5 @@ module.exports = function (socket,db) {
 			}
 		})
 	});
-	//Task===============//
 };
 

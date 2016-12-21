@@ -8,6 +8,7 @@ import Redirect from 'react-router/Redirect'
 import tasks from './Module/Task';
 import moment from 'moment';
 import Loading from './Loading';
+import MiniLoading from './MiniLoading';
 import Avatar from './Avatar';
 
 var _ = require('lodash')
@@ -33,7 +34,6 @@ class Task extends Component {
 	}
 	componentDidMount(){
 		tasks.list(socket,this.state.cardId,this.state.projectId,(rs)=>{
-			console.log(rs);
 			if(!rs){
 
 			}else{
@@ -222,7 +222,7 @@ class Task extends Component {
 				:
 				null
 			}
-			{this.state.loading?<Loading loading={this.state.loading}/>:null}
+			{this.state.loading?<MiniLoading/>:null}
 			{this.state.showAddButton&&<div id="add-task" onClick={this.openAddTaskDialog.bind(this)}>+</div>}
 			</div>
 			)
