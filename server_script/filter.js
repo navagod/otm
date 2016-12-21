@@ -49,7 +49,7 @@ module.exports = function (socket,db) {
 		var only_active_project = "(p.status = 'active')";
 		where_all.push(only_active_project);
 		//console.log(data);
-		var project_query = "-[:LIVE_IN]-(p:Projects)";
+		var project_query = "-[:IN]-(c:Cards)-[:LIVE_IN]-(p:Projects)";
 		if (data.filter.project.length > 0) {
 			var project_where = [];
 			for (var i in data.filter.project) {
@@ -111,7 +111,7 @@ module.exports = function (socket,db) {
 			" OPTIONAL MATCH (lb:Labels)-[:IN]->(t) " +
 			"WITH t,COUNT(lb) as tags_count,lb as tags " +
 			"RETURN ID(t) as id,t.title as title,t.startDate as start_date,t.endDate as end_date,COLLECT(tags) as tags,count(ID(t)) AS count SKIP 0 LIMIT 30";
-		//console.log(query);
+		console.log(query);
 		db.cypher({
 			query:query,
 		},function(err,results){
