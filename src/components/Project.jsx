@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import auth from './Module/Auth';
 import {Link} from 'react-router';
 import projects from './Module/Project'
+import Tasks from './Module/Task'
 import Task from './Task'
 import PopupPage from './PopupPage'
 import TaskDetail from './TaskDetail'
@@ -56,7 +57,16 @@ class Project extends Component {
 		cal_list();
 	}
 	componentWillMount() {
-
+		if(this.state.projectId == ""){
+			Tasks.get(this.props.socket,"",this.props.params.taskId,(rs)=>{
+				if(!rs){
+					return Materialize.toast("เกิดข้อผิดพลาด ไม่พบ Task นี้", 4000)
+				}else{
+					this.setState({projectId:rs[0]["ID(p)"]})
+					this.projectsListCard.bind(this)()
+				}
+			})
+		}
 	}
 	componentDidUpdate(prevProps, prevState){
 		cal_list();
