@@ -2,7 +2,9 @@ import React, { Component } from 'react'
 import {Link} from 'react-router'
 import projects from './Module/Project'
 import Tags from './Tags'
+import Avatar from './Avatar'
 var _ = require('lodash')
+var Columns = require('react-columns');
 class Dashboard extends Component {
 	constructor(props) {
 		super(props)
@@ -18,7 +20,17 @@ class Dashboard extends Component {
 			selectUser:false,
 			listProject:[],
 			listUsers:[],
-			showTag:false
+			showTag:false,
+			queries: [{
+			    columns: 2,
+			    query: 'min-width: 500px'
+			  }, {
+			    columns: 3,
+			    query: 'min-width: 1000px'
+			  }, {
+			    columns: 4,
+			    query: 'min-width: 1200px'
+			  }]
 		}
 	}
 	componentDidMount(){
@@ -34,9 +46,6 @@ class Dashboard extends Component {
 		this.props.socket.on('project:updateEditProject', this._updateEditProject.bind(this))
 		this.props.socket.on('project:updateAddAssign', this._updateAddAssign.bind(this))
 		this.props.socket.on('project:updateRemoveAssign', this._updateRemoveAssign.bind(this))
-	}
-	componentDidUpdate(){
-		$('.tooltip-user').tooltip()
 	}
 	openAddProject(e){
 		if(!this.state.dialogAdd){
@@ -83,7 +92,8 @@ class Dashboard extends Component {
 			editUsers.push({
 				uid:data.id,
 				name:data.name,
-				avatar:data.avatar
+				avatar:data.avatar,
+				avatar:data.color
 			})
 			this.setState({editUsers})
 		}
@@ -108,7 +118,8 @@ class Dashboard extends Component {
 						users.push({
 							uid:u['ID(u)'],
 							name:u['u.Name'],
-							avatar:u['u.Avatar']
+							avatar:u['u.Avatar'],
+							color:u['u.Color']
 						})
 						)
 					return this.setState({
@@ -210,7 +221,8 @@ class Dashboard extends Component {
 					editUsers.push({
 						uid:rs.id,
 						name:rs.name,
-						avatar:rs.avatar
+						avatar:rs.avatar,
+						color:rs.color
 					})
 					this.setState({editUsers})
 
@@ -242,8 +254,9 @@ class Dashboard extends Component {
 			</div>
 			<div id="list-board">
 			<div className="row">
+				<Columns queries={this.state.queries}>
 			{ arrs.map((item, i) =>
-				<div className="col s4 m3" key={i}>
+				<div className="col w100" key={i}>
 				<div className="card blue-grey">
 				<div className="editProjectBtn waves-effect waves-blue blue btn-flat" onClick={this.openEditProject.bind(this,item[0].id)}><i className="material-icons">mode_edit</i></div>
 				<Link to={`/project/${item[0].id}`}>
@@ -257,13 +270,10 @@ class Dashboard extends Component {
 
 
 				{item.map((u, ui) =>
-					<div className="col s2 no-padding" key={"project_dashboard-"+ui}>
+					<div className="col no-padding" key={"project_dashboard-"+ui}>
 					{u.user_name
-						? <div>
-						{u.user_avatar
-							? <img  src={"/uploads/"+u.user_avatar} className="avatar responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
-							: <img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.user_name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="avatar  responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.user_name} />
-						}
+						? <div className='user_list'>
+						<Avatar name={u.user_name} color={u.user_color} avatar={u.user_avatar}/>
 						</div>
 						:null}
 						</div>
@@ -275,6 +285,7 @@ class Dashboard extends Component {
 				</div>
 				)
 		}
+		</Columns>
 		</div>
 		</div>
 
@@ -337,11 +348,7 @@ class Dashboard extends Component {
 				<div className="col s1 no-padding" key={ui}>
 				{u.name&&
 					<div>
-					{u.avatar?
-						<img  src={"/uploads/"+u.avatar} className="avatar circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
-						:
-						<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+u.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={u.name} />
-					}
+						<Avatar name={u.name} avatar={u.avatar} color={u.color} />
 					</div>
 				}
 				</div>
@@ -371,11 +378,7 @@ class Dashboard extends Component {
 			{ this.state.listUsers.map((user, i) =>
 
 				<div key={i} className={this.activeListUser(user.id)} onClick={this.selectUserActive.bind(this,user.id)}>
-				{user.avatar?
-					<img src={"/uploads/"+user.avatar} className="avatar circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
-					:
-					<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+user.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img" data-position="top" data-delay="50" data-tooltip={user.name} />
-				}
+					<Avatar name={user.name} avatar={user.avatar} color={user.color}/>
 				</div>
 				)}
 			</div>

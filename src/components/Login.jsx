@@ -20,8 +20,7 @@ class Login extends Component {
 			if (!loggedIn){
 				return Materialize.toast("ข้อมูลเข้าสู่ระบบไม่ถูกต้อง", 4000)
 			}else{
-				// this.setState({ redirectToReferrer: true })
-				this.context.router.transitionTo('/dashboard')
+        window.location.reload()
 			}
 		})
 	}

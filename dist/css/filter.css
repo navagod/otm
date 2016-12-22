@@ -1,0 +1,264 @@
+@-webkit-keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+#filter_panel {
+  display: table;
+  width: 100vw;
+  height: calc(100vh - 64px);
+}
+#filter_panel .filter_row {
+  display: table-row;
+}
+#filter_panel .filter_row .task_list_panel {
+  width: calc(100vw - 300px);
+  height: 100%;
+  display: table-cell;
+  vertical-align: top;
+  background: #ddd;
+}
+#filter_panel .filter_row .task_list_panel .scroll_list {
+  overflow-y: scroll;
+  height: calc(100vh - 64px);
+}
+#filter_panel .filter_row .task_list_panel .scroll_list .date_panel .date_display {
+  background: #aaa;
+  color: #FFF;
+  padding: 5px 20px 5px 10px;
+  line-height: 20px;
+  font-size: 17px;
+}
+#filter_panel .filter_row .task_list_panel .scroll_list .date_panel .task_in_date {
+  padding: 10px;
+}
+#filter_panel .filter_row .task_list_panel .scroll_list .date_panel .task_in_date .task_in_date_list {
+  margin-bottom: 10px;
+}
+#filter_panel .filter_row .task_list_panel .scroll_list .date_panel .task_in_date .task_in_date_list .task_detail {
+  padding: 10px;
+  background: #fff;
+  border-radius: 5px;
+}
+#filter_panel .filter_row .task_list_panel .scroll_list .date_panel .task_in_date .task_in_date_list .task_detail .task_name {
+  color: #666;
+}
+#filter_panel .filter_row .task_list_panel .scroll_list .date_panel .task_in_date .task_in_date_list .task_detail .tag_panel .tagsList {
+  display: inline-block;
+}
+#filter_panel .filter_row .task_list_panel .scroll_list .date_panel .task_in_date .task_in_date_list:last-child {
+  margin-bottom: 0px;
+}
+#filter_panel .filter_row .filter_panel {
+  width: 300px;
+  height: 100%;
+  display: table-cell;
+  vertical-align: top;
+  background: linear-gradient(to right, #cccccc, #ffffff);
+}
+#filter_panel .filter_row .filter_panel .filter_head {
+  background: #242424;
+  color: #FFF;
+  width: 100%;
+  height: 30px;
+  line-height: 30px;
+  padding-left: 10px;
+}
+#filter_panel .filter_row .filter_panel .filter_option {
+  padding: 10px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail {
+  line-height: 30px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter_header {
+  border-radius: 15px;
+  height: 30px;
+  padding: 0px 10px 0px 10px;
+  background: #666;
+  color: #fff;
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+  position: relative;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter_header .sign {
+  position: absolute;
+  top: 5px;
+  border-radius: 50px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  color: #666;
+  background: #FFF;
+  cursor: pointer;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter_header .right1 {
+  right: 6px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter_header .arrow {
+  transform: rotate(0deg);
+  transition: transform 0.5s,top 0.3s,left 0.3s;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter_header .arrow::after {
+  content: "";
+  border-color: #666 transparent transparent transparent;
+  border-width: 5px;
+  border-style: solid;
+  width: 0px;
+  height: 0px;
+  line-height: 0px;
+  font-size: 0px;
+  display: block;
+  position: absolute;
+  top: 8px;
+  left: 5px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter_header .arrow_ex {
+  transform: rotate(180deg);
+  transition: transform 0.5s,top 0.3s,left 0.3s;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter_header:first-child {
+  margin-top: 0px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_keyword .input_keyword {
+  height: 27px;
+  width: calc(100% - 30px);
+  margin-bottom: 0px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_keyword i {
+  font-size: 30px;
+  vertical-align: top;
+  color: #26a69a;
+  cursor: pointer;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .keyword_list {
+  line-height: 0px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .keyword_list .keyword {
+  display: inline-block;
+  border-radius: 15px;
+  padding: 0px 10px 0px 10px;
+  background: #AAA;
+  margin-top: 5px;
+  margin-right: 5px;
+  height: 26px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .keyword_list .keyword .keyword_text {
+  max-width: 200px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: inline-block;
+  line-height: 26px;
+  font-size: 14px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .keyword_list .keyword i {
+  vertical-align: top;
+  margin-left: 5px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_project .project_list {
+  cursor: hand;
+  cursor: pointer;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_project .project_list .project_select {
+  vertical-align: top;
+  margin-top: 2px;
+  margin-right: 5px;
+  color: #26a69a;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_project .active {
+  display: block !important;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_assign .userList {
+  margin-top: 5px;
+  cursor: hand;
+  cursor: pointer;
+  display: inline-block;
+  margin-right: 10px;
+  position: relative;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_assign .userList .userName {
+  display: inline-block;
+  margin-left: 5px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_assign .userList .selected {
+  position: absolute;
+  bottom: -3px;
+  left: 20px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  color: #FFF;
+  display: none;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_assign .active {
+  display: inline-block !important;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_assign .active .selected {
+  display: block !important;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_tag {
+  line-height: 20px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_tag .tagsList {
+  display: inline-block;
+  margin-right: 5px;
+  cursor: hand;
+  cursor: pointer;
+  width: auto;
+  position: relative;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_tag .tagsList .selected {
+  position: absolute;
+  bottom: -6px;
+  right: -3px;
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5), 0px 0px 2px rgba(0, 0, 0, 0.7);
+  color: #FFF;
+  display: none;
+  font-size: 17px;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_tag .active {
+  display: inline-block !important;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_tag .active .selected {
+  display: block !important;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .hide_none_select .tagsList {
+  display: none;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .hide_none_select .userList {
+  display: none;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .hide_none_select .project_list {
+  display: none;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_status .filter_status_list {
+  display: inline-block;
+  width: 50%;
+  cursor: pointer;
+}
+#filter_panel .filter_row .filter_panel .filter_option .task_detail .filter .filter_status .filter_status_list .status_select {
+  vertical-align: top;
+  margin-top: 2px;
+  margin-right: 5px;
+  color: #26a69a;
+}

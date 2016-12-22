@@ -20,14 +20,14 @@ module.exports = {
       }
     })
   },
-  register(socket,email,pass,name,cb){
+  register(socket,email,pass,name, color,cb){
     cb = arguments[arguments.length - 1]
     if (localStorage.token) {
       if (cb) cb(true)
         this.onChange(true)
       return
     }
-    pretendRegister(socket,email, pass,name, (res) => {
+    pretendRegister(socket,email, pass,name, color, (res) => {
       if (res.authenticated) {
         localStorage.token = Math.random().toString(36).substring(7)
         localStorage.name = res.name
@@ -46,7 +46,7 @@ module.exports = {
     if (localStorage.token) {
       pretendGetProfile(socket,uid,(res) => {
         if(res.process){
-          cb({name:res.name,email:res.email,avatar:res.avatar})
+          cb({name:res.name,color:res.color,email:res.email,avatar:res.avatar})
         }else{
           cb(false)
         }
@@ -96,7 +96,7 @@ function pretendGetProfile(socket,uid, cb) {
     if(!result) {
       cb({ process: false })
     }else{
-      cb({ process: true,name:result['u']['properties']['Name'],email:result['u']['properties']['Email'],avatar:result['u']['properties']['Avatar'] })
+      cb({ process: true,name:result['u']['properties']['Name'],color:result['u']['properties']['Color'],email:result['u']['properties']['Email'],avatar:result['u']['properties']['Avatar'] })
     }
   });
 }
@@ -135,11 +135,12 @@ function pretendRequest(socket,email, pass, cb) {
   });
 }
 
-function pretendRegister(socket,email, pass, name, cb) {
+function pretendRegister(socket,email, pass, name, color, cb) {
   socket.emit('user:register', {
     email:email,
     pass:pass,
-    name:name
+    name:name,
+    color:color,
   }, (result) => {
     if(!result) {
      return alert("เกิดข้อผิดพลาดกรุณาลองใหม่อีกครั้ง.");

@@ -33,7 +33,6 @@ module.exports = {
 				cb(false)
 			}else{
 				cb(result)
-				
 			}
 		});
 	},
@@ -144,7 +143,8 @@ module.exports = {
 		if(mode=="add"){
 			socket.emit('project:addAssign', {
 				uid:uid,
-				pid:pid
+				pid:pid,
+				uuid:localStorage.uid
 			}, (result) => {
 				if(!result) {
 					cb(false)
@@ -155,7 +155,8 @@ module.exports = {
 		}else{
 			socket.emit('project:removeAssign', {
 				uid:uid,
-				pid:pid
+				pid:pid,
+				uuid:localStorage.uid
 			}, (result) => {
 				if(!result) {
 					cb(false)
@@ -201,6 +202,32 @@ module.exports = {
 		socket.emit('tag:setColor', {
 			tid:tid,
 			color:color
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	colorTagCustomBG(socket,custom_bg,tid,cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('tag:setColorCustomBG', {
+			tid:tid,
+			color:custom_bg
+		}, (result) => {
+			if(!result) {
+				cb(false)
+			}else{
+				cb(result)
+			}
+		});
+	},
+	colorTagCustomF(socket,custom_bg,tid,cb) {
+		cb = arguments[arguments.length - 1]
+		socket.emit('tag:setColorCustomF', {
+			tid:tid,
+			color:custom_bg
 		}, (result) => {
 			if(!result) {
 				cb(false)

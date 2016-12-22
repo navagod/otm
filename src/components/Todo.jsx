@@ -18,11 +18,39 @@ class Todo extends Component {
 
 			}else{
 				this.setState({todoList:rs})
+				$( "#todo-sortable" ).sortable({update: this.handleSortTodoUpdate.bind(this)}).disableSelection();
 			}
 		})
+		this.props.socket.on('todo:updateSort', this._updateSort.bind(this));
 	}
 	componentWillMount() {
 		
+	}
+	_updateSort(data){
+		if(data.tid==this.state.taskId){
+			this.setState({ todoList: data.lists });
+			$( "#todo-sortable" ).sortable({update: this.handleSortTodoUpdate.bind(this)}).disableSelection();
+		}
+	}
+	handleSortTodoUpdate(event, ui){
+		var newItems = this.state.todoList;
+		var $node = $('#todo-sortable');
+		var ids = $node.sortable('toArray', { attribute: 'data-id' });
+		ids.forEach(function (i, index) {
+			var elementPos = newItems.map(function(x) {return x['ID(td)'];}).indexOf(parseInt(i));
+			var item = newItems[elementPos];
+			item['td.position'] = index;
+		});
+		let store_state = this.state.todoList
+		this.setState({ todoList: newItems });
+		Tasks.sortTodo(this.props.socket,this.state.taskId,newItems,(rs)=>{
+			if(!rs){
+				$node.sortable('cancel');
+				todoList = todoList.sort(function(a,b){return a['td.position'] > b['td.position']})
+				this.setState({ todoList: todoList });
+				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
+			}
+		})
 	}
 	submitAdd(event){
 		event.preventDefault()
@@ -40,6 +68,7 @@ class Todo extends Component {
 						'td.text':text,
 						'td.position':position
 					})
+					todoList = todoList.sort(function(a,b){return a['td.position'] > b['td.position']})
 					this.setState({todoList})
 					this.refs.todoInputAdd.value = ""
 				}
@@ -91,9 +120,12 @@ class Todo extends Component {
 		})
 	}
 	render() {
+		var todoList = this.state.todoList
+		
 		return (
 			<div>
-			{this.state.todoList.map((item,i)=>
+			<div  id="todo-sortable">
+			{todoList.map((item,i)=>
 				<div key={"todo-"+i+item["ID(td)"]} data-id={item["ID(td)"]} className={"todoItem "+item["td.status"]}>
 				<div className="checkItem" onClick={this.checkerItem.bind(this,item["ID(td)"],item["td.status"])}></div>
 				<InlineEdit
@@ -105,6 +137,7 @@ class Todo extends Component {
 				<div className="deleteItem" onClick={this.deleteIted.bind(this,item["ID(td)"])}>X</div>
 				</div>
 				)}
+			</div>
 			<form onSubmit={this.submitAdd.bind(this)}>
 			<input type="text" ref="todoInputAdd"  className="todoInputAdd" placeholder="Enter something todo and press Enter" required/>
 			</form>

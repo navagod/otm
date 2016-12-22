@@ -5,9 +5,14 @@ import Tasks from './Module/Task'
 import Todo from './Todo'
 import Tags from './Tags'
 import Loading from './Loading';
+import Move from './Move';
+
 var Datetime = require('react-datetime');
 var Dropzone = require('react-dynamic-dropzone');
 class PopupPage extends Component {
+	static propTypes = {
+		submitSuccess: React.PropTypes.bool
+	}
 	constructor(props) {
 		super(props)
 		this.state = {
@@ -92,10 +97,10 @@ class PopupPage extends Component {
 				this.setState({loading:false});
 			}
 		})
-		window.addEventListener('click', this._hideDropdown, false);
+
 	}
 	componentWillUnmount() {
-		window.removeEventListener('click', this._hideDropdown, false);
+
 	}
 	_stopPropagation(e) {
 		e.stopPropagation();
@@ -103,6 +108,7 @@ class PopupPage extends Component {
 
 	_toggleDropdown() {
 		this.setState({ dropdownIsVisible: true });
+		window.addEventListener('click', this._hideDropdown, false);
 	}
 
 
@@ -110,6 +116,7 @@ class PopupPage extends Component {
 		const { dropdownIsActive } = this.state;
 		if (!dropdownIsActive) {
 			this.setState({ dropdownIsVisible: false });
+			window.removeEventListener('click', this._hideDropdown, false);
 		}
 	}
 
@@ -209,6 +216,7 @@ class PopupPage extends Component {
 				var {taskData} = this.state
 				taskData['ua.Name'] = data.name
 				taskData['ua.Avatar'] = data.avatar
+				taskData['ua.Color'] = data.color
 				this.setState({taskData})
 			}
 		})
@@ -223,7 +231,7 @@ class PopupPage extends Component {
 		})
 		this.props.updateTaskCount();
 	}
-	clickTag(id,color,text){
+	clickTag(id,color,text,bg,f){
 		var index = _.findIndex(this.state.currentTags,{'ID(l)':id})
 		let mode = ''
 		if(index >= 0){
@@ -240,7 +248,9 @@ class PopupPage extends Component {
 					currentTags.push({
 						'ID(l)':id,
 						'l.color':color,
-						'l.text':text
+						'l.text':text,
+						'l.bg_color':bg,
+						'l.f_color':f
 					})
 					this.setState({currentTags})
 				}else{
@@ -256,6 +266,24 @@ class PopupPage extends Component {
 	}
 	closeTags(){
 		this.setState({showTag:false})
+		Tasks.currentTag(this.state.socket,this.state.taskId,(rs)=>{
+			if(!rs){
+
+			}else{
+				var {currentTags} = this.state;
+				currentTags = rs
+				this.setState({currentTags})
+			}
+		})
+		Tasks.allTag(this.state.socket,this.state.projectId,(rs)=>{
+			if(!rs){
+
+			}else{
+				var {allTags} = this.state
+				allTags = rs
+				this.setState({allTags})
+			}
+		})
 	}
 	classTag(id){
 		let index = _.findIndex(this.state.currentTags,{'ID(l)':id})
@@ -269,53 +297,56 @@ class PopupPage extends Component {
 		this.setState({U_name:e.target.value});
 	}
 	onDragEnter(e) {
-	    this.setState({ isReceiverOpen: true });
+		this.setState({ isReceiverOpen: true });
 	}
 	onDragOver(e) {
 	    // your codes here
 	}
 	onDragLeave(e) {
-	    this.setState({ isReceiverOpen: false });
+		this.setState({ isReceiverOpen: false });
 	}
 	onOpenClick(e){
-      this.refs.dropzone.open();
-    }
+		this.refs.dropzone.open();
+	}
 	onDrop(acceptedFiles) {
+		if(acceptedFiles.length > 0){
 		this.setState({loading:true});
-		const uid = localStorage.uid
-		var _this = this;
-		var files = acceptedFiles;
-		var file_count = files.length;
-		var file_list_count = 0;
-		 files.forEach((file)=> {
-			var reader = new window.FileReader();
-			var socket_send = this.props.socket;
-			reader.fileName = file.name;
-			reader.readAsBinaryString(file);
-			reader.onload = function(event) {
-		        var binary_file = event.target.result;
-		        var file_name = event.target.fileName;
-				var extension = file_name.split('.').pop().toLowerCase();
-
-		        Tasks.addAttachment(socket_send,binary_file,extension,_this.state.taskId,(list_attachment)=>{
-					file_list_count++;
-					if (!list_attachment){
-						return Materialize.toast("เกิดข้อผิดพลาด", 4000)
-					}else{
-						_this.setState({attachments:list_attachment})
-						if(file_count == file_list_count){
-							_this.setState({loading:false});
+			const uid = localStorage.uid
+			var _this = this;
+			var files = acceptedFiles;
+			var file_count = files.length;
+			var file_list_count = 0;
+			files.forEach((file)=> {
+				var reader = new window.FileReader();
+				var socket_send = this.props.socket;
+				reader.fileName = file.name;
+				reader.readAsBinaryString(file);
+				reader.onload = function(event) {
+					var binary_file = event.target.result;
+					var file_name = event.target.fileName;
+					var extension = file_name.split('.').pop().toLowerCase();
+					Tasks.addAttachment(socket_send,binary_file,extension,_this.state.taskId,(list_attachment)=>{
+						file_list_count++;
+						if (!list_attachment){
+							return Materialize.toast("เกิดข้อผิดพลาด", 4000)
+						}else{
+							_this.setState({attachments:list_attachment})
+							if(file_count == file_list_count){
+								_this.setState({loading:false});
+							}
+							return Materialize.toast("อัพโหลดไฟล์เรียบร้อยแล้ว", 4000)
 						}
-						return Materialize.toast("อัพโหลดไฟล์เรียบร้อยแล้ว", 4000)
-					}
-				})
-			}
-        });
-    }
+					})
+				}
+			});
+		}else{
+			alert("ไม่สามารถอัพโหลดไฟล์ได้");
+		}
+	}
 
-    onAttachmentRemoveClick(attachment_id,file_name){
-    	if (confirm('Do you want to delete?')) {
-    		this.setState({loading:true});
+	onAttachmentRemoveClick(attachment_id,file_name){
+		if (confirm('Do you want to delete?')) {
+			this.setState({loading:true});
 			Tasks.removeAttachment(this.props.socket,attachment_id,this.state.taskId,file_name,(list_attachment)=>{
 				if (!list_attachment){
 					return Materialize.toast("เกิดข้อผิดพลาด", 4000)
@@ -326,7 +357,7 @@ class PopupPage extends Component {
 				}
 			})
 		}
-    }
+	}
 
 	render() {
 		return (
@@ -367,23 +398,23 @@ class PopupPage extends Component {
 		<div id="fileList">
 		<div className="addSubject" onClick={this.onOpenClick}><i className="material-icons">note_add</i> Attachment</div>
 		<Dropzone ref="dropzone" onDrop={this.onDrop} socket={this.socket}>
-            <div>Try dropping some files here, or click to select files to upload.</div>
-        </Dropzone>
-        <div id="attachment-detail">
-	        { this.state.attachments.map((at_item,i)=>
+		<div>Try dropping some files here, or click to select files to upload.</div>
+		</Dropzone>
+		<div id="attachment-detail">
+		{ this.state.attachments.map((at_item,i)=>
 
-				<div id={"att-" + at_item.id} className="attachemnt-item" key={"attachemnt-"+this.state.taskId+"-"+i}>
-					<a href={"/uploads/attachment/"+at_item["a.file_name"]} target="_blank">
-						{ at_item["a.file_type"] == "png" || at_item["a.file_type"] == "jpg" || at_item["a.file_type"] == "jpeg" || at_item["a.file_type"] == "gif"?
-						<div className="img-picture img-100" style={{backgroundImage: 'url(/uploads/attachment/' + at_item["a.file_name"] + ')'}}></div>
-						: <div className={"img-file img-100 img-"+at_item["a.file_type"]}></div>
-						}
-					</a>
-					<div className="attachment-rm circle" onClick={this.onAttachmentRemoveClick.bind(this,at_item.id,at_item["a.file_name"])} data-id={at_item.id}>x</div>
-				</div>
+			<div id={"att-" + at_item.id} className="attachemnt-item" key={"attachemnt-"+this.state.taskId+"-"+i}>
+			<a href={"/uploads/attachment/"+at_item["a.file_name"]} target="_blank">
+			{ at_item["a.file_type"] == "png" || at_item["a.file_type"] == "jpg" || at_item["a.file_type"] == "jpeg" || at_item["a.file_type"] == "gif"?
+			<div className="img-picture img-100" style={{backgroundImage: 'url(/uploads/attachment/' + at_item["a.file_name"] + ')'}}></div>
+			: <div className={"img-file img-100 img-"+at_item["a.file_type"]}></div>
+		}
+		</a>
+		<div className="attachment-rm circle" onClick={this.onAttachmentRemoveClick.bind(this,at_item.id,at_item["a.file_name"])} data-id={at_item.id}>x</div>
+		</div>
 				// {i == 0 ? <div className="card-action"></div> : <div></div>}
-			)}
-			<div className="card-action"></div>
+				)}
+		<div className="card-action"></div>
 		</div>
 		</div>
 		<div id="activity">
@@ -402,7 +433,7 @@ class PopupPage extends Component {
 
 			{c_item["u.Avatar"]
 			? <img  src={"/uploads/"+c_item["u.Avatar"]} className="avatar-mini circle responsive-img" width="40" height="40" />
-			: <img src={"https://placeholdit.imgix.net/~text?txtsize=15&txt="+c_item["u.Name"].charAt(0).toUpperCase()+"&w=40&h=40&txttrack=0"} className="circle  responsive-img" />
+			: <img src={"https://placeholdit.imgix.net/~text?txtsize=15&txt="+c_item["u.Name"].charAt(0).toUpperCase()+"&w=40&h=40&txttrack=0&txtclr=000000&bg="+ c_item["u.Color"]} className="circle  responsive-img" />
 		}
 
 		</div>
@@ -419,6 +450,7 @@ class PopupPage extends Component {
 		</div>
 		</div>
 		<div className="col s4 bg-gray">
+		<Move socket={this.props.socket} taskId={this.state.taskId}/>
 
 
 
@@ -430,7 +462,7 @@ class PopupPage extends Component {
 				this.state.taskData['ua.Name'] && this.state.taskData['ua.Avatar'] ?
 				<img src={"/uploads/"+this.state.taskData['ua.Avatar']} width="50" height="50" className="avatar circle responsive-img" />
 				:
-				<img src="https://placeholdit.imgix.net/~text?txtsize=20&txt=%3F&w=50&h=50&txttrack=0" className="circle img-50responsive-img" />
+				<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+this.state.taskData['ua.Name']+"&w=50&h=50&txttrack=0&txtclr=000000&bg=" + this.state.taskData['ua.Color']} className="circle img-50responsive-img" />
 			}
 			<div>{this.state.taskData['ua.Name']}</div>
 			</div>
@@ -456,7 +488,7 @@ class PopupPage extends Component {
 		<strong>Tags</strong>
 		<div>
 		{this.state.currentTags.map((tag,i)=>
-			<div key={"color-"+i} className={"tagColor "+tag["l.color"]}>{tag["l.text"]}</div>
+			<div key={"color-"+i} className={"tagColor "+tag["l.color"]} style={{backgroundColor:tag["l.bg_color"],color:tag["l.f_color"]}}>{tag["l.text"]}</div>
 			)}
 		<div className="clear"></div>
 		</div>
@@ -467,8 +499,8 @@ class PopupPage extends Component {
 			onMouseLeave={this._handleBlur.bind(this)}>
 			<div id="btn-manage-tag" onClick={this.openTags.bind(this)}>[Manage Tags]</div>
 			{this.state.allTags.map((taga,ti)=>
-				<div className={this.classTag(taga['ID(t)'])} key={"tag-all-"+ti+taga["ID(t)"]} onClick={this.clickTag.bind(this,taga["ID(t)"],taga["t.color"],taga["t.text"])}>
-				<div className={"tagColor "+taga['t.color']}>{taga["t.text"]}</div>
+				<div className={this.classTag(taga['ID(t)'])} key={"tag-all-"+ti+taga["ID(t)"]} onClick={this.clickTag.bind(this,taga["ID(t)"],taga["t.color"],taga["t.text"],taga["t.bg_color"],taga["t.f_color"])}>
+				<div className={"tagColor "+taga['t.color']} style={{backgroundColor:taga['t.bg_color'],color:taga['t.f_color']}}>{taga["t.text"]}</div>
 				<div className="clear"></div>
 				</div>
 				)}
