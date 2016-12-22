@@ -33,7 +33,10 @@ module.exports = {
 				cb(false)
 			}else{
 				cb(result)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0de1edcc7ca82059790b697ebda50cec1e27eec0
 			}
 		});
 	},
@@ -146,7 +149,8 @@ module.exports = {
 		if(mode=="add"){
 			socket.emit('project:addAssign', {
 				uid:uid,
-				pid:pid
+				pid:pid,
+				uuid:localStorage.uid
 			}, (result) => {
 				if(!result) {
 					cb(false)
@@ -157,7 +161,8 @@ module.exports = {
 		}else{
 			socket.emit('project:removeAssign', {
 				uid:uid,
-				pid:pid
+				pid:pid,
+				uuid:localStorage.uid
 			}, (result) => {
 				if(!result) {
 					cb(false)

@@ -7,9 +7,16 @@ import Link from 'react-router/Link'
 import Redirect from 'react-router/Redirect'
 import tasks from './Module/Task';
 import moment from 'moment';
-var _ = require('lodash')
+import Loading from './Loading';
+import MiniLoading from './MiniLoading';
+import Avatar from './Avatar';
 
+var _ = require('lodash')
+var socket = io.connect()
 class Task extends Component {
+	static propTypes = {
+		submitSuccess: React.PropTypes.bool
+	}
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -26,17 +33,17 @@ class Task extends Component {
 		}
 	}
 	componentDidMount(){
-		tasks.list(this.props.socket,this.state.cardId,this.state.projectId,(rs)=>{
+		tasks.list(socket,this.state.cardId,this.state.projectId,(rs)=>{
 			if(!rs){
 
 			}else{
-				this.setState({listTasks:rs });
+				this.setState({listTasks:rs,loading:false });
 				$( ".sort-task" ).sortable({connectWith: ".sort-task",placeholder: "ui-state-highlight",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
 			}
 		})
-		
-		this.props.socket.on('task:updateAddTaskList', this._updateAddTaskList.bind(this));
-		this.props.socket.on('task:reUpdateList', this._updateList.bind(this));
+
+		socket.on('task:updateAddTaskList', this._updateAddTaskList.bind(this));
+		socket.on('task:reUpdateList', this._updateList.bind(this));
 		this.setState({totalCard:document.getElementsByClassName("sort-task").length})
 	}
 	componentDidUpdate(prevProps, prevState){
@@ -51,7 +58,7 @@ class Task extends Component {
 	componentWillReceiveProps(nextProps){
 		this.setState({cardId:nextProps.cardId})
 		$( ".sort-task" ).sortable({connectWith: ".sort-task",placeholder: "ui-state-highlight",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
-		tasks.list(this.props.socket,nextProps.cardId,(rs)=>{
+		tasks.list(socket,nextProps.cardId,(rs)=>{
 			if(!rs){
 
 			}else{
@@ -59,11 +66,14 @@ class Task extends Component {
 			}
 		})
 	}
+
+	componentWillUnmount(){
+
+	}
 	_updateAddTaskList(data){
 		if(data.pid == this.state.projectId && data.lists.cid == this.state.cardId){
-			var {listTasks} = this.state;
-			listTasks.push(data.lists);
-			this.setState({listTasks});
+			this.setState({listTasks:[]});
+			this.setState({listTasks:data.lists});
 		}
 	}
 	_updateList(data){
@@ -82,7 +92,7 @@ class Task extends Component {
 	}
 	handleSortTaskUpdate(type,event, ui){
 		if(type=="receive"){
-			this.setState({looped:true})
+			this.setState({looped:true,loading:true})
 			let id = ui['item'].attr('data-id')
 			let cid = $(event['target']).attr('data-cid')
 			let arr = $(event['target']).sortable('toArray', { attribute: 'data-id' })
@@ -95,22 +105,25 @@ class Task extends Component {
 			}
 			if(after >= 0){
 				after = arr[after + 1]
+				if(after === undefined){
+					after = ""
+				}
 			}else{
 				after = ""
 			}
-
 			let store_state = this.state.cardList
-			tasks.sortTask(this.props.socket,cid,id,parent,after,"sorted",(rs)=>{
+			tasks.sortTask(socket,cid,id,parent,after,"sorted",(rs)=>{
 				if(!rs){
-					$(div).sortable('cancel');
+					$(event['target']).sortable('cancel');
 					this.setState({ listTasks: store_state });
 				}else{
 					this.setState({looped:false})
-					console.log('success : ',rs)
 				}
+				this.setState({loading:false });
 			})
 
 		}else if(type=="sort" && !this.state.looped){
+			this.setState({loading:true });
 			let id = ui['item'].attr('data-id')
 			let cid = $(event['target']).attr('data-cid')
 			let arr = $(event['target']).sortable('toArray', { attribute: 'data-id' })
@@ -128,34 +141,40 @@ class Task extends Component {
 			}
 
 			let store_state = this.state.cardList
-			tasks.sortTask(this.props.socket,cid,id,parent,after,"sorted",(rs)=>{
+			tasks.sortTask(socket,cid,id,parent,after,"sorted",(rs)=>{
 				if(!rs){
-					$(div).sortable('cancel');
+					$(event['target']).sortable('cancel');
 					this.setState({ listTasks: store_state });
 				}else{
 					this.setState({looped:false})
-					console.log('success : ',rs)
 				}
+				this.setState({loading:false });
 			})
 		}
 	}
 	submitAddTask(event){
 		event.preventDefault()
+		this.setState({loading:true });
 		const title = this.refs.addTaskTitle.value
 		let parent = ""
-		if(this.state.listTasks[this.state.listTasks.length - 1] !== undefined){
-			parent = this.state.listTasks[this.state.listTasks.length - 1]['id']
+		let cid = this.state.cardId
+		parent = $('#c-'+cid+' .task-box:last-child').attr('data-id');
+		if(parent === undefined || parent === null){
+			parent = ""
 		}
-		const totalTask = this.state.listTasks.length
-		tasks.add(this.props.socket,localStorage.uid,this.state.projectId,this.state.cardId,title,parent,totalTask,(rs)=>{
+		const totalTask = $('#c-'+cid+' .sort-task .task-box').length
+		tasks.add(socket,localStorage.uid,this.state.projectId,this.state.cardId,title,parent,totalTask,(rs)=>{
 			if(!rs){
 				return Materialize.toast("เกิดข้อผิดพลาด", 4000)
 			}else{
-				var {listTasks} = this.state;
-				listTasks.push(rs.lists);
-				this.setState({listTasks,openAddTask: false,showAddButton:true});
-			}
+				this.setState({listTasks:[]})
+				$('#c-'+cid+' .sort-task').html('');
 
+				this.setState({listTasks:rs,openAddTask: false,showAddButton:true});
+				$( ".sort-task" ).sortable({connectWith: ".sort-task",placeholder: "ui-state-highlight",receive: this.handleSortTaskUpdate.bind(this,"receive"),stop: this.handleSortTaskUpdate.bind(this,"sort")}).disableSelection();
+
+			}
+			this.setState({loading:false });
 		})
 	}
 	styleforInputAddNew(){
@@ -169,16 +188,12 @@ class Task extends Component {
 		return (
 			<div>
 			<div className={this.styleforInputAddNew()} data-cid={this.state.cardId}>
-			
+
 			{ this.state.listTasks.map((task_item, i) =>
 				<div className={"task-box " + task_item.status} data-id={task_item.id} id={"task-"+task_item.id} key={i}>
 				<Link to={`/task/${task_item.id}`}>
 				<div className="task-assign">
-				{task_item.user_name && task_item.user_avatar ?
-					<img src={"/uploads/"+task_item.user_avatar} width="50" height="50" className="avatar circle responsive-img" />
-					:
-					<img src="https://placeholdit.imgix.net/~text?txtsize=20&txt=%3F&w=50&h=50&txttrack=0" className="circle responsive-img" />
-				}
+					<Avatar name={task_item.user_name} avatar={task_item.user_avatar} color={task_item.user_color}/>
 				</div>
 
 				<div className="task-title">{task_item.title}</div>
@@ -207,7 +222,7 @@ class Task extends Component {
 				:
 				null
 			}
-
+			{this.state.loading?<MiniLoading/>:null}
 			{this.state.showAddButton&&<div id="add-task" onClick={this.openAddTaskDialog.bind(this)}>+</div>}
 			</div>
 			)
