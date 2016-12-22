@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import {Link} from 'react-router'
-import projects from './Module/Project'
-import css from '../../dist/css/dashboard.css'
-// require('../../dist/css/dashboard.css')
+import projects from './Module/Project_na'
+// import css from '../../dist/css/dashboard.css'
+require('../../dist/css/dashboard.css')
 
 class Dashboard_na extends Component {
 	constructor(props) {
@@ -33,6 +33,8 @@ class Dashboard_na extends Component {
 		this.props.socket.on('project:updateEditProject', this._updateEditProject.bind(this))
 		this.props.socket.on('project:updateAddAssign', this._updateAddAssign.bind(this))
 		this.props.socket.on('project:updateRemoveAssign', this._updateRemoveAssign.bind(this))
+	}
+	componentWillUnmount(){
 	}
 
 	openAddProject(e){
@@ -87,7 +89,6 @@ class Dashboard_na extends Component {
 					})
 				}
 			})
-
 		}
 	}
 
@@ -228,12 +229,13 @@ class Dashboard_na extends Component {
 	    				<div className="button-bar">
 	    					<button className="waves-effect waves-light btn modalTriger" onClick={this.openAddProject.bind(this)}>Add Project</button>
 	    				</div>
+	    				<div className="project-title">Projects</div>
 		    		{ project.map((item, i) =>
 		    			<div key={i} className="project-link-box">
 		    				<Link to={`/project/${item.id}`}>
 		    					<div className="project-name">{item.title}</div>
 		    				</Link>
-		    				<div className="project-edit" onClick={this.openEditProject.bind(this,item.id)}></div>
+		    				<div className="project-edit" onClick={this.openEditProject.bind(this,item.id)}>Edit</div>
 		    			</div>
 		    		)}
 		    		</div>
@@ -300,10 +302,14 @@ class Dashboard_na extends Component {
 									{ this.state.editUsers&&
 										this.state.editUsers.map((item,i) =>
 										<div className="user-block" key={i}>
-											{item.avatar?
-												<img  src={"/uploads/"+item.avatar} className="avatar circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={item.name} />
-												:
-												<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+item.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={item.name} />
+											{item.name&&
+												<div>
+												{item.avatar?
+													<img  src={"/uploads/"+item.avatar} className="avatar circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={item.name} />
+													:
+													<img src={"https://placeholdit.imgix.net/~text?txtsize=20&txt="+item.name.charAt(0).toUpperCase()+"&w=50&h=50&txttrack=0"} className="circle responsive-img tooltipped tooltip-user" data-position="top" data-delay="50" data-tooltip={item.name} />
+												}
+												</div>
 											}
 										</div>
 										)
